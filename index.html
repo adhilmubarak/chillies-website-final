@@ -6,7 +6,6 @@
     <title>CHILLIES RESTAURANT | Exquisite Flavors</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <!-- Preload Hero Image -->
     <link rel="preload" as="image" href="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80">
     <script>
       tailwind.config = {
@@ -60,6 +59,7 @@
         background-color: #0c0c0c;
         color: #f5f5f4;
         scroll-behavior: smooth;
+        overflow-x: hidden;
       }
       .scrollbar-hide::-webkit-scrollbar {
           display: none;
@@ -68,13 +68,12 @@
           -ms-overflow-style: none;
           scrollbar-width: none;
       }
-      /* Custom selection color */
       ::selection {
         background-color: #D4AF37;
         color: #000;
       }
     </style>
-<script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
