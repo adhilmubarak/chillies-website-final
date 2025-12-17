@@ -29,6 +29,67 @@ import {
   setDoc
 } from 'firebase/firestore';
 
+// Added export for printThermalBill used by multiple components
+export const printThermalBill = (order: Order) => {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return;
+
+  const itemsHtml = order.items
+    .map(item => `
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+        <span>${item.quantity}x ${item.name}</span>
+        <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+      </div>
+    `)
+    .join('');
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Order #${order.id}</title>
+        <style>
+          body { font-family: 'Courier New', Courier, monospace; width: 80mm; padding: 10px; margin: 0; color: #000; }
+          .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+          .footer { text-align: center; border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; font-size: 12px; }
+          .total { font-weight: bold; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
+          h2 { margin: 5px 0; }
+          p { margin: 2px 0; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>CHILLIES</h2>
+          <p>Valiyakulam, Alappuzha</p>
+          <p>Order ID: #${order.id}</p>
+          <p>${order.date} ${order.timestamp}</p>
+        </div>
+        <div style="font-size: 14px;">${itemsHtml}</div>
+        <div class="total" style="font-size: 14px;">
+          <div style="display: flex; justify-content: space-between;">
+            <span>Subtotal:</span>
+            <span>₹${(order.subtotal || 0).toFixed(2)}</span>
+          </div>
+          ${order.deliveryCharge ? `<div style="display: flex; justify-content: space-between;"><span>Delivery:</span><span>₹${order.deliveryCharge.toFixed(2)}</span></div>` : ''}
+          ${order.discount ? `<div style="display: flex; justify-content: space-between;"><span>Discount:</span><span>-₹${order.discount.toFixed(2)}</span></div>` : ''}
+          <div style="display: flex; justify-content: space-between; font-size: 1.1em; margin-top: 5px;">
+            <span>TOTAL:</span>
+            <span>₹${order.total.toFixed(2)}</span>
+          </div>
+        </div>
+        <div class="footer">
+          <p>Thank you for dining with us!</p>
+          <p>Spread Happiness</p>
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 250);
+};
+
 function App() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Leaf, Image as ImageIcon, Check, ChefHat, Lock, Utensils } from 'lucide-react';
+import { Plus, Leaf, Check, ChefHat, Lock } from 'lucide-react';
 import { MenuItem, CartItem } from '../types';
+import SafeImage from './SafeImage';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -21,8 +22,6 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   isAvailable = true, availabilityTime, isStoreOpen = true, cartItems = [], 
   allMenuItems = [], onShowSuggestion 
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
   const handleAdd = () => {
@@ -36,38 +35,16 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const isHappyHour = !isFlashSale && isHappyHourActive && item.isHappyHour && item.happyHourPrice;
   const isItemInteractable = isAvailable && isStoreOpen && !item.isUnavailable;
 
-  // Use a fallback if the image link is empty or broken
-  const displayImage = item.image && item.image.startsWith('http') 
-    ? item.image 
-    : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
-
   return (
     <div className={`group flex flex-col h-full bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden transition-all duration-300 ${isItemInteractable ? 'hover:border-gold-500/50 hover:shadow-2xl' : 'opacity-80'}`}>
-      <div className="relative h-60 sm:h-72 w-full overflow-hidden bg-stone-850">
-        {!isLoaded && !hasError && (
-          <div className="absolute inset-0 bg-stone-800 animate-pulse flex items-center justify-center">
-            <Utensils className="text-stone-700 w-12 h-12" />
-          </div>
-        )}
-        
-        {hasError ? (
-          <div className="absolute inset-0 bg-stone-800 flex flex-col items-center justify-center text-stone-600 p-6 text-center">
-            <ImageIcon className="w-12 h-12 mb-2 opacity-20" />
-            <span className="text-[10px] uppercase tracking-widest font-bold">Image Unavailable</span>
-          </div>
-        ) : (
-          <img
-            src={displayImage}
-            alt={item.name}
-            className={`w-full h-full object-cover transition-transform duration-500 ${isItemInteractable ? 'group-hover:scale-105' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0 md:opacity-0'}`}
-            onLoad={() => setIsLoaded(true)}
-            onError={() => {
-              setHasError(true);
-              setIsLoaded(true);
-            }}
-            loading="lazy"
-          />
-        )}
+      <div className="relative h-60 sm:h-72 w-full overflow-hidden">
+        <SafeImage
+          src={item.image}
+          alt={item.name}
+          containerClassName="w-full h-full"
+          className={`w-full h-full object-cover transition-transform duration-500 ${isItemInteractable ? 'group-hover:scale-105' : ''}`}
+          loading="lazy"
+        />
         
         {!isItemInteractable && (
             <div className="absolute inset-0 bg-stone-950/60 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-20">
