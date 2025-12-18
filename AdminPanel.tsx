@@ -7,9 +7,9 @@ import {
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
   Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera
 } from 'lucide-react';
-import { MenuItem, Order, Coupon, CategoryConfig } from '../types';
-import { printThermalBill } from '../App';
-import SafeImage from './SafeImage';
+import { MenuItem, Order, Coupon, CategoryConfig } from './types';
+import { printThermalBill } from './App';
+import SafeImage from './components/SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
 
 interface AdminPanelProps {
@@ -59,7 +59,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
         await scannerRef.current.start(
           { facingMode: "environment" },
           config,
-          (decodedText) => {
+          (decodedText: string) => {
             onScan(decodedText);
             scannerRef.current?.stop().catch(e => console.error(e));
           },
@@ -72,7 +72,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
           await scannerRef.current.start(
             devices[0].id,
             config,
-            (decodedText) => {
+            (decodedText: string) => {
               onScan(decodedText);
               scannerRef.current?.stop().catch(e => console.error(e));
             },
@@ -188,7 +188,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   }, [isStoreOpen, storeSettings.startTime]);
 
   const stats = useMemo(() => {
-    const totalRev = orders.filter(o => o.status === 'delivered').reduce((acc, o) => acc + o.total, 0);
+    const totalRev = orders.filter(o => o.status === 'delivered').reduce((acc, o) => acc + (o.total || 0), 0);
     const delivered = orders.filter(o => o.status === 'delivered').length;
     return {
       totalItems: items.length,
@@ -390,7 +390,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             { label: 'Total Orders', val: stats.totalOrders, icon: ShoppingBag, color: 'text-gold-500' },
                             { label: 'Delivered', val: stats.deliveredOrders, icon: Check, color: 'text-blue-500' },
                             { label: 'Avg. Order', val: `₹${stats.avgOrderValue}`, icon: Filter, color: 'text-purple-500' }
-                        ].map((s, i) => (
+                        ].map((s: {label: string, val: string | number, icon: any, color: string}, i: number) => (
                             <div key={i} className="bg-stone-900/50 border border-white/5 p-6 rounded-2xl group hover:border-white/10 transition-colors">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className={`p-3 rounded-xl bg-stone-950 border border-white/5 ${s.color} shadow-lg shadow-black/40`}><s.icon size={20} /></div>
@@ -488,7 +488,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     )}
                                     <div className="bg-stone-950 rounded-[1.5rem] border border-white/5 p-6 shadow-inner">
                                         <div className="max-h-40 overflow-y-auto scrollbar-hide space-y-4">
-                                            {order.items.map((it, idx) => (
+                                            {order.items.map((it: any, idx: number) => (
                                                 <div key={idx} className="flex justify-between items-center text-sm border-b border-white/5 pb-3 last:border-0 last:pb-0">
                                                     <div className="flex items-center gap-4 overflow-hidden">
                                                         <SafeImage src={it.image} containerClassName="w-10 h-10 rounded-xl shrink-0" className="w-full h-full object-cover" />
@@ -924,7 +924,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <button onClick={() => { 
                         if(!editingItem || !editingItem.name || !editingItem.price) return; 
                         if(editingItem.id) onUpdateItem(editingItem as MenuItem); 
-                        else onAddItem({ ...editingItem as MenuItem, id: Math.random().toString(36).substr(2,9) }); 
+                        else onAddItem({ ...editingItem as MenuItem, id: Math.random().toString(36).substr(2,9) } as MenuItem); 
                         setIsItemFormOpen(false); 
                     }} className="flex-1 bg-gold-500 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-xs transition-all shadow-xl hover:bg-gold-400 active:scale-95 flex items-center justify-center gap-2"> {editingItem.id ? 'Save Changes' : 'Publish Dish'} <ChevronRight size={16} /> </button>
                     <button onClick={() => setIsItemFormOpen(false)} className="px-8 border border-stone-800 text-stone-500 hover:text-white rounded-2xl uppercase tracking-widest text-[10px] font-black transition-all">Cancel</button>

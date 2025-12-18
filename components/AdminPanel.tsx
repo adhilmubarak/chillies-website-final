@@ -59,7 +59,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
         await scannerRef.current.start(
           { facingMode: "environment" },
           config,
-          (decodedText) => {
+          (decodedText: string) => {
             onScan(decodedText);
             scannerRef.current?.stop().catch(e => console.error(e));
           },
@@ -72,7 +72,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
           await scannerRef.current.start(
             devices[0].id,
             config,
-            (decodedText) => {
+            (decodedText: string) => {
               onScan(decodedText);
               scannerRef.current?.stop().catch(e => console.error(e));
             },
@@ -390,7 +390,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             { label: 'Total Orders', val: stats.totalOrders, icon: ShoppingBag, color: 'text-gold-500' },
                             { label: 'Delivered', val: stats.deliveredOrders, icon: Check, color: 'text-blue-500' },
                             { label: 'Avg. Order', val: `₹${stats.avgOrderValue}`, icon: Filter, color: 'text-purple-500' }
-                        ].map((s, i) => (
+                        ].map((s: {label: string, val: string | number, icon: any, color: string}, i: number) => (
                             <div key={i} className="bg-stone-900/50 border border-white/5 p-6 rounded-2xl group hover:border-white/10 transition-colors">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className={`p-3 rounded-xl bg-stone-950 border border-white/5 ${s.color} shadow-lg shadow-black/40`}><s.icon size={20} /></div>
@@ -488,7 +488,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     )}
                                     <div className="bg-stone-950 rounded-[1.5rem] border border-white/5 p-6 shadow-inner">
                                         <div className="max-h-40 overflow-y-auto scrollbar-hide space-y-4">
-                                            {order.items.map((it, idx) => (
+                                            {order.items.map((it: any, idx: number) => (
                                                 <div key={idx} className="flex justify-between items-center text-sm border-b border-white/5 pb-3 last:border-0 last:pb-0">
                                                     <div className="flex items-center gap-4 overflow-hidden">
                                                         <SafeImage src={it.image} containerClassName="w-10 h-10 rounded-xl shrink-0" className="w-full h-full object-cover" />
@@ -793,6 +793,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         />
       )}
 
+      {/* Category Editor Modal */}
       {editingCategory && (
         <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in">
             <div className="bg-stone-900 border border-white/10 rounded-[2.5rem] w-full max-w-md shadow-2xl p-8 space-y-8">
@@ -826,6 +827,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
+      {/* Item Add/Edit Modal */}
       {isItemFormOpen && editingItem && (
         <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in overflow-y-auto">
             <div className="bg-stone-900 border border-white/10 rounded-[3rem] w-full max-w-2xl shadow-[0_0_100px_rgba(0,0,0,0.8)] my-8 overflow-hidden">
