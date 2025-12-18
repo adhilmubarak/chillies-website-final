@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ChefsChoice from './components/ChefsChoice';
@@ -14,8 +14,8 @@ import SmartSuggestion from './components/SmartSuggestion';
 import NotificationTicker from './components/NotificationTicker';
 import StoreStatusAlert from './components/StoreStatusAlert';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
-import { MenuItem, CartItem, Category, Order, OrderStatus, Coupon, CategoryConfig } from './types';
-import { Search, Zap, PartyPopper } from 'lucide-react';
+import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig } from './types';
+import { Search } from 'lucide-react';
 
 import { db } from './firebase';
 import { 
@@ -372,7 +372,7 @@ function App() {
 
         <div className="flex flex-col items-center gap-6 mb-12">
             <div className="flex w-full overflow-x-auto scrollbar-hide md:flex-wrap md:justify-center gap-2 px-4 pb-4">
-                {['All', ...dbCategories.map(c => c.name)].map(cat => (
+                {['All', 'Flash Sale', 'Happy Hour', ...dbCategories.map(c => c.name)].map(cat => (
                     <button key={cat} onClick={() => setActiveCategory(cat)}
                         className={`flex-shrink-0 px-6 md:px-8 py-3 rounded-full border transition-all text-[10px] md:text-xs font-bold uppercase tracking-widest ${
                             activeCategory === cat ? 'bg-gold-500 border-gold-500 text-stone-950' : 'bg-transparent border-stone-800 text-stone-500'
@@ -389,16 +389,45 @@ function App() {
                 <div className="w-10 h-10 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                {filteredItems.map((item, index) => (
-                    <MenuItemCard 
-                        key={item.id} item={item} onAdd={addToCart} index={index} 
-                        isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive}
-                        isAvailable={checkAvailability(item.category).isAvailable}
-                        isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion}
-                    />
-                ))}
-            </div>
+            <>
+              {activeCategory === 'Flash Sale' && (
+                <FlashSaleView 
+                  items={menuItems.filter(i => i.isFlashSale)} 
+                  onAdd={addToCart} 
+                  isFlashSaleActive={isFlashSaleActive}
+                  flashSaleEndTime={promoSettings.flashSaleEndTime}
+                  checkAvailability={checkAvailability}
+                  isStoreOpen={isStoreOpen}
+                  cartItems={cartItems}
+                  allMenuItems={menuItems}
+                  onShowSuggestion={setSuggestion}
+                />
+              )}
+              {activeCategory === 'Happy Hour' && (
+                <HappyHourView 
+                  items={menuItems.filter(i => i.isHappyHour)} 
+                  onAdd={addToCart} 
+                  isHappyHourActive={isHappyHourActive}
+                  checkAvailability={checkAvailability}
+                  isStoreOpen={isStoreOpen}
+                  cartItems={cartItems}
+                  allMenuItems={menuItems}
+                  onShowSuggestion={setSuggestion}
+                />
+              )}
+              {activeCategory !== 'Flash Sale' && activeCategory !== 'Happy Hour' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+                    {filteredItems.map((item, index) => (
+                        <MenuItemCard 
+                            key={item.id} item={item} onAdd={addToCart} index={index} 
+                            isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive}
+                            isAvailable={checkAvailability(item.category).isAvailable}
+                            isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion}
+                        />
+                    ))}
+                </div>
+              )}
+            </>
         )}
       </section>
 

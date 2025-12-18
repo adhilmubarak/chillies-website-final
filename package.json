@@ -1,3 +1,4 @@
+
 {
   "name": "chillies-restaurant",
   "version": "1.0.0",
@@ -11,7 +12,8 @@
     "firebase": "^10.12.2",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "html5-qrcode": "^2.3.8"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
