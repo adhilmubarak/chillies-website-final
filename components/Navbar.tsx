@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Menu as MenuIcon, X, Search, Clock, Calendar } from 'lucide-react';
+import { ShoppingBag, Menu as MenuIcon, X, Search, Clock } from 'lucide-react';
 
 interface NavbarProps {
   cartItemCount: number;
@@ -70,7 +70,6 @@ const Navbar: React.FC<NavbarProps> = ({
             </span>
           </div>
           
-          {/* Enhanced Premium Live Clock for Desktop */}
           <div className="hidden lg:flex items-center gap-4 px-4 py-1.5 bg-stone-900/40 rounded-2xl border border-white/10 backdrop-blur-xl shadow-inner group/clock overflow-hidden relative">
             <div className="absolute inset-0 bg-gold-500/5 opacity-0 group-hover/clock:opacity-100 transition-opacity duration-700"></div>
             
@@ -97,14 +96,8 @@ const Navbar: React.FC<NavbarProps> = ({
           <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className={navLinkClass}>Contact</a>
         </div>
 
-        {/* Actions */}
+        {/* Actions - Hidden on mobile, moved to BottomNav */}
         <div className="flex items-center space-x-4 md:space-x-6">
-          {/* Tablet Clock View */}
-          <div className="hidden md:flex lg:hidden flex-col items-end gap-0.5 text-stone-500 border-r border-white/10 pr-4">
-             <span className="text-[9px] font-serif italic text-stone-400 leading-none">{formatDate(currentTime)}</span>
-             <span className="text-[11px] font-mono font-bold text-gold-500 leading-none">{formatTime(currentTime).split(' ')[0]}</span>
-          </div>
-
           <button 
              onClick={onOpenTracker}
              className="hidden md:flex items-center gap-2 text-stone-400 hover:text-gold-500 transition-colors text-[10px] uppercase font-bold tracking-widest"
@@ -114,7 +107,7 @@ const Navbar: React.FC<NavbarProps> = ({
           
           <button
             onClick={onOpenCart}
-            className="relative p-2 text-stone-300 hover:text-gold-400 transition-colors group"
+            className="hidden md:block relative p-2 text-stone-300 hover:text-gold-400 transition-colors group"
             aria-label="Open cart"
           >
             <ShoppingBag className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5]" />
@@ -137,7 +130,6 @@ const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile Menu */}
       <div className={`md:hidden fixed inset-0 z-40 bg-stone-950/98 backdrop-blur-2xl transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full justify-center items-center space-y-8 p-8 relative">
-            {/* Background Decorative Element */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gold-500/5 rounded-full blur-[120px] pointer-events-none"></div>
 
             <button 
@@ -165,19 +157,6 @@ const Navbar: React.FC<NavbarProps> = ({
               <a href="#menu" onClick={(e) => handleNavClick(e, 'menu')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Menu</a>
               <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Contact</a>
             </nav>
-            
-            <div className="flex flex-col gap-4 w-full max-w-xs pt-12 border-t border-white/5 relative z-10">
-                 <button
-                    onClick={() => {
-                        setMobileMenuOpen(false);
-                        onOpenTracker();
-                    }}
-                    className="flex items-center justify-center gap-2 border border-gold-500/30 text-gold-500 px-8 py-4 rounded-full transition-all text-xs font-black uppercase tracking-[0.2em] hover:bg-gold-500 hover:text-stone-950 shadow-lg"
-                >
-                    <Search size={16} />
-                    <span>Track Order</span>
-                </button>
-            </div>
         </div>
       </div>
     </nav>

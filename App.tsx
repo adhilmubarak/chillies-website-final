@@ -13,6 +13,7 @@ import OrderTrackerModal from './components/OrderTrackerModal';
 import SmartSuggestion from './components/SmartSuggestion';
 import NotificationTicker from './components/NotificationTicker';
 import StoreStatusAlert from './components/StoreStatusAlert';
+import BottomNav from './components/BottomNav';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
 import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig } from './types';
 import { Search } from 'lucide-react';
@@ -160,10 +161,32 @@ function App() {
   const [suggestion, setSuggestion] = useState<MenuItem | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentSection, setCurrentSection] = useState('home');
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+        const sections = ['home', 'menu', 'contact'];
+        const scrollPosition = window.scrollY + 200;
+
+        for (const section of sections) {
+            const element = document.getElementById(section);
+            if (element) {
+                const { offsetTop, offsetHeight } = element;
+                if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+                    setCurrentSection(section);
+                    break;
+                }
+            }
+        }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -305,7 +328,7 @@ function App() {
   });
 
   return (
-    <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden">
+    <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden pb-20 md:pb-0">
       <div className="fixed inset-0 bg-stone-950 -z-10" />
       
       <NotificationTicker 
@@ -448,6 +471,13 @@ function App() {
             setIsCartOpen(false);
             setIsTrackerOpen(true);
         }} coupons={coupons}
+      />
+
+      <BottomNav 
+        cartItemCount={cartItems.reduce((acc, i) => acc + i.quantity, 0)} 
+        onOpenCart={() => setIsCartOpen(true)}
+        onOpenTracker={() => setIsTrackerOpen(true)}
+        activeSection={currentSection}
       />
       
       {isAdminOpen && (
