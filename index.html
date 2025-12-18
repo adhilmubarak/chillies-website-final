@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -34,7 +35,8 @@
               'fade-in-up': 'fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
               'fade-in': 'fadeIn 1.2s ease-out forwards',
               'bounce-slow': 'bounce 2s infinite',
-              'marquee': 'marquee 25s linear infinite',
+              'marquee': 'marquee 12s linear infinite',
+              'marquee-fast': 'marquee 8s linear infinite',
             },
             keyframes: {
               fadeInUp: {
@@ -47,7 +49,7 @@
               },
               marquee: {
                 '0%': { transform: 'translateX(0%)' },
-                '100%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(-50%)' },
               }
             }
           }
@@ -82,7 +84,8 @@
     "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
     "firebase/": "https://esm.sh/firebase@^12.7.0/",
     "vite": "https://esm.sh/vite@^7.3.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "html5-qrcode": "https://esm.sh/html5-qrcode@^2.3.8"
   }
 }
 </script>

@@ -7,7 +7,8 @@ export interface MenuItem {
   category: string;
   image: string;
   isVegetarian?: boolean;
-  isSpicy?: boolean;
+  isSpicy?: boolean; // Legacy flag
+  spicyLevel?: 'mild' | 'medium' | 'hot' | 'none'; // New granular control
   isChefChoice?: boolean;
   isFlashSale?: boolean; // Added for Flash Sale feature
   flashSalePrice?: number; // Added for discounted price

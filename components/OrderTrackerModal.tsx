@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
-import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User, Printer } from 'lucide-react';
+import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Order } from '../types';
-import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 
 interface OrderTrackerModalProps {
@@ -81,14 +81,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent"></div>
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-stone-950/50">
             <h2 className="font-serif text-xl text-white">Track Your Order</h2>
-            <div className="flex gap-2">
-                {foundOrder && (
-                    <button onClick={() => printThermalBill(foundOrder)} className="text-gold-500 hover:text-white transition-colors p-1 hover:bg-white/5 rounded-lg" title="Print Receipt">
-                        <Printer size={20} />
-                    </button>
-                )}
-                <button onClick={onClose} className="text-stone-500 hover:text-white transition-colors p-1 hover:bg-white/5 rounded-full"><X size={20} /></button>
-            </div>
+            <button onClick={onClose} className="text-stone-500 hover:text-white transition-colors p-1 hover:bg-white/5 rounded-full"><X size={20} /></button>
         </div>
         <div className="p-6">
             <form onSubmit={handleTrack} className="mb-6">

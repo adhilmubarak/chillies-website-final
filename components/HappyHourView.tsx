@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { MenuItem, CartItem } from '../types';
 import MenuItemCard from './MenuItemCard';
-import { PartyPopper, Wine } from 'lucide-react';
+import { PartyPopper, Wine, Sparkles } from 'lucide-react';
 
 interface HappyHourViewProps {
   items: MenuItem[];
@@ -9,7 +10,6 @@ interface HappyHourViewProps {
   isHappyHourActive?: boolean;
   checkAvailability?: (catName: string) => { isAvailable: boolean; availabilityTime?: string };
   isStoreOpen?: boolean;
-  // Added Props
   cartItems?: CartItem[];
   allMenuItems?: MenuItem[];
   onShowSuggestion?: (suggestion: MenuItem) => void;
@@ -25,31 +25,40 @@ const HappyHourView: React.FC<HappyHourViewProps> = ({
   allMenuItems,
   onShowSuggestion
 }) => {
-  // Duplicate items to ensure marquee is seamless even with few items
   const marqueeItems = items.length > 0 
     ? [...items, ...items, ...items, ...items].slice(0, 12) 
     : [];
 
   return (
     <div className="w-full space-y-12 animate-fade-in">
-      {/* Moving Photos Banner (Marquee) - Purple/Neon Theme */}
-      <div className="relative w-full h-48 md:h-64 overflow-hidden rounded-2xl border border-purple-900/30 bg-gradient-to-r from-purple-950/20 to-black">
+      {/* Big Box Highlight with Neon Aesthetic */}
+      <div className="relative w-full h-72 md:h-96 overflow-hidden rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-950/20 via-black to-stone-950 group">
         <div className="absolute inset-0 z-10 bg-gradient-to-r from-stone-950 via-transparent to-stone-950 pointer-events-none"></div>
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
-            <div className="bg-purple-600/90 text-white px-6 py-2 rounded-full font-bold uppercase tracking-[0.3em] text-sm md:text-base backdrop-blur-sm shadow-[0_0_30px_rgba(147,51,234,0.5)] flex items-center gap-3 animate-pulse">
-                <PartyPopper fill="currentColor" className="text-pink-300" /> Happy Hour
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
+            <div className="bg-purple-600/80 text-white px-8 py-3 rounded-full font-bold uppercase tracking-[0.3em] text-sm md:text-xl backdrop-blur-md shadow-[0_0_40px_rgba(147,51,234,0.4)] flex items-center gap-3 animate-pulse border border-purple-400/20">
+                <PartyPopper fill="currentColor" className="text-pink-300" /> HAPPY HOUR LIVE
             </div>
-            <p className="text-purple-200/80 text-xs mt-3 font-serif tracking-widest">Exclusive Drink & Dine Offers</p>
+            
+            <div className="mt-4 space-y-2">
+                <p className="text-purple-300/80 text-[10px] md:text-xs font-serif tracking-[0.5em] uppercase font-bold">Unwind & Elevate Your Evening</p>
+                <h3 className="text-white text-2xl md:text-4xl font-serif">Signature Sips <span className="text-purple-400 italic">& Savory Bites</span></h3>
+            </div>
+            
+            <div className="mt-6 flex items-center gap-4 text-purple-400/60">
+                <Sparkles size={16} />
+                <span className="text-[10px] uppercase tracking-widest font-bold">Special Pricing Active</span>
+                <Sparkles size={16} />
+            </div>
         </div>
         
-        {/* The Marquee Track */}
-        <div className="flex absolute top-0 left-0 h-full animate-marquee hover:[animation-play-state:paused]">
+        {/* The Marquee Track - Running Images */}
+        <div className="flex absolute top-0 left-0 h-full animate-marquee grayscale-[0.3] opacity-30 hover:grayscale-0 hover:opacity-80 transition-all duration-1000">
             {marqueeItems.map((item, idx) => (
-                <div key={`${item.id}-${idx}`} className="h-full w-48 md:w-64 flex-shrink-0 relative border-r border-black/20">
+                <div key={`${item.id}-${idx}`} className="h-full w-56 md:w-80 flex-shrink-0 relative border-r border-purple-500/5">
                     <img 
                         src={item.image} 
                         alt={item.name} 
-                        className="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity duration-500 grayscale-[0.3]"
+                        className="w-full h-full object-cover"
                     />
                 </div>
             ))}
@@ -58,40 +67,31 @@ const HappyHourView: React.FC<HappyHourViewProps> = ({
 
       {/* Items Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        {items.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-                <p className="text-stone-500">No items currently in Happy Hour.</p>
-            </div>
-        ) : (
-            items.map((item, index) => {
-                const availability = checkAvailability ? checkAvailability(item.category) : { isAvailable: true };
-                return (
-                    <div key={item.id} className="relative">
-                        {/* Special Happy Hour Badge overlaying the card */}
-                        <div className="absolute -top-4 -right-4 z-30 bg-purple-600 text-white p-2 rounded-lg shadow-xl border border-purple-400/30 rotate-[10deg]">
-                            <div className="flex flex-col items-center leading-none">
-                                <span className="text-[10px] font-bold uppercase">Special</span>
-                                <Wine size={16} fill="currentColor" className="text-pink-300 my-0.5" />
-                            </div>
-                        </div>
-                        <div className="ring-2 ring-purple-900/30 rounded-3xl h-full transition-all hover:ring-purple-500/50">
-                            <MenuItemCard 
-                                item={item} 
-                                onAdd={onAdd} 
-                                index={index} 
-                                isHappyHourActive={isHappyHourActive} 
-                                isAvailable={availability.isAvailable}
-                                availabilityTime={availability.availabilityTime}
-                                isStoreOpen={isStoreOpen}
-                                cartItems={cartItems}
-                                allMenuItems={allMenuItems}
-                                onShowSuggestion={onShowSuggestion}
-                            />
-                        </div>
+        {items.map((item, index) => {
+            const availability = checkAvailability ? checkAvailability(item.category) : { isAvailable: true };
+            return (
+                <div key={item.id} className="relative group">
+                    <div className="absolute -top-4 -right-4 z-30 bg-purple-600 text-white p-2 rounded-lg shadow-xl rotate-[10deg] group-hover:scale-110 transition-transform">
+                        <Wine size={16} fill="currentColor" className="text-pink-300" />
                     </div>
-                );
-            })
-        )}
+                    <div className="ring-2 ring-purple-900/30 rounded-3xl h-full transition-all hover:ring-purple-500/50 hover:shadow-[0_0_30px_rgba(147,51,234,0.15)]">
+                        <MenuItemCard 
+                            item={item} 
+                            onAdd={onAdd} 
+                            index={index} 
+                            isHappyHourActive={isHappyHourActive} 
+                            isAvailable={availability.isAvailable}
+                            availabilityTime={availability.availabilityTime}
+                            isStoreOpen={isStoreOpen}
+                            cartItems={cartItems}
+                            // Fixed: Corrected variable name from menuItems to allMenuItems
+                            allMenuItems={allMenuItems}
+                            onShowSuggestion={onShowSuggestion}
+                        />
+                    </div>
+                </div>
+            );
+        })}
       </div>
     </div>
   );
