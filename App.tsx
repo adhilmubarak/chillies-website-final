@@ -162,20 +162,16 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Live time update every second
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Optimized tracking parameter detection
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const trackId = params.get('tid') || params.get('trackId');
     if (trackId) {
       setInitialTrackId(trackId);
       setIsTrackerOpen(true);
-      
-      // Clean URL immediately for a better user experience
       const cleanUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, cleanUrl);
     }
@@ -347,7 +343,7 @@ function App() {
         isStoreOpen={isStoreOpen}
         cartItems={cartItems}
         allMenuItems={menuItems}
-        onShowSuggestion={setSuggestion}
+        onShowSuggestion={(s) => setSuggestion(s)}
       />
 
       <section id="menu" className="pb-24 pt-12 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24 md:scroll-mt-32">
@@ -400,7 +396,7 @@ function App() {
                   isStoreOpen={isStoreOpen}
                   cartItems={cartItems}
                   allMenuItems={menuItems}
-                  onShowSuggestion={setSuggestion}
+                  onShowSuggestion={(s) => setSuggestion(s)}
                 />
               )}
               {activeCategory === 'Happy Hour' && (
@@ -412,7 +408,7 @@ function App() {
                   isStoreOpen={isStoreOpen}
                   cartItems={cartItems}
                   allMenuItems={menuItems}
-                  onShowSuggestion={setSuggestion}
+                  onShowSuggestion={(s) => setSuggestion(s)}
                 />
               )}
               {activeCategory !== 'Flash Sale' && activeCategory !== 'Happy Hour' && (
@@ -422,7 +418,8 @@ function App() {
                             key={item.id} item={item} onAdd={addToCart} index={index} 
                             isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive}
                             isAvailable={checkAvailability(item.category).isAvailable}
-                            isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion}
+                            isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} 
+                            onShowSuggestion={(s) => setSuggestion(s)}
                         />
                     ))}
                 </div>

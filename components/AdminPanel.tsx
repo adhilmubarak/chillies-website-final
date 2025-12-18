@@ -188,7 +188,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   }, [isStoreOpen, storeSettings.startTime]);
 
   const stats = useMemo(() => {
-    const totalRev = orders.filter(o => o.status === 'delivered').reduce((acc, o) => acc + o.total, 0);
+    const totalRev = orders.filter(o => o.status === 'delivered').reduce((acc, o) => acc + (o.total || 0), 0);
     const delivered = orders.filter(o => o.status === 'delivered').length;
     return {
       totalItems: items.length,
@@ -793,7 +793,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         />
       )}
 
-      {/* Category Editor Modal */}
       {editingCategory && (
         <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in">
             <div className="bg-stone-900 border border-white/10 rounded-[2.5rem] w-full max-w-md shadow-2xl p-8 space-y-8">
@@ -818,7 +817,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                 </div>
                 <button 
-                  onClick={() => { if(onUpdateCategory) onUpdateCategory(editingCategory); setEditingCategory(null); }} 
+                  onClick={() => { if(onUpdateCategory && editingCategory) onUpdateCategory(editingCategory); setEditingCategory(null); }} 
                   className="w-full bg-gold-500 text-stone-950 font-black py-4 rounded-xl uppercase tracking-widest text-xs shadow-lg hover:bg-gold-400"
                 >
                   Save Category
@@ -827,7 +826,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
-      {/* Item Add/Edit Modal */}
       {isItemFormOpen && editingItem && (
         <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in overflow-y-auto">
             <div className="bg-stone-900 border border-white/10 rounded-[3rem] w-full max-w-2xl shadow-[0_0_100px_rgba(0,0,0,0.8)] my-8 overflow-hidden">
@@ -844,7 +842,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black">Identity</label>
-                                <input type="text" placeholder="Item Name" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none transition-colors" />
+                                <input type="text" placeholder="Item Name" value={editingItem.name || ''} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none transition-colors" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -853,7 +851,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black">Menu</label>
-                                    <select value={editingItem.category} onChange={e => setEditingItem({...editingItem, category: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none appearance-none">
+                                    <select value={editingItem.category || ''} onChange={e => setEditingItem({...editingItem, category: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none appearance-none">
+                                        <option value="" disabled>Select Category</option>
                                         {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                                     </select>
                                 </div>
@@ -864,6 +863,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     {['none', 'mild', 'medium', 'hot'].map((level) => (
                                         <button 
                                             key={level}
+                                            type="button"
                                             onClick={() => setEditingItem({...editingItem, spicyLevel: level as any})}
                                             className={`flex-1 py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
                                                 editingItem.spicyLevel === level 
@@ -878,7 +878,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black">Story</label>
-                                <textarea placeholder="A brief description..." value={editingItem.description} onChange={e => setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-xs focus:border-gold-500 outline-none h-24 resize-none" />
+                                <textarea placeholder="A brief description..." value={editingItem.description || ''} onChange={e => setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-xs focus:border-gold-500 outline-none h-24 resize-none" />
                             </div>
                         </div>
 
@@ -895,7 +895,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         </div>
                                     )}
                                 </div>
-                                <input type="text" placeholder="Paste Image URL" value={editingItem.image} onChange={e => setEditingItem({...editingItem, image: e.target.value})} className="w-full bg-stone-900/50 border border-stone-800 rounded-2xl p-4 text-white text-[10px] font-mono focus:border-gold-500 outline-none mt-2 shadow-inner" />
+                                <input type="text" placeholder="Paste Image URL" value={editingItem.image || ''} onChange={e => setEditingItem({...editingItem, image: e.target.value})} className="w-full bg-stone-900/50 border border-stone-800 rounded-2xl p-4 text-white text-[10px] font-mono focus:border-gold-500 outline-none mt-2 shadow-inner" />
                             </div>
                         </div>
                     </div>
@@ -919,7 +919,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 <div className="p-8 border-t border-white/5 bg-stone-950/40 flex gap-4">
-                    <button onClick={() => { if(!editingItem.name || !editingItem.price) return; if(editingItem.id) onUpdateItem(editingItem as MenuItem); else onAddItem({ ...editingItem as MenuItem, id: Math.random().toString(36).substr(2,9) }); setIsItemFormOpen(false); }} className="flex-1 bg-gold-500 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-xs transition-all shadow-xl hover:bg-gold-400 active:scale-95 flex items-center justify-center gap-2"> {editingItem.id ? 'Save Changes' : 'Publish Dish'} <ChevronRight size={16} /> </button>
+                    <button onClick={() => { 
+                        if(!editingItem || !editingItem.name || !editingItem.price) return; 
+                        if(editingItem.id) onUpdateItem(editingItem as MenuItem); 
+                        else onAddItem({ ...editingItem as MenuItem, id: Math.random().toString(36).substr(2,9) } as MenuItem); 
+                        setIsItemFormOpen(false); 
+                    }} className="flex-1 bg-gold-500 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-xs transition-all shadow-xl hover:bg-gold-400 active:scale-95 flex items-center justify-center gap-2"> {editingItem.id ? 'Save Changes' : 'Publish Dish'} <ChevronRight size={16} /> </button>
                     <button onClick={() => setIsItemFormOpen(false)} className="px-8 border border-stone-800 text-stone-500 hover:text-white rounded-2xl uppercase tracking-widest text-[10px] font-black transition-all">Cancel</button>
                 </div>
             </div>
