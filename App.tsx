@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ChefsChoice from './components/ChefsChoice';
@@ -13,7 +13,6 @@ import OrderTrackerModal from './components/OrderTrackerModal';
 import SmartSuggestion from './components/SmartSuggestion';
 import NotificationTicker from './components/NotificationTicker';
 import StoreStatusAlert from './components/StoreStatusAlert';
-import BottomNav from './components/BottomNav';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
 import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig } from './types';
 import { Search } from 'lucide-react';
@@ -159,34 +158,14 @@ function App() {
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestion, setSuggestion] = useState<MenuItem | null>(null);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isAdminOpen = location.pathname === '/admin';
   const [isLoading, setIsLoading] = useState(true);
-  const [currentSection, setCurrentSection] = useState('home');
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-        const sections = ['home', 'menu', 'contact'];
-        const scrollPosition = window.scrollY + 200;
-
-        for (const section of sections) {
-            const element = document.getElementById(section);
-            if (element) {
-                const { offsetTop, offsetHeight } = element;
-                if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-                    setCurrentSection(section);
-                    break;
-                }
-            }
-        }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -316,6 +295,22 @@ function App() {
     });
   };
 
+  const handleAddOrder = async (order: Order) => {
+    try {
+      await addDoc(collection(db, 'orders'), order);
+    } catch (error) {
+      console.error("Error adding order: ", error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeCategory === 'Flash Sale' && !isFlashSaleActive) {
+      setActiveCategory('All');
+    } else if (activeCategory === 'Happy Hour' && !isHappyHourActive) {
+      setActiveCategory('All');
+    }
+  }, [isFlashSaleActive, isHappyHourActive, activeCategory]);
+
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -328,8 +323,8 @@ function App() {
   });
 
   return (
-    <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden pb-20 md:pb-0">
-      <div className="fixed inset-0 bg-stone-950 -z-10" />
+    <div className="relative min-h-screen font-sans text-stone-800 overflow-x-hidden">
+      <div className="fixed inset-0 bg-white -z-10" />
       
       <NotificationTicker 
         isFlashSaleActive={isFlashSaleActive} 
@@ -371,10 +366,10 @@ function App() {
 
       <section id="menu" className="pb-24 pt-12 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24 md:scroll-mt-32">
         <div className="text-center mb-10 md:mb-16 space-y-4 md:space-y-6">
-          <span className="text-gold-500 uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold block">Our Selection</span>
-          <h2 className="text-3xl md:text-6xl font-serif text-white relative inline-block">
+          <span className="text-brand-500 uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold block">Our Selection</span>
+          <h2 className="text-3xl md:text-6xl font-serif text-stone-900 relative inline-block">
             Curated Menu
-            <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 md:w-24 h-1 bg-gold-500 rounded-full"></span>
+            <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 md:w-24 h-1 bg-brand-500 rounded-full"></span>
           </h2>
         </div>
 
@@ -384,17 +379,22 @@ function App() {
                 <input
                     type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search menu..."
-                    className="block w-full pl-12 pr-4 py-4 bg-stone-900 border border-stone-800 rounded-full text-stone-200 focus:border-gold-500 focus:outline-none"
+                    className="block w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-200 rounded-full text-stone-800 focus:border-brand-500 focus:outline-none"
                 />
             </div>
         </div>
 
         <div className="flex flex-col items-center gap-6 mb-12">
             <div className="flex w-full overflow-x-auto scrollbar-hide md:flex-wrap md:justify-center gap-2 px-4 pb-4">
-                {['All', 'Flash Sale', 'Happy Hour', ...dbCategories.map(c => c.name)].map(cat => (
+                {[
+                  'All', 
+                  ...(isFlashSaleActive ? ['Flash Sale'] : []), 
+                  ...(isHappyHourActive ? ['Happy Hour'] : []), 
+                  ...dbCategories.map(c => c.name)
+                ].map(cat => (
                     <button key={cat} onClick={() => setActiveCategory(cat)}
                         className={`flex-shrink-0 px-6 md:px-8 py-3 rounded-full border transition-all text-[10px] md:text-xs font-bold uppercase tracking-widest ${
-                            activeCategory === cat ? 'bg-gold-500 border-gold-500 text-stone-950' : 'bg-transparent border-stone-800 text-stone-500'
+                            activeCategory === cat ? 'bg-brand-500 border-brand-500 text-white' : 'bg-transparent border-stone-200 text-stone-500'
                         }`}
                     >
                         {cat}
@@ -405,7 +405,7 @@ function App() {
 
         {isLoading ? (
             <div className="flex flex-col items-center py-20 gap-4">
-                <div className="w-10 h-10 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         ) : (
             <>
@@ -451,7 +451,7 @@ function App() {
         )}
       </section>
 
-      <Footer onOpenAdmin={() => setIsAdminOpen(true)} onOpenTC={() => {}} />
+      <Footer onOpenAdmin={() => navigate('/admin')} onOpenTC={() => {}} />
       <OrderTrackerModal 
         isOpen={isTrackerOpen} 
         onClose={() => {
@@ -466,23 +466,17 @@ function App() {
         isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cartItems}
         onUpdateQuantity={(id, delta) => setCartItems(prev => prev.map(i => i.id === id ? {...i, quantity: Math.max(0, i.quantity + delta)} : i).filter(i => i.quantity > 0))}
         onRemove={id => setCartItems(prev => prev.filter(i => i.id !== id))}
-        onClearCart={() => setCartItems([])} onShowNotification={() => {}} onAddOrder={async o => { await addDoc(collection(db, 'orders'), o); }}
+        onClearCart={() => setCartItems([])} onShowNotification={() => {}} 
+        onAddOrder={handleAddOrder}
         onTrackOrder={() => {
             setIsCartOpen(false);
             setIsTrackerOpen(true);
         }} coupons={coupons}
       />
 
-      <BottomNav 
-        cartItemCount={cartItems.reduce((acc, i) => acc + i.quantity, 0)} 
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenTracker={() => setIsTrackerOpen(true)}
-        activeSection={currentSection}
-      />
-      
       {isAdminOpen && (
         <AdminPanel 
-            isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings}
+            isOpen={isAdminOpen} onClose={() => navigate('/')} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings}
             onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
             onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
             onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
@@ -493,6 +487,7 @@ function App() {
             onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
             onUpdateStoreSettings={s => setDoc(doc(db, 'settings', 'general'), s, {merge: true})}
             onUpdatePromos={p => setDoc(doc(db, 'settings', 'general'), p, {merge: true})}
+            onAddOrder={handleAddOrder}
         />
       )}
     </div>
