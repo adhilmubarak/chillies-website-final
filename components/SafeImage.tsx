@@ -40,7 +40,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
     <div className={`relative overflow-hidden ${containerClassName}`}>
       {status === 'loading' && (
         <div className="absolute inset-0 bg-stone-850 animate-pulse flex items-center justify-center z-0">
-          <Utensils className="text-stone-700/50 w-1/4 h-1/4" />
+          <Utensils className="text-stone-300/50 w-1/4 h-1/4" />
         </div>
       )}
       <img

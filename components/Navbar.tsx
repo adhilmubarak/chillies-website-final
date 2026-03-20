@@ -142,7 +142,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="flex flex-col items-center gap-6 mb-12 relative z-10">
               <span className="font-serif text-3xl text-gold-400 font-bold uppercase text-center tracking-tighter">CHILLIES<br/>RESTAURANT.</span>
               
-              <div className="flex flex-col items-center bg-white/5 rounded-3xl p-6 border border-white/10 shadow-2xl min-w-[200px]">
+              <div className="flex flex-col items-center bg-stone-950/5 rounded-3xl p-6 border border-white/10 shadow-2xl min-w-[200px]">
                 <div className="flex items-center gap-2 mb-2">
                    <div className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(212,175,55,0.8)]"></div>
                    <span className="text-[10px] uppercase tracking-[0.3em] font-black text-stone-500">Live Time</span>

@@ -5,7 +5,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig } from '../types';
 import { printThermalBill } from '../App';
@@ -41,6 +41,7 @@ interface AdminPanelProps {
   onDeleteCoupon: (id: string) => void;
   onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string }) => void;
   onUpdatePromos: (promos: any) => void;
+  onAddOrder?: (order: Order) => Promise<void>;
 }
 
 const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => void }> = ({ onScan, onClose }) => {
@@ -138,7 +139,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
       
       <div className="mt-12 flex flex-col items-center gap-6">
           {isReady && !error && <p className="text-gold-500 font-serif text-lg tracking-widest uppercase">Align Code within Frame</p>}
-          <button onClick={onClose} className="px-12 py-4 border border-white/10 text-stone-400 hover:text-white hover:bg-white/5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all">Cancel Scan</button>
+          <button onClick={onClose} className="px-12 py-4 border border-white/10 text-stone-400 hover:text-white hover:bg-stone-950/5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all">Cancel Scan</button>
       </div>
     </div>
   );
@@ -333,7 +334,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
-                        activeTab === tab.id ? 'bg-gold-500 text-stone-950 shadow-xl' : 'text-stone-400 hover:text-white hover:bg-white/5'
+                        activeTab === tab.id ? 'bg-gold-500 text-stone-950 shadow-xl' : 'text-stone-400 hover:text-white hover:bg-stone-950/5'
                     }`}
                 >
                     <tab.icon size={18} className={activeTab === tab.id ? 'stroke-[2.5]' : ''} />
@@ -443,7 +444,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {filteredOrders.length === 0 ? (
                             <div className="col-span-full py-32 text-center border-2 border-dashed border-stone-800 rounded-[3rem] bg-stone-900/20">
-                                <ShoppingBag className="mx-auto text-stone-700 mb-6 opacity-20" size={64} />
+                                <ShoppingBag className="mx-auto text-stone-300 mb-6 opacity-20" size={64} />
                                 <p className="text-stone-500 uppercase tracking-[0.3em] text-xs font-bold">No matching records found</p>
                             </div>
                         ) : filteredOrders.map(order => (
@@ -462,8 +463,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-white/5 transition-all">
                                             {copiedId === order.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
                                         </button>
-                                        <button onClick={() => printThermalBill(order)} title="Print" className="p-3 bg-stone-950 text-stone-400 hover:text-gold-500 rounded-2xl border border-white/5 transition-all">
+                                        <button onClick={() => printThermalBill(order)} title="Print" className="p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-900/5 transition-all">
                                             <Printer size={18} />
+                                        </button>
+                                        <button onClick={() => {
+                                            const phone = order.contactNumber.replace(/\D/g, '');
+                                            const formattedPhone = phone.length === 10 ? `91${phone}` : phone;
+                                            const text = `Hi ${order.customerName},\n\nYour order #${order.id} is confirmed!\nYou can track your order status live here:\n${window.location.origin}/?tid=${order.id}\n\nThank you for choosing Chillies!`;
+                                            window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`, '_blank');
+                                        }} title="WhatsApp Tracking Link" className="p-3 bg-stone-950 text-stone-600 hover:text-green-500 rounded-2xl border border-stone-900/5 transition-all">
+                                            <MessageCircle size={18} />
                                         </button>
                                     </div>
                                 </div>
@@ -577,7 +586,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     {filteredItems.length === 0 ? (
                         <div className="py-32 text-center border-2 border-dashed border-stone-800 rounded-[3rem] bg-stone-900/20 animate-fade-in">
-                            <SearchX className="mx-auto text-stone-700 mb-6 opacity-20" size={64} />
+                            <SearchX className="mx-auto text-stone-300 mb-6 opacity-20" size={64} />
                             <p className="text-stone-500 uppercase tracking-[0.3em] text-xs font-bold mb-8">No results for "{searchTerm}"</p>
                             {searchTerm && (
                                 <button 
@@ -612,7 +621,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 >
                                                     <span
                                                         aria-hidden="true"
-                                                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full shadow-lg ring-0 transition duration-300 ease-in-out ${!item.isUnavailable ? 'translate-x-4 bg-stone-950' : 'translate-x-0 bg-stone-500'}`}
+                                                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full shadow-lg ring-0 transition duration-300 ease-in-out ${!item.isUnavailable ? 'translate-x-4 bg-stone-950' : 'translate-x-0 bg-stone-9000'}`}
                                                     />
                                                 </button>
                                             </div>
@@ -701,7 +710,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <div className="p-3.5 rounded-xl bg-gold-500/10 text-gold-500"><Ticket size={24} /></div>
                                         <div><p className="text-white font-mono font-bold text-lg">{coupon.code}</p><p className="text-stone-500 text-[10px] uppercase font-black tracking-widest">₹{coupon.value} Flat Off</p></div>
                                     </div>
-                                    <button onClick={() => coupon.id && onDeleteCoupon(coupon.id)} className="p-3 text-stone-700 hover:text-red-500 transition-all hover:bg-red-500/5 rounded-xl"> <Trash2 size={20} /> </button>
+                                    <button onClick={() => coupon.id && onDeleteCoupon(coupon.id)} className="p-3 text-stone-300 hover:text-red-500 transition-all hover:bg-red-500/5 rounded-xl"> <Trash2 size={20} /> </button>
                                 </div>
                             ))}
                         </div>
@@ -715,7 +724,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <div className={`bg-stone-900/80 border p-10 rounded-[3rem] transition-all duration-700 ${promoSettings.isFlashSaleActive ? 'border-red-500/40 shadow-[0_0_50px_rgba(220,38,38,0.1)]' : 'border-white/5'}`}>
                             <div className="flex justify-between items-start mb-10">
                                 <div className={`p-5 rounded-[1.5rem] ${promoSettings.isFlashSaleActive ? 'bg-red-500 text-white shadow-lg' : 'bg-stone-950 text-stone-600 border border-white/5'}`}><Zap size={40} /></div>
-                                <button onClick={() => onUpdatePromos({ ...promoSettings, isFlashSaleActive: !promoSettings.isFlashSaleActive })} className={`relative w-16 h-8 rounded-full transition-colors ${promoSettings.isFlashSaleActive ? 'bg-red-500' : 'bg-stone-800'}`}><div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all ${promoSettings.isFlashSaleActive ? 'left-9' : 'left-1'}`}></div></button>
+                                <button onClick={() => onUpdatePromos({ ...promoSettings, isFlashSaleActive: !promoSettings.isFlashSaleActive })} className={`relative w-16 h-8 rounded-full transition-colors ${promoSettings.isFlashSaleActive ? 'bg-red-500' : 'bg-stone-800'}`}><div className={`absolute top-1 w-6 h-6 bg-stone-950 rounded-full shadow-lg transition-all ${promoSettings.isFlashSaleActive ? 'left-9' : 'left-1'}`}></div></button>
                             </div>
                             <div className="space-y-2 mb-8"><h4 className="text-3xl font-serif text-white">Flash Sale</h4><p className="text-stone-500 text-xs">Timed aggressive discounts.</p></div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -727,7 +736,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <div className={`bg-stone-900/80 border p-10 rounded-[3rem] transition-all duration-700 ${promoSettings.isHappyHourActive ? 'border-purple-500/40 shadow-[0_0_50px_rgba(147,51,234,0.1)]' : 'border-white/5'}`}>
                             <div className="flex justify-between items-start mb-10">
                                 <div className={`p-5 rounded-[1.5rem] ${promoSettings.isHappyHourActive ? 'bg-purple-500 text-white shadow-lg' : 'bg-stone-950 text-stone-600 border border-white/5'}`}><PartyPopper size={40} /></div>
-                                <button onClick={() => onUpdatePromos({ ...promoSettings, isHappyHourActive: !promoSettings.isHappyHourActive })} className={`relative w-16 h-8 rounded-full transition-colors ${promoSettings.isHappyHourActive ? 'bg-purple-500' : 'bg-stone-800'}`}><div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all ${promoSettings.isHappyHourActive ? 'left-9' : 'left-1'}`}></div></button>
+                                <button onClick={() => onUpdatePromos({ ...promoSettings, isHappyHourActive: !promoSettings.isHappyHourActive })} className={`relative w-16 h-8 rounded-full transition-colors ${promoSettings.isHappyHourActive ? 'bg-purple-500' : 'bg-stone-800'}`}><div className={`absolute top-1 w-6 h-6 bg-stone-950 rounded-full shadow-lg transition-all ${promoSettings.isHappyHourActive ? 'left-9' : 'left-1'}`}></div></button>
                             </div>
                             <div className="space-y-2 mb-8"><h4 className="text-3xl font-serif text-white">Happy Hour</h4><p className="text-stone-500 text-xs">Daily recurring special pricing.</p></div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

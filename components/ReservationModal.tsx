@@ -66,7 +66,7 @@ const ReservationModal: React.FC<ReservationModalProps> = ({ isOpen, onClose, on
                 <h2 className="font-serif text-2xl text-white">Book a Table</h2>
                 <p className="text-stone-400 text-xs mt-1">Reserve your spot for an unforgettable evening.</p>
             </div>
-            <button onClick={onClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full">
+            <button onClick={onClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-950/5 rounded-full">
                 <X size={24} />
             </button>
         </div>

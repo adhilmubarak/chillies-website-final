@@ -187,10 +187,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
           {step === 'confirmation' && confirmedOrder ? (
               <div className="flex flex-col h-full animate-fade-in">
                   <div className="p-6 md:p-8 pb-4 flex justify-between items-center">
-                      <button onClick={() => printThermalBill(confirmedOrder)} className="text-gold-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full flex items-center gap-2 text-[10px] uppercase font-black tracking-widest">
+                      <button onClick={() => printThermalBill(confirmedOrder)} className="text-gold-500 hover:text-white transition-colors p-2 hover:bg-stone-950/5 rounded-full flex items-center gap-2 text-[10px] uppercase font-black tracking-widest">
                           <Printer size={18} /> Print Receipt
                       </button>
-                      <button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={24} /></button>
+                      <button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-950/5 rounded-full"><X size={24} /></button>
                   </div>
                   
                   <div className="flex-1 flex flex-col items-center px-6 md:px-8 text-center overflow-y-auto scrollbar-hide">
@@ -238,7 +238,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
               </div>
           ) : step === 'details' ? (
               <div className="flex flex-col h-full animate-fade-in">
-                  <div className="p-6 md:p-8 pb-4 border-b border-white/5 flex justify-between items-center bg-stone-950/50"><div className="flex items-center gap-4"><button onClick={() => setStep('cart')} className="text-stone-400 p-2 hover:bg-white/5 rounded-full transition-colors"><ArrowLeft size={24} /></button><h2 className="font-serif text-xl md:text-2xl text-white">Details</h2></div><button onClick={handleClose} className="text-stone-500 p-2 hover:bg-white/5 rounded-full transition-colors"><X size={24} /></button></div>
+                  <div className="p-6 md:p-8 pb-4 border-b border-white/5 flex justify-between items-center bg-stone-950/50"><div className="flex items-center gap-4"><button onClick={() => setStep('cart')} className="text-stone-400 p-2 hover:bg-stone-950/5 rounded-full transition-colors"><ArrowLeft size={24} /></button><h2 className="font-serif text-xl md:text-2xl text-white">Details</h2></div><button onClick={handleClose} className="text-stone-500 p-2 hover:bg-stone-950/5 rounded-full transition-colors"><X size={24} /></button></div>
                   <div className="flex-1 p-6 md:p-8 space-y-8 overflow-y-auto scrollbar-hide">
                       <div className="bg-stone-900/50 border border-white/5 rounded-2xl p-6 flex justify-between items-end relative overflow-hidden"><div className="space-y-1"><span className="text-stone-300 text-sm block font-medium">{cartItems.reduce((acc, i) => acc + i.quantity, 0)} Items Selected</span><span className="text-stone-400 text-[10px] font-black uppercase tracking-widest block flex items-center gap-1 mt-1">{orderType === 'delivery' ? <Bike size={12}/> : <Store size={12}/>} {orderType === 'delivery' ? 'Home Delivery' : 'Self Pickup'}</span></div><div className="text-right"><span className="text-gold-400 font-serif text-2xl md:text-3xl font-bold">₹{total.toFixed(0)}</span></div></div>
                       <div className="space-y-5">
@@ -267,7 +267,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
               </div>
           ) : (
             <>
-                <div className="p-6 md:p-8 pb-4 border-b border-white/5 flex justify-between items-center bg-stone-950/50"><h2 className="font-serif text-2xl md:text-3xl text-white">Your Selection</h2><button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={24} /></button></div>
+                <div className="p-6 md:p-8 pb-4 border-b border-white/5 flex justify-between items-center bg-stone-950/50"><h2 className="font-serif text-2xl md:text-3xl text-white">Your Selection</h2><button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-950/5 rounded-full"><X size={24} /></button></div>
                 <div className="px-6 md:px-8 py-6 border-b border-white/5 bg-stone-950/30"><div className="grid grid-cols-2 gap-2 p-1 bg-stone-900/50 rounded-xl border border-white/5 shadow-inner"><button onClick={() => setOrderType('delivery')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'delivery' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Bike size={16} /><span>Delivery</span></button><button onClick={() => setOrderType('pickup')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'pickup' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Store size={16} /><span>Pickup</span></button></div></div>
                 <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 scrollbar-hide min-h-0">
                     {cartItems.length === 0 ? (<div className="h-full flex flex-col items-center justify-center text-stone-500 space-y-6 animate-fade-in"><ShoppingBag size={32} className="opacity-20" /><p className="font-light tracking-widest uppercase text-[10px]">Cart is empty</p><button onClick={() => { onClose(); document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gold-400 hover:text-gold-300 uppercase text-[10px] tracking-widest font-black border-b border-gold-400/30 pb-1 transition-all">Explore Menu</button></div>) : (cartItems.map((item) => (

@@ -323,8 +323,28 @@ function App() {
   });
 
   return (
-    <div className="relative min-h-screen font-sans text-stone-800 overflow-x-hidden">
-      <div className="fixed inset-0 bg-white -z-10" />
+    <Routes>
+      <Route path="/admin" element={
+        <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
+          <AdminPanel 
+            isOpen={true} onClose={() => navigate('/')} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings}
+            onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
+            onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
+            onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
+            onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59'})}
+            onUpdateCategory={c => updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59'})}
+            onDeleteCategory={async n => { const q = query(collection(db, 'categories'), where("name", "==", n)); const s = await getDocs(q); s.forEach(d => deleteDoc(d.ref)); }}
+            onUpdateOrderStatus={async (id, s) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, {status: s})); }}
+            onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
+            onUpdateStoreSettings={s => setDoc(doc(db, 'settings', 'general'), s, {merge: true})}
+            onUpdatePromos={p => setDoc(doc(db, 'settings', 'general'), p, {merge: true})}
+            onAddOrder={handleAddOrder}
+          />
+        </div>
+      } />
+      <Route path="/*" element={
+        <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden">
+          <div className="fixed inset-0 bg-stone-950 -z-10" />
       
       <NotificationTicker 
         isFlashSaleActive={isFlashSaleActive} 
@@ -367,7 +387,7 @@ function App() {
       <section id="menu" className="pb-24 pt-12 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24 md:scroll-mt-32">
         <div className="text-center mb-10 md:mb-16 space-y-4 md:space-y-6">
           <span className="text-brand-500 uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold block">Our Selection</span>
-          <h2 className="text-3xl md:text-6xl font-serif text-stone-900 relative inline-block">
+          <h2 className="text-3xl md:text-6xl font-serif text-stone-50 relative inline-block">
             Curated Menu
             <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 md:w-24 h-1 bg-brand-500 rounded-full"></span>
           </h2>
@@ -379,7 +399,7 @@ function App() {
                 <input
                     type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search menu..."
-                    className="block w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-200 rounded-full text-stone-800 focus:border-brand-500 focus:outline-none"
+                    className="block w-full pl-12 pr-4 py-4 bg-stone-900 border border-stone-800 rounded-full text-stone-200 focus:border-brand-500 focus:outline-none"
                 />
             </div>
         </div>
@@ -394,7 +414,7 @@ function App() {
                 ].map(cat => (
                     <button key={cat} onClick={() => setActiveCategory(cat)}
                         className={`flex-shrink-0 px-6 md:px-8 py-3 rounded-full border transition-all text-[10px] md:text-xs font-bold uppercase tracking-widest ${
-                            activeCategory === cat ? 'bg-brand-500 border-brand-500 text-white' : 'bg-transparent border-stone-200 text-stone-500'
+                            activeCategory === cat ? 'bg-brand-500 border-brand-500 text-white' : 'bg-transparent border-stone-800 text-stone-500'
                         }`}
                     >
                         {cat}
@@ -474,23 +494,9 @@ function App() {
         }} coupons={coupons}
       />
 
-      {isAdminOpen && (
-        <AdminPanel 
-            isOpen={isAdminOpen} onClose={() => navigate('/')} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings}
-            onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
-            onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
-            onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
-            onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59'})}
-            onUpdateCategory={c => updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59'})}
-            onDeleteCategory={async n => { const q = query(collection(db, 'categories'), where("name", "==", n)); const s = await getDocs(q); s.forEach(d => deleteDoc(d.ref)); }}
-            onUpdateOrderStatus={async (id, s) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, {status: s})); }}
-            onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
-            onUpdateStoreSettings={s => setDoc(doc(db, 'settings', 'general'), s, {merge: true})}
-            onUpdatePromos={p => setDoc(doc(db, 'settings', 'general'), p, {merge: true})}
-            onAddOrder={handleAddOrder}
-        />
-      )}
-    </div>
+        </div>
+      } />
+    </Routes>
   );
 }
 

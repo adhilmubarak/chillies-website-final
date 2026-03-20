@@ -61,7 +61,7 @@ const NotificationTicker: React.FC<NotificationTickerProps> = ({
                 )}
               </>
             )}
-            <span className="text-stone-700">///</span>
+            <span className="text-stone-300">///</span>
           </React.Fragment>
         ))}
       </div>
