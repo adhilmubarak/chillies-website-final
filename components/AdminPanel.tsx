@@ -5,7 +5,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig } from '../types';
 import { printThermalBill } from '../App';
@@ -148,7 +148,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
 const AdminPanel: React.FC<AdminPanelProps> = ({
   isOpen, onClose, items, categories, orders, coupons = [], isStoreOpen, promoSettings, storeSettings,
   onAddItem, onUpdateItem, onDeleteItem, onAddCategory, onUpdateCategory, onDeleteCategory, onUpdateOrderStatus,
-  onAddCoupon, onDeleteCoupon, onUpdateStoreSettings, onUpdatePromos
+  onAddCoupon, onDeleteCoupon, onUpdateStoreSettings, onUpdatePromos, onAddOrder
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -168,6 +168,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newCouponVal, setNewCouponVal] = useState(0);
   const [openingCountdown, setOpeningCountdown] = useState<string>('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  const [isManualOrderOpen, setIsManualOrderOpen] = useState(false);
+  const [manualOrderItems, setManualOrderItems] = useState<{item: MenuItem, quantity: number}[]>([]);
+  const [manualCustomerName, setManualCustomerName] = useState('');
+  const [manualContact, setManualContact] = useState('');
+  const [manualAddress, setManualAddress] = useState('');
+  const [manualOrderType, setManualOrderType] = useState<'delivery'|'pickup'>('pickup');
 
   useEffect(() => {
     if (isStoreOpen) {
@@ -434,7 +441,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 </button>
                             ))}
                         </div>
-                        <div className="relative w-full lg:max-w-sm flex items-center gap-2">
+                        <div className="relative w-full lg:max-w-md flex items-center gap-2">
                             <div className="relative flex-1">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" size={16} />
                                 <input 
@@ -446,6 +453,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 />
                                 <button onClick={() => setIsScannerOpen(true)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gold-500 hover:text-gold-400 transition-colors" title="Scan QR Code"><Scan size={18} /></button>
                             </div>
+                            <button onClick={() => setIsManualOrderOpen(true)} className="bg-gold-500 text-stone-950 p-4 rounded-2xl hover:bg-gold-400 transition-colors shadow-lg shrink-0" title="Create Manual Order">
+                                <Plus size={20} />
+                            </button>
                         </div>
                     </div>
 
@@ -808,6 +818,140 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           onScan={(text) => { setOrderSearch(text); setIsScannerOpen(false); }}
           onClose={() => setIsScannerOpen(false)}
         />
+      )}
+
+      {/* Manual Order Modal */}
+      {isManualOrderOpen && (
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in overflow-y-auto">
+            <div className="bg-stone-900 border border-white/10 rounded-[3rem] w-full max-w-4xl shadow-[0_0_100px_rgba(0,0,0,0.8)] my-8 overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-stone-950/40 shrink-0">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center text-stone-950 shadow-lg shadow-gold-500/20"><ShoppingBag size={24} className="stroke-[3]" /></div>
+                        <div>
+                            <h3 className="text-xl font-serif text-white leading-none">Walk-in Order</h3>
+                            <p className="text-[10px] text-stone-500 uppercase tracking-widest mt-1">Manual POS System</p>
+                        </div>
+                    </div>
+                    <button onClick={() => setIsManualOrderOpen(false)} className="text-stone-500 hover:text-white transition-all"><X size={28} /></button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Left Side: Items Selection */}
+                    <div className="space-y-6">
+                        <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-4">Menu Items</h4>
+                        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
+                            {items.map(item => {
+                                const cartItem = manualOrderItems.find(i => i.item.id === item.id);
+                                const qty = cartItem ? cartItem.quantity : 0;
+                                return (
+                                    <div key={item.id} className="flex items-center justify-between p-4 bg-stone-950 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+                                        <div className="flex-1 min-w-0 pr-4">
+                                            <p className="text-white text-sm font-bold truncate">{item.name}</p>
+                                            <p className="text-gold-500 text-[10px] font-mono font-bold">₹{item.price}</p>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-stone-900 rounded-xl border border-white/10 p-1">
+                                            <button onClick={() => {
+                                                if (qty > 1) {
+                                                    setManualOrderItems(prev => prev.map(p => p.item.id === item.id ? {...p, quantity: p.quantity - 1} : p));
+                                                } else if (qty === 1) {
+                                                    setManualOrderItems(prev => prev.filter(p => p.item.id !== item.id));
+                                                }
+                                            }} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white"><Minus size={14} /></button>
+                                            <span className="w-4 text-center text-white text-xs font-bold">{qty}</span>
+                                            <button onClick={() => {
+                                                if (qty === 0) {
+                                                    setManualOrderItems(prev => [...prev, {item, quantity: 1}]);
+                                                } else {
+                                                    setManualOrderItems(prev => prev.map(p => p.item.id === item.id ? {...p, quantity: p.quantity + 1} : p));
+                                                }
+                                            }} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white"><Plus size={14} /></button>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                    {/* Right Side: Order Details */}
+                    <div className="space-y-6 flex flex-col h-full">
+                        <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-4">Customer Details</h4>
+                        <div className="space-y-4">
+                            <input type="text" placeholder="Customer Name" value={manualCustomerName} onChange={e => setManualCustomerName(e.target.value)} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none" />
+                            <input type="tel" placeholder="Contact Number (Optional for walk-in)" value={manualContact} onChange={e => setManualContact(e.target.value.replace(/\D/g, '').slice(0,10))} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none" />
+                            <div className="grid grid-cols-2 gap-4">
+                                <button onClick={() => setManualOrderType('pickup')} className={`py-4 rounded-xl border text-[10px] uppercase font-black tracking-[0.2em] transition-all ${manualOrderType === 'pickup' ? 'bg-gold-500 text-stone-950 border-gold-500 shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'bg-stone-950 text-stone-500 border-stone-800 hover:border-stone-700'}`}>Pickup/Dine-in</button>
+                                <button onClick={() => setManualOrderType('delivery')} className={`py-4 rounded-xl border text-[10px] uppercase font-black tracking-[0.2em] transition-all ${manualOrderType === 'delivery' ? 'bg-gold-500 text-stone-950 border-gold-500 shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'bg-stone-950 text-stone-500 border-stone-800 hover:border-stone-700'}`}>Delivery</button>
+                            </div>
+                            {manualOrderType === 'delivery' && (
+                                <textarea placeholder="Delivery Address" value={manualAddress} onChange={e => setManualAddress(e.target.value)} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none h-24 resize-none" />
+                            )}
+                        </div>
+                        
+                        <div className="bg-stone-950 p-6 rounded-[2rem] border border-white/5 mt-auto shadow-inner">
+                            <div className="flex justify-between items-center text-white mb-3">
+                                <span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Subtotal</span>
+                                <span className="font-mono text-sm">₹{manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0)}</span>
+                            </div>
+                            {manualOrderType === 'delivery' && (
+                                <div className="flex justify-between items-center text-white mb-3">
+                                    <span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Delivery Fee</span>
+                                    <span className="font-mono text-sm">₹20</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between items-center text-gold-500 text-2xl font-serif pt-4 border-t border-white/5 mt-2">
+                                <span>Total Payable</span>
+                                <span>₹{manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0) + (manualOrderType === 'delivery' ? 20 : 0)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-8 border-t border-white/5 bg-stone-950/40 shrink-0">
+                    <button 
+                        disabled={manualOrderItems.length === 0 || !manualCustomerName || (manualOrderType === 'delivery' && !manualAddress)}
+                        onClick={() => {
+                            if (!onAddOrder) return;
+                            const subtotal = manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0);
+                            const total = subtotal + (manualOrderType === 'delivery' ? 20 : 0);
+                            let newOrderId = '';
+                            if (manualContact.length >= 5) {
+                                newOrderId = `CHILL${manualContact.slice(-5)}`;
+                            } else {
+                                newOrderId = `CHILL${Math.floor(10000 + Math.random() * 90000)}`;
+                            }
+                            const now = new Date();
+                            const newOrder: Order = {
+                                id: newOrderId,
+                                items: manualOrderItems.map(i => ({...i.item, quantity: i.quantity, selectedVariations: {}} as any)),
+                                subtotal,
+                                discount: 0,
+                                couponCode: null,
+                                deliveryCharge: manualOrderType === 'delivery' ? 20 : 0,
+                                total,
+                                customerName: manualCustomerName,
+                                contactNumber: manualContact || 'N/A',
+                                address: manualOrderType === 'delivery' ? manualAddress : '',
+                                type: manualOrderType,
+                                status: 'pending',
+                                timestamp: now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
+                                date: now.toLocaleDateString(),
+                                createdAt: now.getTime(),
+                                trackingLink: ''
+                            };
+                            onAddOrder(newOrder);
+                            setIsManualOrderOpen(false);
+                            setManualOrderItems([]);
+                            setManualCustomerName('');
+                            setManualContact('');
+                            setManualAddress('');
+                        }}
+                        className="w-full bg-gold-500 text-stone-950 font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-xs transition-all shadow-xl hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gold-500"
+                    >
+                        Confirm Internal Order
+                    </button>
+                    <p className="text-center text-stone-600 text-[10px] mt-4 uppercase tracking-[0.2em] font-bold">This will add the order to the main queue instantly.</p>
+                </div>
+            </div>
+        </div>
       )}
 
       {/* Category Editor Modal */}
