@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User } from 'lucide-react';
+import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User, Star } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { Order } from '../types';
 import SafeImage from './SafeImage';
 
@@ -17,6 +17,8 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [foundOrder, setFoundOrder] = useState<Order | null>(null);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
     if(initialOrderId) {
@@ -54,6 +56,21 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault();
     fetchOrderDetails(orderId);
+  };
+
+  const handleRatingSubmit = async (rating: number) => {
+    if (!foundOrder || foundOrder.status !== 'delivered') return;
+    setIsSubmittingRating(true);
+    try {
+       const q = query(collection(db, 'orders'), where("id", "==", foundOrder.id));
+       const snap = await getDocs(q);
+       snap.forEach(d => updateDoc(d.ref, { deliveryRating: rating }));
+       setFoundOrder(prev => prev ? {...prev, deliveryRating: rating} : null);
+    } catch (e) {
+       console.error("Error rating delivery:", e);
+    } finally {
+       setIsSubmittingRating(false);
+    }
   };
 
   const getStatusDisplay = (status: Order['status'], type: Order['type']) => {
@@ -121,6 +138,37 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                         </div>
                         <div className="flex items-center gap-2 pt-2 mt-2 border-t border-white/5 text-[10px] text-stone-500 uppercase tracking-wide">{foundOrder.type === 'delivery' ? <Bike size={12} /> : <Store size={12} />}{foundOrder.type === 'delivery' && foundOrder.address ? 'Delivery' : 'Pickup'}</div>
                     </div>
+                    
+                    {foundOrder.status === 'delivered' && foundOrder.type === 'delivery' && (
+                        <div className="mt-6 bg-stone-900 border border-gold-500/20 rounded-2xl p-5 text-center shadow-lg animate-fade-in">
+                            <h4 className="text-white font-serif text-lg mb-1">How was your delivery?</h4>
+                            <p className="text-stone-500 text-[10px] uppercase font-bold tracking-widest mb-4">Rate your rider</p>
+                            
+                            {foundOrder.deliveryRating ? (
+                                <div className="flex justify-center gap-1">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <Star key={star} size={24} className={star <= foundOrder.deliveryRating! ? "fill-gold-500 text-gold-500" : "text-stone-700"} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex justify-center gap-2">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <button 
+                                            key={star}
+                                            disabled={isSubmittingRating}
+                                            onMouseEnter={() => setHoverRating(star)}
+                                            onMouseLeave={() => setHoverRating(0)}
+                                            onClick={() => handleRatingSubmit(star)}
+                                            className="p-1 transition-all disabled:opacity-50 hover:scale-110 active:scale-95"
+                                        >
+                                            <Star size={32} className={(hoverRating >= star) ? "fill-gold-500 text-gold-500" : "text-stone-700"} />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            {foundOrder.deliveryRating && <p className="text-gold-500 text-xs mt-3 font-bold">Thank you for your feedback!</p>}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

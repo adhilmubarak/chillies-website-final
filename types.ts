@@ -58,4 +58,5 @@ export interface Order {
   date: string;
   createdAt: number;
   trackingLink?: string; // Added to persist the tracking link
+  deliveryRating?: number; // Added to track customer rating
 }

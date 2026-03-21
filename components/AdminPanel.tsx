@@ -5,7 +5,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig } from '../types';
 import { printThermalBill } from '../App';

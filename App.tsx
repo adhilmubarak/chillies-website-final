@@ -150,7 +150,8 @@ function App() {
   const [storeSettings, setStoreSettings] = useState({
       acceptingOrders: true,
       startTime: '07:00',
-      endTime: '23:00'
+      endTime: '23:00',
+      deliveryUpiId: ''
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -276,7 +277,8 @@ function App() {
             setStoreSettings({
                 acceptingOrders: data.acceptingOrders ?? true,
                 startTime: data.startTime || '07:00',
-                endTime: data.endTime || '23:00'
+                endTime: data.endTime || '23:00',
+                deliveryUpiId: data.deliveryUpiId || ''
             });
         }
     });
@@ -348,6 +350,7 @@ function App() {
           <DeliveryPanel 
             orders={orders}
             onUpdateOrderStatus={async (id, s) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, {status: s})); }}
+            deliveryUpiId={storeSettings.deliveryUpiId}
           />
         </div>
       } />
