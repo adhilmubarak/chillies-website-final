@@ -16,6 +16,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<Record<string, 'Cash' | 'UPI'>>({});
 
   const deliveryOrders = useMemo(() => {
     return orders.filter(order => 
@@ -93,7 +94,9 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                     <p className="text-stone-500 uppercase tracking-[0.2em] text-xs font-bold">No active deliveries</p>
                     <p className="text-stone-600 text-[10px] mt-2">You're all caught up! Great job.</p>
                 </div>
-            ) : deliveryOrders.map(order => (
+            ) : deliveryOrders.map(order => {
+                const method = paymentMethods[order.id] || 'Cash';
+                return (
                 <div key={order.id} className="bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden shadow-xl">
                     <div className="p-6 border-b border-stone-800 bg-stone-950/50 flex justify-between items-start">
                         <div>
@@ -154,16 +157,45 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                 Start Delivery <ArrowRight size={16} /> 
                             </button>
                         ) : (
-                            <button 
-                                onClick={() => onUpdateOrderStatus(order.id, 'delivered')} 
-                                className="w-full py-4 bg-green-500 hover:bg-green-400 text-white rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex justify-center items-center gap-2 transition-all shadow-lg active:scale-95"
-                            > 
-                                <Check size={18} /> Mark as Delivered 
-                            </button>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button 
+                                        onClick={() => setPaymentMethods(p => ({...p, [order.id]: 'Cash'}))}
+                                        className={`py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${method === 'Cash' ? 'bg-brand-500 text-white border-brand-500 shadow-lg' : 'bg-stone-950 text-stone-500 border-stone-800 hover:text-white hover:border-stone-700'}`}
+                                    >Cash</button>
+                                    <button 
+                                        onClick={() => setPaymentMethods(p => ({...p, [order.id]: 'UPI'}))}
+                                        className={`py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${method === 'UPI' ? 'bg-purple-500 text-white border-purple-500 shadow-lg' : 'bg-stone-950 text-stone-500 border-stone-800 hover:text-white hover:border-stone-700'}`}
+                                    >UPI QR</button>
+                                </div>
+                                
+                                {method === 'UPI' && (
+                                    <div className="bg-white p-4 rounded-3xl flex flex-col items-center justify-center space-y-3 mx-auto w-fit shadow-xl border-4 border-purple-500/20 animate-fade-in">
+                                        <div className="w-48 h-48 bg-white overflow-hidden relative rounded-xl">
+                                            <img 
+                                                src={`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(`upi://pay?pa=8301032794@ybl&pn=Chillies&am=${order.total}&cu=INR`)}`} 
+                                                alt="UPI QR Code" 
+                                                className="w-full h-full object-cover mix-blend-multiply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.15]"
+                                            />
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-stone-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total to Collect</p>
+                                            <p className="text-stone-950 font-black text-xl font-mono">₹{order.total}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <button 
+                                    onClick={() => onUpdateOrderStatus(order.id, 'delivered')} 
+                                    className="w-full py-4 bg-green-500 hover:bg-green-400 text-white rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex justify-center items-center gap-2 transition-all shadow-lg active:scale-95"
+                                > 
+                                    <Check size={18} /> Mark as Delivered 
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
-            ))}
+            )})}
         </div>
       </main>
     </div>
