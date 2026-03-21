@@ -8,6 +8,7 @@ import FlashSaleView from './components/FlashSaleView';
 import HappyHourView from './components/HappyHourView';
 import CartSidebar from './components/CartSidebar';
 import AdminPanel from './components/AdminPanel';
+import DeliveryPanel from './components/DeliveryPanel';
 import Footer from './components/Footer';
 import OrderTrackerModal from './components/OrderTrackerModal';
 import SmartSuggestion from './components/SmartSuggestion';
@@ -339,6 +340,14 @@ function App() {
             onUpdateStoreSettings={s => setDoc(doc(db, 'settings', 'general'), s, {merge: true})}
             onUpdatePromos={p => setDoc(doc(db, 'settings', 'general'), p, {merge: true})}
             onAddOrder={handleAddOrder}
+          />
+        </div>
+      } />
+      <Route path="/delivery" element={
+        <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
+          <DeliveryPanel 
+            orders={orders}
+            onUpdateOrderStatus={async (id, s) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, {status: s})); }}
           />
         </div>
       } />
