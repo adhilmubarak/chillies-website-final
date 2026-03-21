@@ -5,7 +5,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig } from './types';
 import { printThermalBill } from './App';
@@ -167,6 +167,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponVal, setNewCouponVal] = useState(0);
   const [openingCountdown, setOpeningCountdown] = useState<string>('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isStoreOpen) {
@@ -312,7 +313,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   return (
     <div className="fixed inset-0 z-[200] bg-stone-950 flex overflow-hidden font-sans text-stone-200">
-      <aside className="w-72 bg-stone-900 border-r border-stone-900/5 flex flex-col shrink-0 h-full hidden md:flex">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-stone-900 border-r border-stone-900/5 flex flex-col shrink-0 h-full transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-8 border-b border-stone-900/5 flex items-center gap-3">
             <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center font-serif text-stone-50 font-bold text-xl shadow-lg shadow-brand-500/20">C</div>
             <div>
@@ -332,7 +333,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             ].map(tab => (
                 <button 
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => { setActiveTab(tab.id as any); setIsMobileMenuOpen(false); }}
                     className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
                         activeTab === tab.id ? 'bg-brand-500 text-white shadow-xl' : 'text-stone-600 hover:text-stone-50 hover:bg-stone-900/5'
                     }`}
@@ -348,11 +349,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       </aside>
 
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-stone-950/80 z-40 md:hidden backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       <main className="flex-1 flex flex-col min-w-0 bg-stone-950 h-full overflow-hidden">
         <header className="h-20 border-b border-stone-900/5 px-8 flex items-center justify-between shrink-0 bg-stone-900/20 backdrop-blur-md">
             <div className="flex items-center gap-4">
-                <button onClick={handleExit} className="md:hidden p-2 text-stone-500 hover:text-stone-50 transition-colors">
-                    <X size={24} />
+                <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-stone-500 hover:text-stone-50 transition-colors">
+                    <Menu size={24} />
                 </button>
                 <h2 className="text-2xl font-serif text-stone-50 capitalize">{activeTab}</h2>
             </div>
