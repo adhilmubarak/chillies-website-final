@@ -29,7 +29,7 @@ interface AdminPanelProps {
     happyHourStartTime: string;
     happyHourEndTime: string;
   };
-  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string };
+  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string };
   onAddItem: (item: MenuItem) => void;
   onUpdateItem: (item: MenuItem) => void;
   onDeleteItem: (id: string) => void;
@@ -39,7 +39,7 @@ interface AdminPanelProps {
   onUpdateOrderStatus: (id: string, status: Order['status']) => void;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
-  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string }) => void;
+  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
 }
