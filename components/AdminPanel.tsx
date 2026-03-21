@@ -935,6 +935,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             ))}
                         </div>
                     </div>
+
+                    {(editingItem.isFlashSale || editingItem.isHappyHour) && (
+                        <div className="bg-stone-950/40 p-6 rounded-[2rem] border border-white/5 shadow-inner mt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {editingItem.isFlashSale && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black flex items-center gap-2"><Zap size={14} className="text-red-500"/> Flash Sale Price (₹)</label>
+                                        <input type="number" placeholder="Offer Price" value={editingItem.flashSalePrice || ''} onChange={e => setEditingItem({...editingItem, flashSalePrice: Number(e.target.value)})} className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white font-mono text-lg focus:border-red-500 outline-none" />
+                                    </div>
+                                )}
+                                {editingItem.isHappyHour && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black flex items-center gap-2"><PartyPopper size={14} className="text-purple-500"/> Happy Hour Price (₹)</label>
+                                        <input type="number" placeholder="Offer Price" value={editingItem.happyHourPrice || ''} onChange={e => setEditingItem({...editingItem, happyHourPrice: Number(e.target.value)})} className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white font-mono text-lg focus:border-purple-500 outline-none" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-8 border-t border-white/5 bg-stone-950/40 flex gap-4">
