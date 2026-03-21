@@ -100,11 +100,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     setErrors({ name: hasNameError, contact: hasContactError, address: hasAddressError });
     if (hasNameError || hasContactError || hasAddressError) return;
 
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let newOrderId = '';
-    for (let i = 0; i < 6; i++) {
-        newOrderId += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    const newOrderId = `CHILL${contactNumber.trim().slice(-5)}`;
     
     const now = new Date();
     const baseUrl = window.location.href.split('?')[0].split('#')[0].replace(/\/$/, "");
