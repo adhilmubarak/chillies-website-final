@@ -807,6 +807,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     </div>
                                 </div>
                             </div>
+                            
+                            <div className="space-y-6">
+                                <h5 className="text-white text-base font-bold flex items-center gap-3"><Wallet size={20} className="text-gold-500" /> Payment Config</h5>
+                                <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-3">
+                                    <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2"><Scan size={14} className="text-purple-500"/> Delivery Rider UPI ID</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. 9876543210@ybl"
+                                        value={storeSettings.deliveryUpiId || ''} 
+                                        onChange={e => onUpdateStoreSettings({...storeSettings, deliveryUpiId: e.target.value})} 
+                                        className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-xs outline-none focus:border-gold-500 font-mono tracking-widest"
+                                    />
+                                    <p className="text-[10px] text-stone-500 max-w-xs">Dynamic QRs in the rider delivery portal will receive payments on this ID.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
