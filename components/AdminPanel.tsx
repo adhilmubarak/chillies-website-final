@@ -175,6 +175,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [manualContact, setManualContact] = useState('');
   const [manualAddress, setManualAddress] = useState('');
   const [manualOrderType, setManualOrderType] = useState<'delivery'|'pickup'>('pickup');
+  const [manualOrderSearch, setManualOrderSearch] = useState('');
 
   useEffect(() => {
     if (isStoreOpen) {
@@ -837,10 +838,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left Side: Items Selection */}
-                    <div className="space-y-6">
-                        <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-4">Menu Items</h4>
-                        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
-                            {items.map(item => {
+                    <div className="space-y-6 flex flex-col h-full">
+                        <div className="space-y-4">
+                            <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-4">Menu Items</h4>
+                            <div className="relative">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" size={14} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search items..." 
+                                    value={manualOrderSearch}
+                                    onChange={e => setManualOrderSearch(e.target.value)}
+                                    className="w-full bg-stone-950 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-xs text-white focus:border-gold-500 outline-none"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide flex-1">
+                            {items.filter(i => i.name.toLowerCase().includes(manualOrderSearch.toLowerCase())).map(item => {
                                 const cartItem = manualOrderItems.find(i => i.item.id === item.id);
                                 const qty = cartItem ? cartItem.quantity : 0;
                                 return (
@@ -943,6 +956,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             setManualCustomerName('');
                             setManualContact('');
                             setManualAddress('');
+                            setManualOrderSearch('');
                         }}
                         className="w-full bg-gold-500 text-stone-950 font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-xs transition-all shadow-xl hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gold-500"
                     >
