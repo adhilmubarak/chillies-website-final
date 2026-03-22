@@ -8,11 +8,12 @@ import { Order } from '../types';
 interface DeliveryPanelProps {
   orders: Order[];
   onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string) => void;
+  onUpdateRiderLocation?: (lat: number, lng: number) => void;
   deliveryUpiId?: string;
 }
 
 const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
-  orders, onUpdateOrderStatus, deliveryUpiId = ''
+  orders, onUpdateOrderStatus, onUpdateRiderLocation, deliveryUpiId = ''
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -25,6 +26,26 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
       setHasSavedSession(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated || !onUpdateRiderLocation) return;
+    
+    let watchId: number;
+    if ("geolocation" in navigator) {
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          onUpdateRiderLocation(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.error("Error watching location:", error);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isAuthenticated, onUpdateRiderLocation]);
 
   const deliveryOrders = useMemo(() => {
     return orders.filter(order => 

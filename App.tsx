@@ -142,6 +142,7 @@ function App() {
   
   const [activeSection, setActiveSection] = useState('home');
   const [foodRatings, setFoodRatings] = useState<FoodRating[]>([]);
+  const [riderLocation, setRiderLocation] = useState<{lat: number, lng: number, timestamp: number} | null>(null);
 
   const [promoSettings, setPromoSettings] = useState({
       isFlashSaleActive: false,
@@ -277,6 +278,16 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const q = doc(db, 'tracking', 'rider1');
+    const unsubscribe = onSnapshot(q, (docSnap) => {
+      if (docSnap.exists()) {
+        setRiderLocation(docSnap.data() as any);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const settingsRef = doc(db, 'settings', 'general');
     const unsubscribe = onSnapshot(settingsRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -346,7 +357,7 @@ function App() {
       <Route path="/admin" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
           <AdminPanel 
-            isOpen={true} onClose={() => navigate('/')} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings} foodRatings={foodRatings}
+            isOpen={true} onClose={() => navigate('/')} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings} foodRatings={foodRatings} riderLocation={riderLocation}
             onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
             onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
             onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
@@ -366,6 +377,7 @@ function App() {
           <DeliveryPanel 
             orders={orders}
             onUpdateOrderStatus={async (id, s, pm) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, pm ? {status: s, paymentMethod: pm} : {status: s})); }}
+            onUpdateRiderLocation={async (lat, lng) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }}
             deliveryUpiId={storeSettings.deliveryUpiId}
           />
         </div>

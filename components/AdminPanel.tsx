@@ -5,7 +5,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating } from '../types';
 import { printThermalBill } from '../App';
@@ -37,6 +37,7 @@ interface AdminPanelProps {
   onUpdateCategory?: (category: CategoryConfig) => void;
   onDeleteCategory: (category: string) => void;
   onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string) => void;
+  riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
   onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string }) => void;
@@ -147,7 +148,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
 };
 
 const AdminPanel: React.FC<AdminPanelProps> = ({
-  isOpen, onClose, items, categories, orders, coupons = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings,
+  isOpen, onClose, items, categories, orders, coupons = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings, riderLocation,
   onAddItem, onUpdateItem, onDeleteItem, onAddCategory, onUpdateCategory, onDeleteCategory, onUpdateOrderStatus,
   onAddCoupon, onDeleteCoupon, onUpdateStoreSettings, onUpdatePromos, onAddOrder
 }) => {
@@ -167,6 +168,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'Cash' | 'UPI'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isRiderMapOpen, setIsRiderMapOpen] = useState(false);
   const [newCatInput, setNewCatInput] = useState('');
   const [editingCategory, setEditingCategory] = useState<CategoryConfig | null>(null);
   const [newCouponCode, setNewCouponCode] = useState('');
@@ -502,6 +504,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 />
                                 <button onClick={() => setIsScannerOpen(true)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gold-500 hover:text-gold-400 transition-colors" title="Scan QR Code"><Scan size={18} /></button>
                             </div>
+                            {orderStage === 'active' && riderLocation && (
+                                <button onClick={() => setIsRiderMapOpen(true)} className="bg-brand-500 text-white p-4 rounded-2xl hover:bg-brand-400 transition-colors shadow-lg shrink-0 flex items-center justify-center gap-2" title="Track Rider">
+                                    <Navigation size={20} className="animate-pulse" />
+                                </button>
+                            )}
                             <button onClick={() => setIsManualOrderOpen(true)} className="bg-gold-500 text-stone-950 p-4 rounded-2xl hover:bg-gold-400 transition-colors shadow-lg shrink-0" title="Create Manual Order">
                                 <Plus size={20} />
                             </button>
@@ -1289,6 +1296,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <button onClick={() => setIsItemFormOpen(false)} className="px-8 border border-stone-800 text-stone-500 hover:text-white rounded-2xl uppercase tracking-widest text-[10px] font-black transition-all">Cancel</button>
                 </div>
             </div>
+        </div>
+      )}
+
+      {isRiderMapOpen && riderLocation && (
+        <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-stone-900 w-full max-w-2xl rounded-3xl overflow-hidden relative border border-brand-500/20 shadow-2xl">
+            <button onClick={() => setIsRiderMapOpen(false)} className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black border border-white/10 rounded-full flex items-center justify-center text-white transition-all"><X size={20} /></button>
+            <div className="p-6 bg-stone-950 border-b border-brand-500/10 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-500 relative">
+                  <Navigation size={24} />
+                  <div className="absolute top-0 right-0 w-3 h-3 bg-brand-500 rounded-full animate-ping"></div>
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-lg uppercase tracking-widest">Live Rider Feed</h3>
+                <p className="text-brand-500 text-[10px] uppercase font-black tracking-[0.2em] mt-1 hidden sm:block">Coordinates Last Synced: {new Date(riderLocation.timestamp).toLocaleTimeString()}</p>
+              </div>
+            </div>
+            <div className="w-full h-80 relative bg-stone-950">
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    className="absolute inset-0 grayscale contrast-125 opacity-80"
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${riderLocation.lng-0.005},${riderLocation.lat-0.005},${riderLocation.lng+0.005},${riderLocation.lat+0.005}&layer=mapnik&marker=${riderLocation.lat},${riderLocation.lng}`}
+                    style={{ border: 0 }}
+                ></iframe>
+            </div>
+            <div className="p-4 bg-stone-950 border-t border-brand-500/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-stone-500 text-[10px] uppercase tracking-widest font-mono">LAT {riderLocation.lat.toFixed(6)} | LNG {riderLocation.lng.toFixed(6)}</p>
+                <a href={`https://www.google.com/maps/search/?api=1&query=${riderLocation.lat},${riderLocation.lng}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-brand-500 text-white px-6 py-3 rounded-xl uppercase font-black text-[10px] tracking-widest hover:bg-brand-400 transition-colors shadow-lg shadow-brand-500/20 active:scale-95">
+                    Open in Google Maps <MapPin size={14} />
+                </a>
+            </div>
+          </div>
         </div>
       )}
     </div>
