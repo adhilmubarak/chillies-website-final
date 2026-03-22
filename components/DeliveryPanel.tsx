@@ -7,7 +7,7 @@ import { Order } from '../types';
 
 interface DeliveryPanelProps {
   orders: Order[];
-  onUpdateOrderStatus: (id: string, status: Order['status']) => void;
+  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string) => void;
   deliveryUpiId?: string;
 }
 
@@ -213,7 +213,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                 )}
 
                                 <button 
-                                    onClick={() => onUpdateOrderStatus(order.id, 'delivered')} 
+                                    onClick={() => onUpdateOrderStatus(order.id, 'delivered', method)} 
                                     className="w-full py-4 bg-green-500 hover:bg-green-400 text-white rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex justify-center items-center gap-2 transition-all shadow-lg active:scale-95"
                                 > 
                                     <Check size={18} /> Mark as Delivered 

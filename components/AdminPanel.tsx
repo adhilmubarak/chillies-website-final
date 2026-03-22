@@ -36,7 +36,7 @@ interface AdminPanelProps {
   onAddCategory: (category: string) => void;
   onUpdateCategory?: (category: CategoryConfig) => void;
   onDeleteCategory: (category: string) => void;
-  onUpdateOrderStatus: (id: string, status: Order['status']) => void;
+  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string) => void;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
   onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string }) => void;
@@ -164,6 +164,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStage, setOrderStage] = useState<'new' | 'active' | 'history'>('new');
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'Cash' | 'UPI'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [newCatInput, setNewCatInput] = useState('');
@@ -232,17 +233,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                              order.customerName.toLowerCase().includes(orderSearch.toLowerCase()) ||
                              order.contactNumber.includes(orderSearch);
         
+        let matchesPayment = true;
+        if (orderStage === 'history' && paymentFilter !== 'all') {
+            matchesPayment = order.paymentMethod === paymentFilter;
+        }
+
         if (searchActive) {
-            return matchesSearch;
+            return matchesSearch && matchesPayment;
         }
 
         if (!matchesSearch) return false;
+        if (!matchesPayment) return false;
+
         if (orderStage === 'new') return order.status === 'pending';
         if (orderStage === 'active') return ['preparing', 'ready', 'out_for_delivery'].includes(order.status);
         if (orderStage === 'history') return ['delivered', 'cancelled'].includes(order.status);
         return false;
     });
-  }, [orders, orderStage, orderSearch]);
+  }, [orders, orderStage, orderSearch, paymentFilter]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -467,6 +475,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 </button>
                             ))}
                         </div>
+                        {orderStage === 'history' && (
+                            <div className="flex p-1.5 bg-stone-900 border border-white/5 rounded-2xl shadow-inner">
+                                {['all', 'Cash', 'UPI'].map(pf => (
+                                    <button
+                                        key={pf}
+                                        onClick={() => setPaymentFilter(pf as any)}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                                            paymentFilter === pf ? 'bg-brand-500 text-white shadow-lg' : 'text-stone-500 hover:text-white'
+                                        }`}
+                                    >
+                                        {pf === 'all' ? 'All Payments' : pf}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                         <div className="relative w-full lg:max-w-md flex items-center gap-2">
                             <div className="relative flex-1">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" size={16} />
@@ -502,6 +525,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <div className="flex items-center gap-2 text-stone-500 font-bold uppercase tracking-widest text-[10px]">
                                             <Calendar size={12} /> {order.date} <span className="opacity-30 mx-1">|</span> {order.timestamp}
                                         </div>
+                                        {order.paymentMethod && order.status === 'delivered' && (
+                                            <div className={`mt-3 inline-flex border border-white/5 items-center justify-center gap-2 text-[10px] uppercase font-black tracking-widest px-3 py-1.5 rounded-xl shadow-sm ${order.paymentMethod === 'UPI' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'}`}>
+                                                {order.paymentMethod === 'UPI' ? '📱 UPI' : '💵 Cash'}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex gap-2">
                                         <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-white/5 transition-all">

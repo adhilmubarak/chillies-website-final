@@ -60,6 +60,7 @@ export interface Order {
   createdAt: number;
   trackingLink?: string; // Added to persist the tracking link
   deliveryRating?: number; // Added to track customer rating
+  paymentMethod?: 'Cash' | 'UPI' | 'Online';
 }
 
 export interface FoodRating {

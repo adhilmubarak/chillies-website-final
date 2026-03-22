@@ -353,7 +353,7 @@ function App() {
             onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59'})}
             onUpdateCategory={c => updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59'})}
             onDeleteCategory={async n => { const q = query(collection(db, 'categories'), where("name", "==", n)); const s = await getDocs(q); s.forEach(d => deleteDoc(d.ref)); }}
-            onUpdateOrderStatus={async (id, s) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, {status: s})); }}
+            onUpdateOrderStatus={async (id, s, pm) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, pm ? {status: s, paymentMethod: pm} : {status: s})); }}
             onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
             onUpdateStoreSettings={s => setDoc(doc(db, 'settings', 'general'), s, {merge: true})}
             onUpdatePromos={p => setDoc(doc(db, 'settings', 'general'), p, {merge: true})}
@@ -365,7 +365,7 @@ function App() {
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
           <DeliveryPanel 
             orders={orders}
-            onUpdateOrderStatus={async (id, s) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, {status: s})); }}
+            onUpdateOrderStatus={async (id, s, pm) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, pm ? {status: s, paymentMethod: pm} : {status: s})); }}
             deliveryUpiId={storeSettings.deliveryUpiId}
           />
         </div>
