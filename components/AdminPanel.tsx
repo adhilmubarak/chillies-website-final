@@ -1069,10 +1069,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             const subtotal = manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0);
                             const total = subtotal + (manualOrderType === 'delivery' ? 20 : 0);
                             let newOrderId = '';
+                            const uniqueSuffix = Math.random().toString(36).substring(2, 4).toUpperCase();
                             if (manualContact.length >= 5) {
-                                newOrderId = `CHILL${manualContact.slice(-5)}`;
+                                newOrderId = `CHILL${manualContact.slice(-5)}-${uniqueSuffix}`;
                             } else {
-                                newOrderId = `CHILL${Math.floor(10000 + Math.random() * 90000)}`;
+                                newOrderId = `CHILL${Math.floor(10000 + Math.random() * 90000)}-${uniqueSuffix}`;
                             }
                             const now = new Date();
                             const newOrder: Order = {
