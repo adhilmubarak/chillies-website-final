@@ -504,9 +504,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 />
                                 <button onClick={() => setIsScannerOpen(true)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gold-500 hover:text-gold-400 transition-colors" title="Scan QR Code"><Scan size={18} /></button>
                             </div>
-                            {orderStage === 'active' && riderLocation && (
-                                <button onClick={() => setIsRiderMapOpen(true)} className="bg-brand-500 text-white p-4 rounded-2xl hover:bg-brand-400 transition-colors shadow-lg shrink-0 flex items-center justify-center gap-2" title="Track Rider">
-                                    <Navigation size={20} className="animate-pulse" />
+                            {orderStage === 'active' && (
+                                <button 
+                                    onClick={() => riderLocation ? setIsRiderMapOpen(true) : alert("Rider Location is completely unavailable. Waiting for them to open the Delivery Portal and grant GPS tracking permissions.")} 
+                                    className={`p-4 rounded-2xl transition-all shadow-lg shrink-0 flex items-center justify-center gap-2 ${riderLocation ? 'bg-brand-500 text-white hover:bg-brand-400' : 'bg-stone-900 border border-white/5 text-stone-600 hover:text-stone-400'}`} 
+                                    title={riderLocation ? "Open Live Track Feed" : "Signal Missing"}
+                                >
+                                    <Navigation size={20} className={riderLocation ? "animate-pulse" : ""} />
                                 </button>
                             )}
                             <button onClick={() => setIsManualOrderOpen(true)} className="bg-gold-500 text-stone-950 p-4 rounded-2xl hover:bg-gold-400 transition-colors shadow-lg shrink-0" title="Create Manual Order">
