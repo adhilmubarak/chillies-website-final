@@ -229,6 +229,7 @@ function App() {
       if (!isStoreOpen) return { isAvailable: false, reason: 'Store Closed' };
       const config = dbCategories.find(c => c.name === catName);
       if (!config) return { isAvailable: true };
+      if (config.isUnavailable) return { isAvailable: false, reason: 'Category Offline' };
       const active = checkTimeRange(config.startTime, config.endTime);
       return { isAvailable: active, availabilityTime: config.startTime };
   };
@@ -346,6 +347,9 @@ function App() {
   }, [isFlashSaleActive, isHappyHourActive, activeCategory]);
 
   const filteredItems = menuItems.filter(item => {
+    const parentCategory = dbCategories.find(c => c.name === item.category);
+    if (parentCategory?.isUnavailable) return false;
+
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
     let matchesCategory = false;
@@ -365,8 +369,8 @@ function App() {
             onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
             onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
             onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
-            onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59'})}
-            onUpdateCategory={c => updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59'})}
+            onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59', isUnavailable: false})}
+            onUpdateCategory={c => updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59', isUnavailable: c.isUnavailable || false})}
             onDeleteCategory={async n => { const q = query(collection(db, 'categories'), where("name", "==", n)); const s = await getDocs(q); s.forEach(d => deleteDoc(d.ref)); }}
             onUpdateOrderStatus={async (id, s, pm) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, pm ? {status: s, paymentMethod: pm} : {status: s})); }}
             onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
@@ -457,7 +461,7 @@ function App() {
                   'All', 
                   ...(isFlashSaleActive ? ['Flash Sale'] : []), 
                   ...(isHappyHourActive ? ['Happy Hour'] : []), 
-                  ...dbCategories.map(c => c.name)
+                  ...dbCategories.filter(c => !c.isUnavailable).map(c => c.name)
                 ].map(cat => (
                     <button key={cat} onClick={() => setActiveCategory(cat)}
                         className={`flex-shrink-0 px-6 md:px-8 py-3 rounded-full border transition-all text-[10px] md:text-xs font-bold uppercase tracking-widest ${

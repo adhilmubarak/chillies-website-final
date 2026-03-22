@@ -781,18 +781,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {categories.map((cat) => (
-                                <div key={cat.id} className="flex items-center justify-between p-6 bg-stone-950/50 rounded-2xl border border-white/5 hover:border-gold-500/30 transition-all group">
+                                <div key={cat.id} className={`flex items-center justify-between p-6 bg-stone-950/50 rounded-2xl border transition-all group ${cat.isUnavailable ? 'border-red-500/20 opacity-60 grayscale' : 'border-white/5 hover:border-gold-500/30'}`}>
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-gold-500 group-hover:scale-110 transition-transform"><Tag size={18} /></div>
                                         <div>
-                                            <p className="text-white font-bold tracking-tight">{cat.name}</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-white font-bold tracking-tight">{cat.name}</p>
+                                                {cat.isUnavailable && <span className="text-[8px] font-black uppercase tracking-widest text-red-500 bg-red-500/10 px-2 py-0.5 rounded-sm">Offline</span>}
+                                            </div>
                                             {cat.startTime && cat.endTime && <p className="text-[9px] text-stone-500 font-mono">{cat.startTime} - {cat.endTime}</p>}
                                             <p className="text-[10px] text-stone-500 uppercase font-black">{items.filter(i => i.category === cat.name).length} Dishes</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <button onClick={() => setEditingCategory(cat)} className="p-3 text-stone-600 hover:text-gold-500 hover:bg-gold-500/5 rounded-xl transition-all"> <Edit2 size={18} /> </button>
-                                        <button onClick={() => onDeleteCategory(cat.name)} className="p-3 text-stone-600 hover:text-red-500 hover:bg-red-500/5 rounded-xl transition-all"> <Trash2 size={20} /> </button>
+                                    <div className="flex items-center gap-3">
+                                        <button 
+                                            onClick={() => onUpdateCategory && onUpdateCategory({ ...cat, isUnavailable: !cat.isUnavailable })}
+                                            className={`group relative flex h-5 w-9 shrink-0 cursor-pointer rounded-full p-0.5 transition-all duration-300 ease-in-out focus:outline-none ${!cat.isUnavailable ? 'bg-gold-500 shadow-[0_0_10px_rgba(212,175,55,0.3)]' : 'bg-stone-800 border border-stone-700'}`}
+                                        >
+                                            <span
+                                                aria-hidden="true"
+                                                className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full shadow-lg ring-0 transition duration-300 ease-in-out ${!cat.isUnavailable ? 'translate-x-4 bg-stone-950' : 'translate-x-0 bg-stone-900'}`}
+                                            />
+                                        </button>
+                                        <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
+                                        <button onClick={() => setEditingCategory(cat)} className="p-2 text-stone-600 hover:text-gold-500 hover:bg-gold-500/5 rounded-xl transition-all"> <Edit2 size={16} /> </button>
+                                        <button onClick={() => onDeleteCategory(cat.name)} className="p-2 text-stone-600 hover:text-red-500 hover:bg-red-500/5 rounded-xl transition-all"> <Trash2 size={18} /> </button>
                                     </div>
                                 </div>
                             ))}
