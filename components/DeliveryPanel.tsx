@@ -33,6 +33,11 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
     );
   }, [orders]);
 
+  const dailyDeliveredCount = useMemo(() => {
+    const today = new Date().toLocaleDateString();
+    return orders.filter(order => order.type === 'delivery' && order.status === 'delivered' && order.date === today).length;
+  }, [orders]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordInput === 'rider123' || passwordInput === 'admin123') {
@@ -105,7 +110,11 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
               <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white"><ShoppingBag size={20} /></div>
               <div>
                   <h2 className="text-xl font-serif text-stone-50 leading-none">Deliveries</h2>
-                  <p className="text-[10px] text-brand-500 font-bold uppercase tracking-widest">{deliveryOrders.length} Active</p>
+                  <div className="flex items-center gap-2">
+                      <p className="text-[10px] text-brand-500 font-bold uppercase tracking-widest">{deliveryOrders.length} Active</p>
+                      <span className="text-stone-700 text-[10px]">•</span>
+                      <p className="text-[10px] text-green-500 font-bold uppercase tracking-widest">{dailyDeliveredCount} Delivered</p>
+                  </div>
               </div>
           </div>
           <button onClick={() => { setIsAuthenticated(false); localStorage.removeItem('chillies_rider_token'); setHasSavedSession(false); }} className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-red-500 hover:bg-stone-800 transition-colors">
