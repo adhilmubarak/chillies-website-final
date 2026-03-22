@@ -46,8 +46,6 @@ export const printThermalBill = (order: Order) => {
       </div>
     `)
     .join('');
-
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${order.id}&bgcolor=ffffff&color=000000&margin=0`;
   const trackingQrUrl = order.trackingLink ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(order.trackingLink)}&bgcolor=ffffff&color=000000&margin=0` : '';
 
   printWindow.document.write(`
@@ -108,13 +106,9 @@ export const printThermalBill = (order: Order) => {
           </div>
         </div>
         
-        <div class="qr-section">
-          <div class="qr-label">Admin: Scan to search order</div>
-          <img src="${qrUrl}" alt="Admin QR Code" />
-        </div>
         ${order.trackingLink ? `
-        <div class="qr-section" style="margin-top: 5px;">
-          <div class="qr-label">Customer: Scan to track order</div>
+        <div class="qr-section">
+          <div class="qr-label">Scan to track order</div>
           <img src="${trackingQrUrl}" alt="Tracking QR Code" />
         </div>
         ` : ''}
