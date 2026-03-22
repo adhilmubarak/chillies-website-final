@@ -5,7 +5,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating } from '../types';
 import { printThermalBill } from '../App';
@@ -810,7 +810,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     <div>
                                         <p className="text-white font-bold">{rating.customerName}</p>
                                         <p className="text-stone-500 text-[10px] font-mono mt-1 w-fit">{new Date(rating.createdAt).toLocaleDateString()} at {new Date(rating.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                                        {rating.contactNumber && <p className="text-stone-600 text-[10px] font-mono mt-0.5">{rating.contactNumber}</p>}
+                                        {rating.contactNumber && (
+                                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 border border-white/5 rounded-md text-stone-300 text-[10px] font-mono mt-3 shadow-inner">
+                                                <Phone size={10} className="text-gold-500" />
+                                                {rating.contactNumber}
+                                            </div>
+                                        )}
                                     </div>
                                     <p className="text-stone-300 text-sm italic py-2 border-l-2 border-gold-500/30 pl-4">{rating.comment}</p>
                                 </div>
