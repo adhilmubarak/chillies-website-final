@@ -302,20 +302,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleDrop = (sourceId: string, targetId: string) => {
     const sorted = [...items].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-    
-    const sourceItem = sorted.find(i => i.id === sourceId);
-    const targetItem = sorted.find(i => i.id === targetId);
-    
-    if (!sourceItem || !targetItem) return;
-
     const sourceIndex = sorted.findIndex(i => i.id === sourceId);
     const targetIndex = sorted.findIndex(i => i.id === targetId);
+    
+    if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return;
 
-    const sourceOrder = sourceItem.sortOrder ?? sourceIndex;
-    const targetOrder = targetItem.sortOrder ?? targetIndex;
+    const newSorted = [...sorted];
+    const [movedItem] = newSorted.splice(sourceIndex, 1);
+    newSorted.splice(targetIndex, 0, movedItem);
 
-    onUpdateItem({ ...sourceItem, sortOrder: targetOrder });
-    onUpdateItem({ ...targetItem, sortOrder: sourceOrder });
+    newSorted.forEach((item, index) => {
+        if (item.sortOrder !== index) {
+            onUpdateItem({ ...item, sortOrder: index } as MenuItem);
+        }
+    });
   };
 
   const handleExit = () => {
@@ -712,7 +712,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         setDraggedItemId(null);
                                         setDragOverItemId(null);
                                     }}
-                                    className={`bg-stone-900 border ${dragOverItemId === item.id ? 'border-gold-500 ring-2 ring-gold-500 scale-[1.03] z-10' : 'border-white/5'} rounded-3xl overflow-hidden group relative transition-all duration-300 ${item.isUnavailable ? 'opacity-40 grayscale' : 'hover:border-gold-500/30'} ${draggedItemId === item.id ? 'opacity-50 blur-[1px]' : ''} cursor-grab active:cursor-grabbing`}
+                                    className={`bg-stone-900 border ${dragOverItemId === item.id ? 'border-gold-500 border-2 border-dashed shadow-[inset_0_0_30px_rgba(212,175,55,0.2)] z-10' : 'border-white/5'} rounded-3xl overflow-hidden group relative transition-all duration-300 ${item.isUnavailable ? 'opacity-40 grayscale' : 'hover:border-gold-500/30'} ${draggedItemId === item.id ? 'opacity-30 scale-95 border-dashed border-2 border-gold-500 ring-4 ring-gold-500/10' : ''} cursor-grab active:cursor-grabbing`}
                                 >
                                     <div className="h-44 relative overflow-hidden">
                                         <SafeImage src={item.image} containerClassName="w-full h-full pointer-events-none" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
