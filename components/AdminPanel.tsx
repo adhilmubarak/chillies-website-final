@@ -159,6 +159,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [inventoryStatusFilter, setInventoryStatusFilter] = useState<'all' | 'available' | 'unavailable'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStage, setOrderStage] = useState<'new' | 'active' | 'history'>('new');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -217,9 +220,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       const matchesStatus = inventoryStatusFilter === 'all' || 
                            (inventoryStatusFilter === 'available' && !item.isUnavailable) ||
                            (inventoryStatusFilter === 'unavailable' && item.isUnavailable);
-      return matchesSearch && matchesStatus;
+      const matchesCategory = categoryFilter === 'All' || item.category === categoryFilter;
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [items, searchTerm, inventoryStatusFilter]);
+  }, [items, searchTerm, inventoryStatusFilter, categoryFilter]);
 
   const filteredOrders = useMemo(() => {
     const searchActive = orderSearch.trim() !== '';
@@ -286,19 +290,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       setIsItemFormOpen(true);
   };
 
-  const handleMoveItem = (item: MenuItem, direction: 1 | -1) => {
+  const handleDrop = (sourceId: string, targetId: string) => {
     const sorted = [...items].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-    const currentIndex = sorted.findIndex(i => i.id === item.id);
-    if (currentIndex === -1) return;
-    const swapIndex = currentIndex + direction;
-    if (swapIndex < 0 || swapIndex >= sorted.length) return;
     
-    const swapItem = sorted[swapIndex];
-    const currentOrder = item.sortOrder ?? currentIndex;
-    const swapOrder = swapItem.sortOrder ?? swapIndex;
+    const sourceItem = sorted.find(i => i.id === sourceId);
+    const targetItem = sorted.find(i => i.id === targetId);
+    
+    if (!sourceItem || !targetItem) return;
 
-    onUpdateItem({ ...item, sortOrder: swapOrder });
-    onUpdateItem({ ...swapItem, sortOrder: currentOrder });
+    const sourceIndex = sorted.findIndex(i => i.id === sourceId);
+    const targetIndex = sorted.findIndex(i => i.id === targetId);
+
+    const sourceOrder = sourceItem.sortOrder ?? sourceIndex;
+    const targetOrder = targetItem.sortOrder ?? targetIndex;
+
+    onUpdateItem({ ...sourceItem, sortOrder: targetOrder });
+    onUpdateItem({ ...targetItem, sortOrder: sourceOrder });
   };
 
   const handleExit = () => {
@@ -611,6 +618,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 </button>
                             ))}
                         </div>
+
+                        <div className="relative w-full xl:w-auto">
+                            <select 
+                                value={categoryFilter} 
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                                className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-3.5 pl-4 pr-10 text-[10px] uppercase font-bold tracking-widest text-stone-400 focus:border-gold-500 focus:text-white outline-none transition-all shadow-inner appearance-none cursor-pointer"
+                            >
+                                <option value="All">All Categories</option>
+                                {categories.map(c => (
+                                    <option key={c.id} value={c.name}>{c.name}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
+                        </div>
                         
                         <button 
                             onClick={() => openNewItemModal()} 
@@ -638,21 +659,33 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                             {filteredItems.map(item => (
-                                <div key={item.id} className={`bg-stone-900 border border-white/5 rounded-3xl overflow-hidden group relative transition-all duration-500 ${item.isUnavailable ? 'opacity-40 grayscale' : 'hover:border-gold-500/30'}`}>
+                                <div 
+                                    key={item.id} 
+                                    draggable
+                                    onDragStart={(e) => setDraggedItemId(item.id || null)}
+                                    onDragOver={(e) => { e.preventDefault(); setDragOverItemId(item.id || null); }}
+                                    onDragLeave={() => setDragOverItemId(null)}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        if (draggedItemId && draggedItemId !== item.id) {
+                                            handleDrop(draggedItemId, item.id || '');
+                                        }
+                                        setDraggedItemId(null);
+                                        setDragOverItemId(null);
+                                    }}
+                                    className={`bg-stone-900 border ${dragOverItemId === item.id ? 'border-gold-500 ring-2 ring-gold-500 scale-[1.03] z-10' : 'border-white/5'} rounded-3xl overflow-hidden group relative transition-all duration-300 ${item.isUnavailable ? 'opacity-40 grayscale' : 'hover:border-gold-500/30'} ${draggedItemId === item.id ? 'opacity-50 blur-[1px]' : ''} cursor-grab active:cursor-grabbing`}
+                                >
                                     <div className="h-44 relative overflow-hidden">
-                                        <SafeImage src={item.image} containerClassName="w-full h-full" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                                        <SafeImage src={item.image} containerClassName="w-full h-full pointer-events-none" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                                     </div>
                                     <div className="p-5">
-                                        <p className="text-stone-600 text-[8px] uppercase font-black tracking-[0.2em] mb-1">{item.category}</p>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <p className="text-stone-600 text-[8px] uppercase font-black tracking-[0.2em]">{item.category}</p>
+                                        </div>
                                         
                                         <div className="flex justify-between items-center mb-3">
-                                            <h4 className="text-white font-bold text-sm truncate flex-1">{item.name}</h4>
+                                            <h4 className="text-white font-bold text-sm truncate flex-1 pr-2">{item.name}</h4>
                                             
-                                            <div className="flex items-center gap-1 mr-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => handleMoveItem(item, -1)} className="p-1 hover:text-white transition-colors bg-stone-800 rounded-md"><ChevronUp size={14} /></button>
-                                                <button onClick={() => handleMoveItem(item, 1)} className="p-1 hover:text-white transition-colors bg-stone-800 rounded-md"><ChevronDown size={14} /></button>
-                                            </div>
-
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-[8px] font-black uppercase tracking-widest transition-colors ${!item.isUnavailable ? 'text-gold-500' : 'text-stone-600'}`}>
                                                     {item.isUnavailable ? 'OFF' : 'LIVE'}
