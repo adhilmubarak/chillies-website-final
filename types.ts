@@ -17,6 +17,7 @@ export interface MenuItem {
   isExclusive?: boolean; // If true, only shows in Flash/Happy tabs, not in "All" or standard categories
   tags?: string[];
   isUnavailable?: boolean; // Mark as Sold Out/Unavailable
+  sortOrder?: number; // Added for admin rearrangement
 }
 
 export interface CartItem extends MenuItem {
@@ -59,4 +60,13 @@ export interface Order {
   createdAt: number;
   trackingLink?: string; // Added to persist the tracking link
   deliveryRating?: number; // Added to track customer rating
+}
+
+export interface FoodRating {
+  id?: string;
+  customerName: string;
+  contactNumber?: string;
+  rating: number;
+  comment: string;
+  createdAt: number;
 }

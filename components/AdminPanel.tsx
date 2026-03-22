@@ -5,9 +5,9 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown
 } from 'lucide-react';
-import { MenuItem, Order, Coupon, CategoryConfig } from '../types';
+import { MenuItem, Order, Coupon, CategoryConfig, FoodRating } from '../types';
 import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
@@ -42,6 +42,7 @@ interface AdminPanelProps {
   onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
+  foodRatings?: FoodRating[];
 }
 
 const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => void }> = ({ onScan, onClose }) => {
@@ -146,14 +147,14 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
 };
 
 const AdminPanel: React.FC<AdminPanelProps> = ({
-  isOpen, onClose, items, categories, orders, coupons = [], isStoreOpen, promoSettings, storeSettings,
+  isOpen, onClose, items, categories, orders, coupons = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings,
   onAddItem, onUpdateItem, onDeleteItem, onAddCategory, onUpdateCategory, onDeleteCategory, onUpdateOrderStatus,
   onAddCoupon, onDeleteCoupon, onUpdateStoreSettings, onUpdatePromos, onAddOrder
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'settings'>('dashboard');
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -285,6 +286,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       setIsItemFormOpen(true);
   };
 
+  const handleMoveItem = (item: MenuItem, direction: 1 | -1) => {
+    const sorted = [...items].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    const currentIndex = sorted.findIndex(i => i.id === item.id);
+    if (currentIndex === -1) return;
+    const swapIndex = currentIndex + direction;
+    if (swapIndex < 0 || swapIndex >= sorted.length) return;
+    
+    const swapItem = sorted[swapIndex];
+    const currentOrder = item.sortOrder ?? currentIndex;
+    const swapOrder = swapItem.sortOrder ?? swapIndex;
+
+    onUpdateItem({ ...item, sortOrder: swapOrder });
+    onUpdateItem({ ...swapItem, sortOrder: currentOrder });
+  };
+
   const handleExit = () => {
     setIsAuthenticated(false);
     onClose();
@@ -337,6 +353,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 { id: 'categories', icon: Tag, label: 'Categories' },
                 { id: 'coupons', icon: Ticket, label: 'Coupons' },
                 { id: 'promotions', icon: Zap, label: 'Marketing' },
+                { id: 'reviews', icon: Star, label: 'Feedback' },
                 { id: 'settings', icon: Settings, label: 'Operations' }
             ].map(tab => (
                 <button 
@@ -630,6 +647,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <div className="flex justify-between items-center mb-3">
                                             <h4 className="text-white font-bold text-sm truncate flex-1">{item.name}</h4>
                                             
+                                            <div className="flex items-center gap-1 mr-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleMoveItem(item, -1)} className="p-1 hover:text-white transition-colors bg-stone-800 rounded-md"><ChevronUp size={14} /></button>
+                                                <button onClick={() => handleMoveItem(item, 1)} className="p-1 hover:text-white transition-colors bg-stone-800 rounded-md"><ChevronDown size={14} /></button>
+                                            </div>
+
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-[8px] font-black uppercase tracking-widest transition-colors ${!item.isUnavailable ? 'text-gold-500' : 'text-stone-600'}`}>
                                                     {item.isUnavailable ? 'OFF' : 'LIVE'}
@@ -762,6 +784,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 <div className="space-y-3"><label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2"><Clock size={14} className="text-purple-500"/> Opens</label><input type="time" value={promoSettings.happyHourStartTime} onChange={e => onUpdatePromos({...promoSettings, happyHourStartTime: e.target.value})} className="w-full bg-stone-950 border border-white/5 rounded-2xl p-5 text-white text-xs outline-none focus:border-purple-500 [color-scheme:dark]" /></div>
                                 <div className="space-y-3"><label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2"><Clock size={14} className="text-purple-500"/> Closes</label><input type="time" value={promoSettings.happyHourEndTime} onChange={e => onUpdatePromos({...promoSettings, happyHourEndTime: e.target.value})} className="w-full bg-stone-950 border border-white/5 rounded-2xl p-5 text-white text-xs outline-none focus:border-purple-500 [color-scheme:dark]" /></div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'reviews' && (
+                <div className="max-w-4xl animate-fade-in space-y-12 mx-auto pb-12">
+                    <div className="bg-stone-900 border border-white/5 p-10 rounded-[3rem] shadow-xl">
+                        <div className="flex items-center gap-4 mb-10">
+                            <div className="w-12 h-12 bg-gold-500/10 rounded-2xl flex items-center justify-center text-gold-500 border border-gold-500/20"><Star size={24} /></div>
+                            <div>
+                                <h4 className="text-2xl font-serif text-white">Customer Reviews</h4>
+                                <p className="text-stone-500 text-xs uppercase tracking-widest font-bold">Feedback Portal</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-6">
+                            {(foodRatings || []).map(rating => (
+                                <div key={rating.id} className="p-6 bg-stone-950/50 rounded-3xl border border-white/5 space-y-4 shadow-inner relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-4">
+                                        <div className="flex gap-1 justify-end">
+                                            {[1,2,3,4,5].map(star => <Star key={star} size={14} className={star <= rating.rating ? "fill-gold-500 text-gold-500" : "text-stone-800"} />)}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-white font-bold">{rating.customerName}</p>
+                                        <p className="text-stone-500 text-[10px] font-mono mt-1 w-fit">{new Date(rating.createdAt).toLocaleDateString()} at {new Date(rating.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                        {rating.contactNumber && <p className="text-stone-600 text-[10px] font-mono mt-0.5">{rating.contactNumber}</p>}
+                                    </div>
+                                    <p className="text-stone-300 text-sm italic py-2 border-l-2 border-gold-500/30 pl-4">{rating.comment}</p>
+                                </div>
+                            ))}
+                            {(!foodRatings || foodRatings.length === 0) && (
+                                <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[2rem]">
+                                    <MessageCircle size={40} className="mx-auto text-stone-700 mb-4" />
+                                    <p className="text-stone-500">No feedback received yet.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

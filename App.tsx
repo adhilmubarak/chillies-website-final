@@ -14,8 +14,10 @@ import OrderTrackerModal from './components/OrderTrackerModal';
 import SmartSuggestion from './components/SmartSuggestion';
 import NotificationTicker from './components/NotificationTicker';
 import StoreStatusAlert from './components/StoreStatusAlert';
+import BottomNav from './components/BottomNav';
+import FeedbackModal from './components/FeedbackModal';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
-import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig } from './types';
+import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig, FoodRating } from './types';
 import { Search } from 'lucide-react';
 
 import { db } from './firebase';
@@ -137,6 +139,9 @@ function App() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   
+  const [activeSection, setActiveSection] = useState('home');
+  const [foodRatings, setFoodRatings] = useState<FoodRating[]>([]);
+
   const [promoSettings, setPromoSettings] = useState({
       isFlashSaleActive: false,
       flashSaleDate: new Date().toISOString().split('T')[0],
@@ -227,7 +232,8 @@ function App() {
   useEffect(() => {
     const q = query(collection(db, 'menuItems'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MenuItem));
+      let items = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MenuItem));
+      items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
       setMenuItems(items.length > 0 ? items : INITIAL_MENU_ITEMS);
       setIsLoading(false);
     }, () => setIsLoading(false));
@@ -256,6 +262,15 @@ function App() {
     const q = query(collection(db, 'coupons'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setCoupons(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Coupon)));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, 'foodRatings'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetched = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as FoodRating));
+      setFoodRatings(fetched.sort((a, b) => b.createdAt - a.createdAt));
     });
     return () => unsubscribe();
   }, []);
@@ -330,7 +345,7 @@ function App() {
       <Route path="/admin" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
           <AdminPanel 
-            isOpen={true} onClose={() => navigate('/')} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings}
+            isOpen={true} onClose={() => navigate('/')} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings} foodRatings={foodRatings}
             onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
             onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
             onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
@@ -354,6 +369,7 @@ function App() {
           />
         </div>
       } />
+      <Route path="/feedback" element={<FeedbackModal />} />
       <Route path="/*" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden">
           <div className="fixed inset-0 bg-stone-950 -z-10" />
@@ -484,6 +500,15 @@ function App() {
       </section>
 
       <Footer onOpenAdmin={() => navigate('/admin')} onOpenTC={() => {}} />
+      <BottomNav 
+        cartItemCount={cartItems.reduce((acc, i) => acc + i.quantity, 0)} 
+        onOpenCart={() => setIsCartOpen(true)} 
+        onOpenTracker={() => {
+            setInitialTrackId('');
+            setIsTrackerOpen(true);
+        }}
+        activeSection={activeSection}
+      />
       <OrderTrackerModal 
         isOpen={isTrackerOpen} 
         onClose={() => {
