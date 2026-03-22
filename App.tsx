@@ -158,7 +158,9 @@ function App() {
       acceptingOrders: true,
       startTime: '07:00',
       endTime: '23:00',
-      deliveryUpiId: ''
+      deliveryUpiId: '',
+      announcement: '',
+      isAnnouncementActive: false
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -305,7 +307,9 @@ function App() {
                 acceptingOrders: data.acceptingOrders ?? true,
                 startTime: data.startTime || '07:00',
                 endTime: data.endTime || '23:00',
-                deliveryUpiId: data.deliveryUpiId || ''
+                deliveryUpiId: data.deliveryUpiId || '',
+                announcement: data.announcement || '',
+                isAnnouncementActive: data.isAnnouncementActive || false
             });
         }
     });
@@ -393,6 +397,8 @@ function App() {
         flashSaleEndTime={promoSettings.flashSaleEndTime}
         isStoreOpen={isStoreOpen}
         startTime={storeSettings.startTime}
+        announcement={storeSettings.announcement}
+        isAnnouncementActive={storeSettings.isAnnouncementActive}
       />
 
       <Navbar 
@@ -403,7 +409,7 @@ function App() {
             setInitialTrackId('');
             setIsTrackerOpen(true);
         }}
-        hasTicker={!isStoreOpen || isFlashSaleActive || isHappyHourActive}
+        hasTicker={!isStoreOpen || isFlashSaleActive || isHappyHourActive || storeSettings.isAnnouncementActive}
       />
       
       <Hero />

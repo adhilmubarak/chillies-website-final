@@ -5,7 +5,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating } from '../types';
 import { printThermalBill } from '../App';
@@ -29,7 +29,7 @@ interface AdminPanelProps {
     happyHourStartTime: string;
     happyHourEndTime: string;
   };
-  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string };
+  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean };
   onAddItem: (item: MenuItem) => void;
   onUpdateItem: (item: MenuItem) => void;
   onDeleteItem: (id: string) => void;
@@ -40,7 +40,7 @@ interface AdminPanelProps {
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
-  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string }) => void;
+  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
   foodRatings?: FoodRating[];
@@ -960,6 +960,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-white/10">
+                            <div className="space-y-6 md:col-span-2">
+                                <h5 className="text-white text-base font-bold flex items-center gap-3"><MessageSquare size={20} className="text-brand-500" /> Customer Bulletin</h5>
+                                <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                                     <div className="flex items-center justify-between">
+                                        <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2">Enable Announcement Banner</label>
+                                        <button 
+                                            onClick={() => onUpdateStoreSettings({ ...storeSettings, isAnnouncementActive: !storeSettings.isAnnouncementActive })}
+                                            className={`group relative flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none ${storeSettings.isAnnouncementActive ? 'bg-brand-500 shadow-[0_0_15px_rgba(255,107,107,0.3)]' : 'bg-stone-800 border border-stone-700'}`}
+                                        >
+                                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full ring-0 transition duration-300 ease-in-out ${storeSettings.isAnnouncementActive ? 'translate-x-5 bg-white' : 'translate-x-0 bg-stone-500'}`} />
+                                        </button>
+                                     </div>
+                                     <textarea 
+                                         value={storeSettings.announcement || ''}
+                                         onChange={e => onUpdateStoreSettings({ ...storeSettings, announcement: e.target.value })}
+                                         placeholder="e.g. Special Holiday Hours: We open at 4 PM tomorrow!"
+                                         className={`w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-brand-500 outline-none h-24 resize-none transition-all ${!storeSettings.isAnnouncementActive ? 'opacity-50' : ''}`}
+                                         disabled={!storeSettings.isAnnouncementActive}
+                                     />
+                                </div>
+                            </div>
+
                             <div className="space-y-6">
                                 <h5 className="text-white text-base font-bold flex items-center gap-3"><Clock size={20} className="text-gold-500" /> Opening Window</h5>
                                 <div className="grid grid-cols-2 gap-4">

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Zap, PartyPopper, Lock, Clock } from 'lucide-react';
+import { Zap, PartyPopper, Lock, Clock, MessageSquare } from 'lucide-react';
 
 interface NotificationTickerProps {
   isFlashSaleActive: boolean;
@@ -8,6 +8,8 @@ interface NotificationTickerProps {
   flashSaleEndTime: string;
   isStoreOpen?: boolean;
   startTime?: string;
+  announcement?: string;
+  isAnnouncementActive?: boolean;
 }
 
 const NotificationTicker: React.FC<NotificationTickerProps> = ({ 
@@ -15,9 +17,11 @@ const NotificationTicker: React.FC<NotificationTickerProps> = ({
   isHappyHourActive, 
   flashSaleEndTime,
   isStoreOpen = true,
-  startTime = ''
+  startTime = '',
+  announcement = '',
+  isAnnouncementActive = false
 }) => {
-  if (isStoreOpen && !isFlashSaleActive && !isHappyHourActive) return null;
+  if (isStoreOpen && !isFlashSaleActive && !isHappyHourActive && !isAnnouncementActive) return null;
 
   const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
@@ -57,6 +61,12 @@ const NotificationTicker: React.FC<NotificationTickerProps> = ({
                   <span className="flex items-center gap-2 text-purple-400">
                     <PartyPopper size={12} fill="currentColor" /> 
                     Happy Hour is ON! Grab exclusive deals now.
+                  </span>
+                )}
+                {isAnnouncementActive && announcement && (
+                  <span className="flex items-center gap-2 text-brand-400">
+                    <MessageSquare size={12} fill="currentColor" /> 
+                    {announcement}
                   </span>
                 )}
               </>
