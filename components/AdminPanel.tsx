@@ -1063,7 +1063,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="p-8 border-t border-white/5 bg-stone-950/40 shrink-0">
                     <button 
-                        disabled={manualOrderItems.length === 0 || !manualCustomerName || (manualOrderType === 'delivery' && !manualAddress)}
+                        disabled={manualOrderItems.length === 0 || (manualOrderType === 'delivery' && !manualAddress)}
                         onClick={() => {
                             if (!onAddOrder) return;
                             const subtotal = manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0);
@@ -1076,23 +1076,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 newOrderId = `CHILL${Math.floor(10000 + Math.random() * 90000)}-${uniqueSuffix}`;
                             }
                             const now = new Date();
+                            const baseUrl = window.location.href.split('?')[0].split('#')[0].replace(/\/$/, "");
                             const newOrder: Order = {
                                 id: newOrderId,
                                 items: manualOrderItems.map(i => ({...i.item, quantity: i.quantity, selectedVariations: {}} as any)),
                                 subtotal,
-                                discount: 0,
-                                couponCode: null,
                                 deliveryCharge: manualOrderType === 'delivery' ? 20 : 0,
                                 total,
-                                customerName: manualCustomerName,
-                                contactNumber: manualContact || 'N/A',
+                                customerName: manualCustomerName.trim() || 'Walk-in Guest',
+                                contactNumber: manualContact,
                                 address: manualOrderType === 'delivery' ? manualAddress : '',
                                 type: manualOrderType,
                                 status: 'pending',
                                 timestamp: now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
                                 date: now.toLocaleDateString(),
                                 createdAt: now.getTime(),
-                                trackingLink: ''
+                                trackingLink: `${baseUrl}?tid=${newOrderId}`
                             };
                             onAddOrder(newOrder);
                             setIsManualOrderOpen(false);

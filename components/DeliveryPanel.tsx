@@ -174,7 +174,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                     <div className="bg-white p-4 rounded-3xl flex flex-col items-center justify-center space-y-3 mx-auto w-fit shadow-xl border-4 border-purple-500/20 animate-fade-in">
                                         <div className="w-48 h-48 bg-white overflow-hidden relative rounded-xl">
                                             <img 
-                                                src={`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(`upi://pay?pa=${deliveryUpiId || '8301032794@ybl'}&pn=Chillies&am=${order.total}&cu=INR`)}`} 
+                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`upi://pay?pa=${deliveryUpiId || '8301032794@ybl'}&pn=Chillies&am=${order.total}&cu=INR`)}`} 
                                                 alt="UPI QR Code" 
                                                 className="w-full h-full object-contain p-2"
                                             />
