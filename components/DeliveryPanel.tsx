@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, Lock, LogOut, ShoppingBag, MapPin, 
   Send, Check, PhoneCall, User, Navigation, ArrowRight
@@ -17,7 +17,14 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
+  const [hasSavedSession, setHasSavedSession] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<Record<string, 'Cash' | 'UPI'>>({});
+
+  useEffect(() => {
+    if (localStorage.getItem('chillies_rider_token') === 'authorized') {
+      setHasSavedSession(true);
+    }
+  }, []);
 
   const deliveryOrders = useMemo(() => {
     return orders.filter(order => 
@@ -32,6 +39,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
         setIsAuthenticated(true);
         setAuthError(false);
         setPasswordInput('');
+        localStorage.setItem('chillies_rider_token', 'authorized');
     } else {
         setAuthError(true);
     }
@@ -56,17 +64,35 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
           </div>
           <h2 className="text-2xl font-serif text-stone-50 mb-2">Delivery Portal</h2>
           <p className="text-stone-500 text-sm mb-8">Chillies Rider Access</p>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input 
-              type="password" 
-              placeholder="Rider Passkey" 
-              value={passwordInput} 
-              onChange={e => setPasswordInput(e.target.value)} 
-              className={`w-full bg-stone-950 border rounded-xl p-4 text-center text-stone-50 focus:outline-none focus:border-brand-500 ${authError ? 'border-red-500' : 'border-stone-800'}`}
-              autoFocus 
-            />
-            <button type="submit" className="w-full bg-brand-500 text-white font-bold py-4 rounded-xl uppercase tracking-widest shadow-lg">Login</button>
-          </form>
+          
+          {hasSavedSession ? (
+            <div className="space-y-4">
+                <button 
+                  onClick={() => setIsAuthenticated(true)} 
+                  className="w-full bg-brand-500 text-white font-bold py-4 rounded-xl uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+                >
+                    <User size={18} /> Continue as Rider
+                </button>
+                <button 
+                  onClick={() => { setHasSavedSession(false); localStorage.removeItem('chillies_rider_token'); }} 
+                  className="text-stone-500 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors mt-4 block mx-auto"
+                >
+                    Switch Account
+                </button>
+            </div>
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-4">
+                <input 
+                type="password" 
+                placeholder="Rider Passkey" 
+                value={passwordInput} 
+                onChange={e => setPasswordInput(e.target.value)} 
+                className={`w-full bg-stone-950 border rounded-xl p-4 text-center text-stone-50 focus:outline-none focus:border-brand-500 ${authError ? 'border-red-500' : 'border-stone-800'}`}
+                autoFocus 
+                />
+                <button type="submit" className="w-full bg-brand-500 text-white font-bold py-4 rounded-xl uppercase tracking-widest shadow-lg">Login</button>
+            </form>
+          )}
         </div>
       </div>
     );
@@ -82,7 +108,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                   <p className="text-[10px] text-brand-500 font-bold uppercase tracking-widest">{deliveryOrders.length} Active</p>
               </div>
           </div>
-          <button onClick={() => setIsAuthenticated(false)} className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-red-500 hover:bg-stone-800 transition-colors">
+          <button onClick={() => { setIsAuthenticated(false); localStorage.removeItem('chillies_rider_token'); setHasSavedSession(false); }} className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-red-500 hover:bg-stone-800 transition-colors">
               <LogOut size={16} />
           </button>
       </header>
