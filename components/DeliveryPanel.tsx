@@ -176,7 +176,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                             <img 
                                                 src={`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(`upi://pay?pa=${deliveryUpiId || '8301032794@ybl'}&pn=Chillies&am=${order.total}&cu=INR`)}`} 
                                                 alt="UPI QR Code" 
-                                                className="w-full h-full object-cover mix-blend-multiply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.15]"
+                                                className="w-full h-full object-contain p-2"
                                             />
                                         </div>
                                         <div className="text-center">

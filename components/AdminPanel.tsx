@@ -154,7 +154,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings'>('dashboard');
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -354,6 +354,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 { id: 'coupons', icon: Ticket, label: 'Coupons' },
                 { id: 'promotions', icon: Zap, label: 'Marketing' },
                 { id: 'reviews', icon: Star, label: 'Feedback' },
+                { id: 'payment', icon: Wallet, label: 'Payment' },
                 { id: 'settings', icon: Settings, label: 'Operations' }
             ].map(tab => (
                 <button 
@@ -831,6 +832,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
             )}
 
+            {activeTab === 'payment' && (
+                <div className="max-w-4xl animate-fade-in mx-auto pb-12">
+                    <div className="bg-stone-900/80 border border-white/5 rounded-[3rem] p-12 space-y-8 shadow-2xl">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 bg-gold-500/10 rounded-2xl flex items-center justify-center text-gold-500 border border-gold-500/20"><Wallet size={24} /></div>
+                            <div>
+                                <h4 className="text-2xl font-serif text-white">Payment Gateway Config</h4>
+                                <p className="text-stone-500 text-xs uppercase tracking-widest font-bold">Manage Checkout & Rider Payments</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <h5 className="text-white text-base font-bold flex items-center gap-3"><Scan size={20} className="text-purple-500" /> Rider App UPI Integration</h5>
+                            <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-3">
+                                <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2">Delivery Rider UPI ID</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g. 9876543210@ybl"
+                                    value={storeSettings.deliveryUpiId || ''} 
+                                    onChange={e => onUpdateStoreSettings({...storeSettings, deliveryUpiId: e.target.value})} 
+                                    className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-xs outline-none focus:border-purple-500 font-mono tracking-widest"
+                                />
+                                <p className="text-[10px] text-stone-500 max-w-sm">Dynamic QRs in the rider delivery portal (<span className="text-purple-400 font-mono">/delivery</span>) will receive payments on this ID.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {activeTab === 'settings' && (
                 <div className="max-w-4xl animate-fade-in mx-auto pb-12">
                     <div className="bg-stone-900/80 border border-white/5 rounded-[3rem] p-12 space-y-12 shadow-2xl">
@@ -873,17 +903,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                             
                             <div className="space-y-6">
-                                <h5 className="text-white text-base font-bold flex items-center gap-3"><Wallet size={20} className="text-gold-500" /> Payment Config</h5>
+                                <h5 className="text-white text-base font-bold flex items-center gap-3"><MessageCircle size={20} className="text-gold-500" /> Feedback Portal</h5>
                                 <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-3">
-                                    <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2"><Scan size={14} className="text-purple-500"/> Delivery Rider UPI ID</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="e.g. 9876543210@ybl"
-                                        value={storeSettings.deliveryUpiId || ''} 
-                                        onChange={e => onUpdateStoreSettings({...storeSettings, deliveryUpiId: e.target.value})} 
-                                        className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-xs outline-none focus:border-gold-500 font-mono tracking-widest"
-                                    />
-                                    <p className="text-[10px] text-stone-500 max-w-xs">Dynamic QRs in the rider delivery portal will receive payments on this ID.</p>
+                                    <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2">Customer Rating Link</label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            readOnly 
+                                            value={`${window.location.origin}/feedback`}
+                                            className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-stone-500 text-xs outline-none font-mono"
+                                        />
+                                        <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/feedback`)} className="px-6 bg-gold-500 text-stone-950 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:bg-gold-400 whitespace-nowrap border border-gold-500">Copy URL</button>
+                                    </div>
+                                    <p className="text-[10px] text-stone-500 max-w-xs leading-relaxed">Share this link directly with customers to collect their dining experience ratings.</p>
                                 </div>
                             </div>
                         </div>
