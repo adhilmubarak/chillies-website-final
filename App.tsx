@@ -16,6 +16,7 @@ import NotificationTicker from './components/NotificationTicker';
 import StoreStatusAlert from './components/StoreStatusAlert';
 import BottomNav from './components/BottomNav';
 import FeedbackModal from './components/FeedbackModal';
+import OffersPage from './components/OffersPage';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
 import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig, FoodRating } from './types';
 import { Search } from 'lucide-react';
@@ -389,6 +390,16 @@ function App() {
             deliveryUpiId={storeSettings.deliveryUpiId}
           />
         </div>
+      } />
+      <Route path="/offers" element={
+        <OffersPage 
+          isFlashSaleActive={isFlashSaleActive}
+          isHappyHourActive={isHappyHourActive}
+          flashSaleEndTime={promoSettings.flashSaleEndTime}
+          happyHourStartTime={promoSettings.happyHourStartTime}
+          happyHourEndTime={promoSettings.happyHourEndTime}
+          coupons={coupons}
+        />
       } />
       <Route path="/feedback" element={<FeedbackModal />} />
       <Route path="/*" element={

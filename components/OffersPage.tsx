@@ -1,0 +1,157 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Zap, PartyPopper, Ticket, Star } from 'lucide-react';
+import { Coupon } from '../types';
+
+interface OffersPageProps {
+  isFlashSaleActive: boolean;
+  isHappyHourActive: boolean;
+  flashSaleEndTime: string;
+  happyHourStartTime: string;
+  happyHourEndTime: string;
+  coupons: Coupon[];
+}
+
+const OffersPage: React.FC<OffersPageProps> = ({ 
+  isFlashSaleActive, 
+  isHappyHourActive,
+  flashSaleEndTime,
+  happyHourStartTime,
+  happyHourEndTime,
+  coupons
+}) => {
+  const navigate = useNavigate();
+
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    if (isNaN(hours)) return timeStr;
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    const h = hours % 12 || 12;
+    return `${h}:${minutes.toString().padStart(2, '0')} ${suffix}`;
+  };
+
+  return (
+    <div className="min-h-[100dvh] bg-stone-950 text-stone-200 font-sans flex flex-col relative overflow-hidden">
+      
+      {/* Background Ambience */}
+      <div className="absolute inset-0 z-0 select-none pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-stone-900 to-transparent opacity-50"></div>
+        <div className="absolute top-1/4 -right-64 w-[500px] h-[500px] bg-gold-500/10 rounded-full blur-[120px]"></div>
+        <div className="absolute -bottom-32 -left-32 w-[600px] h-[600px] bg-brand-500/10 rounded-full blur-[150px]"></div>
+      </div>
+
+      <header className="fixed top-0 w-full z-40 bg-stone-950/80 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="p-3 bg-stone-900 rounded-full text-stone-400 hover:text-white hover:bg-stone-800 transition-all border border-white/5 shadow-lg active:scale-95"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          
+          <div className="flex items-center gap-3">
+             <Star className="w-5 h-5 text-gold-500" />
+             <h1 className="text-xl font-serif text-white tracking-widest uppercase">Special Offers</h1>
+          </div>
+          <div className="w-11"></div> {/* Spacer to center the title */}
+        </div>
+      </header>
+
+      <main className="flex-1 max-w-4xl w-full mx-auto px-6 pb-24 pt-32 relative z-10 space-y-12 animate-fade-in">
+          
+        {/* Flash Sale Banner */}
+        {isFlashSaleActive && (
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-stone-900 border border-red-500/30 p-8 shadow-[0_0_50px_rgba(220,38,38,0.1)] group">
+             <div className="absolute top-0 right-0 p-8 text-red-500/20 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700 pointer-events-none">
+               <Zap size={120} />
+             </div>
+             <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                <div>
+                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-md mb-4">
+                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                     Live Now
+                   </div>
+                   <h2 className="text-3xl font-serif text-white mb-2">Flash Sale Active!</h2>
+                   <p className="text-stone-400 max-w-md text-sm leading-relaxed">Exclusive deep discounts on selected premium dishes. Ends promptly at <span className="text-red-400 font-bold">{formatTime(flashSaleEndTime)}</span>.</p>
+                </div>
+                <button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth'}), 100); }} className="bg-red-500 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg hover:shadow-red-500/30 transition-all hover:-translate-y-1 active:scale-95 whitespace-nowrap">
+                   Shop Flash Sale
+                </button>
+             </div>
+          </div>
+        )}
+
+        {/* Happy Hour Banner */}
+        {isHappyHourActive ? (
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-stone-900 border border-purple-500/30 p-8 shadow-[0_0_50px_rgba(147,51,234,0.1)] group">
+             <div className="absolute top-0 right-0 p-8 text-purple-500/20 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 pointer-events-none">
+               <PartyPopper size={120} />
+             </div>
+             <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                <div>
+                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/20 text-purple-400 text-[10px] font-black uppercase tracking-widest rounded-md mb-4">
+                     <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+                     Live Now
+                   </div>
+                   <h2 className="text-3xl font-serif text-white mb-2">Happy Hour Special!</h2>
+                   <p className="text-stone-400 max-w-md text-sm leading-relaxed">Unwind with our recurring daily specials, running from <span className="text-purple-400 font-bold">{formatTime(happyHourStartTime)}</span> to <span className="text-purple-400 font-bold">{formatTime(happyHourEndTime)}</span>.</p>
+                </div>
+                <button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth'}), 100); }} className="bg-purple-500 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg hover:shadow-purple-500/30 transition-all hover:-translate-y-1 active:scale-95 whitespace-nowrap">
+                   View Specials
+                </button>
+             </div>
+          </div>
+        ) : (
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-stone-900/50 border border-white/5 p-8 group">
+             <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                <div>
+                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-800 text-stone-500 text-[10px] font-black uppercase tracking-widest rounded-md mb-4">
+                     Upcoming
+                   </div>
+                   <h2 className="text-2xl font-serif text-white/50 mb-2">Happy Hour</h2>
+                   <p className="text-stone-600 max-w-sm text-xs leading-relaxed">Join us daily from {formatTime(happyHourStartTime)} to {formatTime(happyHourEndTime)} for exclusive pricing.</p>
+                </div>
+                <PartyPopper size={40} className="text-stone-700" />
+             </div>
+          </div>
+        )}
+
+        {/* Coupons Grid */}
+        <div className="space-y-6">
+            <h3 className="text-gold-500 font-black uppercase tracking-[0.2em] text-xs">Available Vouchers</h3>
+            
+            {coupons.length === 0 ? (
+                <div className="bg-stone-900 border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center">
+                    <Ticket className="w-12 h-12 text-stone-700 mb-4" />
+                    <p className="text-stone-400 font-bold">No active coupons right now.</p>
+                    <p className="text-stone-600 text-sm mt-2">Check back later for seasonal discounts and promo codes!</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {coupons.map((coupon) => (
+                        <div key={coupon.id} className="p-6 bg-stone-900 rounded-3xl border border-white/5 flex flex-col justify-between group hover:border-gold-500/30 transition-colors relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-2 h-full bg-gold-500"></div>
+                            <div className="flex justify-between items-start mb-6 z-10">
+                                <div className="p-3 bg-stone-950 rounded-xl text-gold-500 border border-white/5">
+                                    <Ticket size={24} />
+                                </div>
+                                <span className="text-stone-500 text-[10px] uppercase font-black tracking-widest bg-stone-950 px-3 py-1 rounded-full border border-white/5">Flat Off</span>
+                            </div>
+                            <div className="z-10">
+                                <p className="text-white font-mono font-bold text-2xl mb-1">{coupon.code}</p>
+                                <p className="text-stone-400 text-sm">Save <span className="text-gold-400 font-bold">₹{coupon.value}</span> on your next order.</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+
+      </main>
+    </div>
+  );
+};
+
+export default OffersPage;

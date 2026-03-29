@@ -11,6 +11,24 @@ import { MenuItem, Order, Coupon, CategoryConfig, FoodRating } from '../types';
 import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+const riderIcon = new L.Icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
+    className: 'drop-shadow-xl saturate-200'
+});
+
+function MapUpdater({ center }: { center: [number, number] }) {
+    const map = useMap();
+    React.useEffect(() => {
+        map.setView(center, map.getZoom() || 16, { animate: true });
+    }, [center, map]);
+    return null;
+}
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -1116,11 +1134,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             )}
                         </div>
                         
-                        <div className="bg-stone-950 p-6 rounded-[2rem] border border-white/5 mt-auto shadow-inner">
-                            <div className="flex justify-between items-center text-white mb-3">
-                                <span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Subtotal</span>
-                                <span className="font-mono text-sm">₹{manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0)}</span>
+                        <div className="bg-stone-950 p-6 rounded-[2rem] border border-white/5 mt-auto shadow-inner flex flex-col flex-1 min-h-0">
+                            <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-3 mb-4 shrink-0">Added Items</h4>
+                            <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-3 mb-4">
+                                {manualOrderItems.length === 0 ? (
+                                    <p className="text-stone-600 text-xs italic text-center py-4">Cart is empty</p>
+                                ) : (
+                                    manualOrderItems.map(item => (
+                                        <div key={item.item.id} className="flex justify-between items-center text-sm">
+                                            <div className="flex items-center gap-2 min-w-0 pr-2">
+                                                <span className="text-gold-500 font-bold shrink-0">{item.quantity}x</span>
+                                                <span className="text-stone-300 truncate">{item.item.name}</span>
+                                            </div>
+                                            <span className="text-white font-mono shrink-0">₹{(item.item.price * item.quantity).toFixed(2)}</span>
+                                        </div>
+                                    ))
+                                )}
                             </div>
+                            <div className="pt-4 border-t border-white/5 shrink-0">
+                                <div className="flex justify-between items-center text-white mb-3">
+                                    <span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Subtotal</span>
+                                    <span className="font-mono text-sm">₹{manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0)}</span>
+                                </div>
                             {manualOrderType === 'delivery' && (
                                 <div className="flex justify-between items-center text-white mb-3">
                                     <span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Delivery Fee</span>
@@ -1133,6 +1168,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <div className="p-8 border-t border-white/5 bg-stone-950/40 shrink-0">
@@ -1352,14 +1388,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 <p className="text-brand-500 text-[10px] uppercase font-black tracking-[0.2em] mt-1 hidden sm:block">Coordinates Last Synced: {new Date(riderLocation.timestamp).toLocaleTimeString()}</p>
               </div>
             </div>
-            <div className="w-full h-80 relative bg-stone-950">
-                <iframe 
-                    width="100%" 
-                    height="100%" 
-                    className="absolute inset-0 grayscale contrast-125 opacity-80"
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${riderLocation.lng-0.005},${riderLocation.lat-0.005},${riderLocation.lng+0.005},${riderLocation.lat+0.005}&layer=mapnik&marker=${riderLocation.lat},${riderLocation.lng}`}
-                    style={{ border: 0 }}
-                ></iframe>
+            <div className="w-full h-80 relative bg-stone-950 z-0">
+                <MapContainer 
+                    center={[riderLocation.lat, riderLocation.lng]} 
+                    zoom={17} 
+                    scrollWheelZoom={true} 
+                    style={{ height: '100%', width: '100%' }}
+                    zoomControl={false}
+                >
+                    <TileLayer 
+                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                        attribution="&copy; <a href='https://carto.com/'>CARTO</a>"
+                    />
+                    <MapUpdater center={[riderLocation.lat, riderLocation.lng]} />
+                    <Marker position={[riderLocation.lat, riderLocation.lng]} icon={riderIcon} />
+                </MapContainer>
             </div>
             <div className="p-4 bg-stone-950 border-t border-brand-500/10 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p className="text-stone-500 text-[10px] uppercase tracking-widest font-mono">LAT {riderLocation.lat.toFixed(6)} | LNG {riderLocation.lng.toFixed(6)}</p>
