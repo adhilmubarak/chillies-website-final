@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Menu as MenuIcon, X, Search, Clock } from 'lucide-react';
+import { ShoppingBag, Menu as MenuIcon, X, Search, Clock, Sparkles } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface NavbarProps {
   cartItemCount: number;
@@ -19,6 +20,8 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,6 +34,21 @@ const Navbar: React.FC<NavbarProps> = ({
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
+
+    if (id === 'offers') {
+        navigate('/offers');
+        return;
+    }
+
+    if (location.pathname !== '/') {
+        navigate('/');
+        setTimeout(() => {
+            const element = document.getElementById(id);
+            if (element) element.scrollIntoView({ behavior: 'smooth' });
+            else if (id === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+        return;
+    }
 
     const element = document.getElementById(id);
     if (element) {
@@ -93,6 +111,7 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="hidden md:flex space-x-10 items-center">
           <a href="#home" onClick={(e) => handleNavClick(e, 'home')} className={navLinkClass}>Home</a>
           <a href="#menu" onClick={(e) => handleNavClick(e, 'menu')} className={navLinkClass}>Menu</a>
+          <a href="#offers" onClick={(e) => handleNavClick(e, 'offers')} className={`${navLinkClass} text-gold-400 flex items-center gap-1`}><Sparkles size={12} /> Offers</a>
           <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className={navLinkClass}>Contact</a>
         </div>
 
@@ -155,6 +174,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <nav className="flex flex-col items-center space-y-8 relative z-10">
               <a href="#home" onClick={(e) => handleNavClick(e, 'home')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Home</a>
               <a href="#menu" onClick={(e) => handleNavClick(e, 'menu')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Menu</a>
+              <a href="#offers" onClick={(e) => handleNavClick(e, 'offers')} className="text-2xl text-gold-400 hover:text-gold-300 font-serif transition-colors flex items-center gap-2"><Sparkles size={20} /> Offers</a>
               <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Contact</a>
             </nav>
         </div>

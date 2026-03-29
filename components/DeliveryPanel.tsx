@@ -51,7 +51,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
     return orders.filter(order => 
         order.type === 'delivery' && 
         ['ready', 'out_for_delivery'].includes(order.status)
-    );
+    ).sort((a, b) => a.createdAt - b.createdAt);
   }, [orders]);
 
   const dailyDeliveredCount = useMemo(() => {
