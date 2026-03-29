@@ -5,9 +5,9 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles
 } from 'lucide-react';
-import { MenuItem, Order, Coupon, CategoryConfig, FoodRating } from '../types';
+import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer } from '../types';
 import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
@@ -26,6 +26,7 @@ function MapUpdater({ center }: { center: [number, number] }) {
     const map = useMap();
     React.useEffect(() => {
         map.setView(center, map.getZoom() || 16, { animate: true });
+        setTimeout(() => map.invalidateSize(), 200);
     }, [center, map]);
     return null;
 }
@@ -62,6 +63,10 @@ interface AdminPanelProps {
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
   foodRatings?: FoodRating[];
+  customOffers?: CustomOffer[];
+  onAddCustomOffer?: (offer: CustomOffer) => void;
+  onUpdateCustomOffer?: (offer: CustomOffer) => void;
+  onDeleteCustomOffer?: (id: string) => void;
 }
 
 const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => void }> = ({ onScan, onClose }) => {
@@ -166,9 +171,9 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
 };
 
 const AdminPanel: React.FC<AdminPanelProps> = ({
-  isOpen, onClose, items, categories, orders, coupons = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings, riderLocation,
+  isOpen, onClose, items, categories, orders, coupons = [], customOffers = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings, riderLocation,
   onAddItem, onUpdateItem, onDeleteItem, onAddCategory, onUpdateCategory, onDeleteCategory, onUpdateOrderStatus,
-  onAddCoupon, onDeleteCoupon, onUpdateStoreSettings, onUpdatePromos, onAddOrder
+  onAddCoupon, onDeleteCoupon, onAddCustomOffer, onUpdateCustomOffer, onDeleteCustomOffer, onUpdateStoreSettings, onUpdatePromos, onAddOrder
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -176,6 +181,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings'>('dashboard');
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
+  const [isOfferFormOpen, setIsOfferFormOpen] = useState(false);
+  const [editingOffer, setEditingOffer] = useState<Partial<CustomOffer> | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [inventoryStatusFilter, setInventoryStatusFilter] = useState<'all' | 'available' | 'unavailable'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
@@ -890,6 +897,45 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                         </div>
                     </div>
+                    
+                    <div className="bg-stone-900/80 border border-white/5 rounded-[3rem] p-10 mt-12 shadow-2xl">
+                        <div className="flex justify-between items-center mb-10">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gold-500/10 rounded-2xl flex items-center justify-center text-gold-500 border border-gold-500/20"><Sparkles size={24} /></div>
+                                <div>
+                                    <h4 className="text-2xl font-serif text-white">Custom Offers</h4>
+                                    <p className="text-stone-500 text-xs uppercase tracking-widest font-bold">Manage Public Banners</p>
+                                </div>
+                            </div>
+                            <button onClick={() => { setEditingOffer({ title: '', description: '', image: '', isActive: true }); setIsOfferFormOpen(true); }} className="bg-stone-800 border border-gold-500/20 text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 hover:bg-gold-500 hover:text-stone-950 transition-all shadow-lg active:scale-95"> <Plus size={16} /> New Offer </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {customOffers.map(offer => (
+                                <div key={offer.id} className="p-6 bg-stone-950 rounded-[2rem] border border-white/5 flex flex-col group relative overflow-hidden transition-all hover:border-gold-500/20">
+                                    {offer.image && (
+                                        <div className="absolute inset-0 z-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                                            <img src={offer.image} alt="" className="w-full h-full object-cover" />
+                                        </div>
+                                    )}
+                                    <div className="relative z-10 flex justify-between items-start mb-6">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`w-2 h-2 rounded-full ${offer.isActive ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                            <span className="text-[10px] text-stone-500 uppercase font-black tracking-widest">{offer.isActive ? 'Active' : 'Draft'}</span>
+                                        </div>
+                                        <div className="flex justify-end gap-2">
+                                            <button onClick={() => { setEditingOffer(offer); setIsOfferFormOpen(true); }} className="p-2 text-stone-500 hover:text-gold-500 transition-colors bg-stone-900 rounded-lg"><Edit2 size={16} /></button>
+                                            <button onClick={() => offer.id && onDeleteCustomOffer && onDeleteCustomOffer(offer.id)} className="p-2 text-stone-500 hover:text-red-500 transition-colors bg-stone-900 rounded-lg"><Trash2 size={16} /></button>
+                                        </div>
+                                    </div>
+                                    <div className="relative z-10 flex-1">
+                                        <h5 className="text-white font-serif text-xl mb-2 pr-4">{offer.title}</h5>
+                                        <p className="text-stone-400 text-xs leading-relaxed line-clamp-2">{offer.description}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -1369,6 +1415,53 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         setIsItemFormOpen(false); 
                     }} className="flex-1 bg-gold-500 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-xs transition-all shadow-xl hover:bg-gold-400 active:scale-95 flex items-center justify-center gap-2"> {editingItem.id ? 'Save Changes' : 'Publish Dish'} <ChevronRight size={16} /> </button>
                     <button onClick={() => setIsItemFormOpen(false)} className="px-8 border border-stone-800 text-stone-500 hover:text-white rounded-2xl uppercase tracking-widest text-[10px] font-black transition-all">Cancel</button>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* Offer Editor Modal */}
+      {isOfferFormOpen && editingOffer && (
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in overflow-y-auto">
+            <div className="bg-stone-900 border border-white/10 rounded-[3rem] w-full max-w-xl shadow-2xl my-8 overflow-hidden">
+                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-stone-950/40">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center text-stone-950 shadow-lg shadow-gold-500/20"><Sparkles size={24} className="stroke-[3]" /></div>
+                        <h3 className="text-xl font-serif text-white">{editingOffer.id ? 'Edit Offer' : 'Create Offer'}</h3>
+                    </div>
+                    <button onClick={() => setIsOfferFormOpen(false)} className="text-stone-500 hover:text-white transition-all"><X size={28} /></button>
+                </div>
+                <div className="p-8 space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black">Title</label>
+                        <input type="text" value={editingOffer.title} onChange={e => setEditingOffer({...editingOffer, title: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black">Description</label>
+                        <textarea value={editingOffer.description} onChange={e => setEditingOffer({...editingOffer, description: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none h-24 resize-none" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black">Background Image URL (Optional)</label>
+                        <input type="text" value={editingOffer.image || ''} onChange={e => setEditingOffer({...editingOffer, image: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-xs font-mono focus:border-gold-500 outline-none" />
+                    </div>
+                    <label className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer select-none transition-all ${editingOffer.isActive ? 'bg-gold-500/10 border-gold-500 text-gold-500' : 'bg-stone-950 border-stone-800 text-stone-600'}`}>
+                        <input type="checkbox" className="hidden" checked={!!editingOffer.isActive} onChange={() => setEditingOffer({...editingOffer, isActive: !editingOffer.isActive})} />
+                        <div className={`w-5 h-5 rounded-md flex items-center justify-center border ${editingOffer.isActive ? 'bg-gold-500 border-gold-500 text-stone-950' : 'border-stone-600'}`}>
+                            {editingOffer.isActive && <Check size={14} className="stroke-[4]" />}
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-widest">Publish to public board</span>
+                    </label>
+                </div>
+                <div className="p-8 border-t border-white/5 bg-stone-950/40 flex gap-4">
+                    <button onClick={() => {
+                        if (!editingOffer.title || !editingOffer.description) return;
+                        if (editingOffer.id && onUpdateCustomOffer) {
+                            onUpdateCustomOffer(editingOffer as CustomOffer);
+                        } else if (onAddCustomOffer) {
+                            onAddCustomOffer(editingOffer as CustomOffer);
+                        }
+                        setIsOfferFormOpen(false);
+                    }} className="flex-1 bg-gold-500 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-xs transition-all shadow-xl hover:bg-gold-400"> Save Offer </button>
                 </div>
             </div>
         </div>

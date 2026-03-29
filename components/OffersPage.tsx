@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, PartyPopper, Ticket, Star } from 'lucide-react';
-import { Coupon } from '../types';
+import { ArrowLeft, Zap, PartyPopper, Star, Sparkles } from 'lucide-react';
+import { CustomOffer } from '../types';
 
 interface OffersPageProps {
   isFlashSaleActive: boolean;
@@ -9,7 +9,7 @@ interface OffersPageProps {
   flashSaleEndTime: string;
   happyHourStartTime: string;
   happyHourEndTime: string;
-  coupons: Coupon[];
+  customOffers: CustomOffer[];
 }
 
 const OffersPage: React.FC<OffersPageProps> = ({ 
@@ -18,7 +18,7 @@ const OffersPage: React.FC<OffersPageProps> = ({
   flashSaleEndTime,
   happyHourStartTime,
   happyHourEndTime,
-  coupons
+  customOffers
 }) => {
   const navigate = useNavigate();
 
@@ -118,30 +118,38 @@ const OffersPage: React.FC<OffersPageProps> = ({
           </div>
         )}
 
-        {/* Coupons Grid */}
+        {/* Custom Offers Grid */}
         <div className="space-y-6">
-            <h3 className="text-gold-500 font-black uppercase tracking-[0.2em] text-xs">Available Vouchers</h3>
+            <h3 className="text-gold-500 font-black uppercase tracking-[0.2em] text-xs">Special Offers</h3>
             
-            {coupons.length === 0 ? (
+            {customOffers.filter(o => o.isActive).length === 0 ? (
                 <div className="bg-stone-900 border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center">
-                    <Ticket className="w-12 h-12 text-stone-700 mb-4" />
-                    <p className="text-stone-400 font-bold">No active coupons right now.</p>
-                    <p className="text-stone-600 text-sm mt-2">Check back later for seasonal discounts and promo codes!</p>
+                    <Sparkles className="w-12 h-12 text-stone-700 mb-4" />
+                    <p className="text-stone-400 font-bold">No special custom offers right now.</p>
+                    <p className="text-stone-600 text-sm mt-2">Check back later for seasonal discounts and exclusive deals!</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {coupons.map((coupon) => (
-                        <div key={coupon.id} className="p-6 bg-stone-900 rounded-3xl border border-white/5 flex flex-col justify-between group hover:border-gold-500/30 transition-colors relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-2 h-full bg-gold-500"></div>
-                            <div className="flex justify-between items-start mb-6 z-10">
-                                <div className="p-3 bg-stone-950 rounded-xl text-gold-500 border border-white/5">
-                                    <Ticket size={24} />
+                    {customOffers.filter(o => o.isActive).map((offer) => (
+                        <div key={offer.id} className="p-6 bg-stone-900 rounded-3xl border border-white/5 flex flex-col justify-between group hover:border-gold-500/30 transition-colors relative overflow-hidden min-h-[160px]">
+                            {offer.image && (
+                                <div className="absolute inset-0 z-0 opacity-20 group-hover:opacity-30 transition-opacity">
+                                    <img src={offer.image} alt="" className="w-full h-full object-cover" />
                                 </div>
-                                <span className="text-stone-500 text-[10px] uppercase font-black tracking-widest bg-stone-950 px-3 py-1 rounded-full border border-white/5">Flat Off</span>
-                            </div>
-                            <div className="z-10">
-                                <p className="text-white font-mono font-bold text-2xl mb-1">{coupon.code}</p>
-                                <p className="text-stone-400 text-sm">Save <span className="text-gold-400 font-bold">₹{coupon.value}</span> on your next order.</p>
+                            )}
+                            <div className="absolute top-0 left-0 w-2 h-full bg-gold-500 z-10"></div>
+                            
+                            <div className="relative z-10 h-full flex flex-col">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="p-3 bg-stone-950 rounded-xl text-gold-500 border border-white/5 backdrop-blur-md">
+                                        <Sparkles size={24} />
+                                    </div>
+                                    <span className="text-stone-500 text-[10px] uppercase font-black tracking-widest bg-stone-950 px-3 py-1 rounded-full border border-white/5 backdrop-blur-md">Featured Offer</span>
+                                </div>
+                                <div className="mt-auto">
+                                    <h4 className="text-white font-serif font-bold text-xl mb-2">{offer.title}</h4>
+                                    <p className="text-stone-400 text-sm">{offer.description}</p>
+                                </div>
                             </div>
                         </div>
                     ))}

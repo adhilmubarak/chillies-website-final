@@ -43,6 +43,14 @@ export interface Coupon {
   type: 'flat' | 'percent';
 }
 
+export interface CustomOffer {
+  id?: string;
+  title: string;
+  description: string;
+  image?: string;
+  isActive: boolean;
+}
+
 export interface Order {
   id: string;
   items: CartItem[];

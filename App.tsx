@@ -18,7 +18,7 @@ import BottomNav from './components/BottomNav';
 import FeedbackModal from './components/FeedbackModal';
 import OffersPage from './components/OffersPage';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
-import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig, FoodRating } from './types';
+import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig, FoodRating, CustomOffer } from './types';
 import { Search } from 'lucide-react';
 
 import { db } from './firebase';
@@ -139,6 +139,7 @@ function App() {
       { id: '4', name: 'Drinks' }
   ]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [customOffers, setCustomOffers] = useState<CustomOffer[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   
   const [activeSection, setActiveSection] = useState('home');
@@ -172,7 +173,7 @@ function App() {
   const [suggestion, setSuggestion] = useState<MenuItem | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const isAdminOpen = location.pathname === '/admin';
+  const [isAdminOpen, setIsAdminOpen] = useState(location.pathname === '/admin');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -282,6 +283,14 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const q = query(collection(db, 'customOffers'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setCustomOffers(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as CustomOffer)));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const q = doc(db, 'tracking', 'rider1');
     const unsubscribe = onSnapshot(q, (docSnap) => {
       if (docSnap.exists()) {
@@ -366,7 +375,18 @@ function App() {
       <Route path="/admin" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
           <AdminPanel 
-            isOpen={true} onClose={() => navigate('/')} items={menuItems} categories={dbCategories} orders={orders} coupons={coupons} isStoreOpen={isStoreOpen} promoSettings={promoSettings} storeSettings={storeSettings} foodRatings={foodRatings} riderLocation={riderLocation}
+            isOpen={isAdminOpen} 
+            onClose={() => setIsAdminOpen(false)} 
+            items={menuItems}
+            categories={dbCategories}
+            orders={orders}
+            coupons={coupons}
+            customOffers={customOffers}
+            foodRatings={foodRatings}
+            isStoreOpen={isStoreOpen}
+            promoSettings={promoSettings}
+            storeSettings={storeSettings}
+            riderLocation={riderLocation}
             onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
             onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
             onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
@@ -375,6 +395,9 @@ function App() {
             onDeleteCategory={async n => { const q = query(collection(db, 'categories'), where("name", "==", n)); const s = await getDocs(q); s.forEach(d => deleteDoc(d.ref)); }}
             onUpdateOrderStatus={async (id, s, pm) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, pm ? {status: s, paymentMethod: pm} : {status: s})); }}
             onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
+            onAddCustomOffer={o => addDoc(collection(db, 'customOffers'), o)}
+            onUpdateCustomOffer={async o => { if(o.id) await updateDoc(doc(db, 'customOffers', o.id), {...o}); }}
+            onDeleteCustomOffer={async id => await deleteDoc(doc(db, 'customOffers', id))}
             onUpdateStoreSettings={s => setDoc(doc(db, 'settings', 'general'), s, {merge: true})}
             onUpdatePromos={p => setDoc(doc(db, 'settings', 'general'), p, {merge: true})}
             onAddOrder={handleAddOrder}
@@ -398,7 +421,7 @@ function App() {
           flashSaleEndTime={promoSettings.flashSaleEndTime}
           happyHourStartTime={promoSettings.happyHourStartTime}
           happyHourEndTime={promoSettings.happyHourEndTime}
-          coupons={coupons}
+          customOffers={customOffers}
         />
       } />
       <Route path="/feedback" element={<FeedbackModal />} />
