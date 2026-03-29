@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Minus, Plus, ShoppingBag, Send, Bike, Store, User, CheckCircle, Clock, FileText, AlertCircle, Copy, Check, ArrowRight, ArrowLeft, MapPin, ExternalLink, Ticket, Tag, Printer } from 'lucide-react';
-import { CartItem, Order, Coupon } from '../types';
+import { CartItem, Order, Coupon, LoyaltyAccount } from '../types';
 import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 
@@ -16,6 +16,7 @@ interface CartSidebarProps {
   onAddOrder: (order: Order) => void;
   onTrackOrder: () => void;
   coupons?: Coupon[];
+  loyaltyAccounts?: LoyaltyAccount[];
 }
 
 const DELIVERY_FEE = 20;
@@ -30,7 +31,8 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   onShowNotification,
   onAddOrder,
   onTrackOrder,
-  coupons = []
+  coupons = [],
+  loyaltyAccounts = []
 }) => {
   const [step, setStep] = useState<'cart' | 'details' | 'confirmation'>('cart');
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
@@ -46,6 +48,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
   const [whatsappMsg, setWhatsappMsg] = useState('');
+  const [redeemPoints, setRedeemPoints] = useState(false);
+
+  const userLoyalty = contactNumber.length === 10 ? loyaltyAccounts.find(l => l.phone === contactNumber) : null;
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
@@ -60,7 +65,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   }
 
   const deliveryCharge = orderType === 'delivery' ? DELIVERY_FEE : 0;
-  const total = subtotal - discountAmount + deliveryCharge;
+  const baseTotal = subtotal - discountAmount + deliveryCharge;
+  const pointsRedeemed = redeemPoints && userLoyalty ? Math.min(userLoyalty.points, baseTotal) : 0;
+  const total = baseTotal - pointsRedeemed;
 
   useEffect(() => {
     if (cartItems.length === 0 && step === 'details') {
@@ -122,7 +129,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
         timestamp: now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
         date: now.toLocaleDateString(),
         createdAt: now.getTime(),
-        trackingLink: trackingLink
+        trackingLink: trackingLink,
+        pointsRedeemed,
+        pointsEarned: Math.floor(total / 10)
     };
 
     setConfirmedOrder(currentOrder);
@@ -136,7 +145,11 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     message += `\nSubtotal: ₹${subtotal.toFixed(2)}\n`;
     if (orderType === 'delivery') message += `Delivery Charge: ₹${deliveryCharge.toFixed(2)}\n`;
     if (appliedCoupon && discountAmount > 0) message += `Discount (${appliedCoupon.code}): -₹${discountAmount.toFixed(2)}\n`;
-    message += `*TOTAL PAYABLE:* ₹${total.toFixed(2)}`;
+    if (pointsRedeemed > 0) message += `Points Redeemed: -₹${pointsRedeemed.toFixed(2)}\n`;
+    message += `*TOTAL PAYABLE:* ₹${total.toFixed(2)}\n`;
+    
+    const pointsEarned = Math.floor(total / 10);
+    if (pointsEarned > 0) message += `_You earned ${pointsEarned} Chillies Points!_`;
 
     setWhatsappMsg(message);
     setStep('confirmation');
@@ -160,6 +173,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
           setErrors({ name: false, contact: false, address: false });
           setAppliedCoupon(null);
           setCouponInput('');
+          setRedeemPoints(false);
           setStep('cart');
       }
       onClose();
@@ -243,6 +257,18 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                             <input type="text" placeholder="Your Name" value={customerName} onChange={(e) => { setCustomerName(e.target.value); setErrors(p => ({...p, name: false})); }} className={`w-full bg-stone-900 border rounded-xl py-4 px-4 text-sm text-white focus:outline-none transition-all ${errors.name ? 'border-red-500' : 'border-white/5 focus:border-gold-500'}`} />
                             <input type="tel" placeholder="WhatsApp Number" value={contactNumber} maxLength={10} onChange={(e) => { const val = e.target.value.replace(/\D/g, '').slice(0, 10); setContactNumber(val); setErrors(p => ({...p, contact: false})); }} className={`w-full bg-stone-900 border rounded-xl py-4 px-4 text-sm text-white focus:outline-none transition-all ${errors.contact ? 'border-red-500' : 'border-white/5 focus:border-gold-500'}`} />
                         </div>
+                        {contactNumber.length === 10 && userLoyalty && userLoyalty.points > 0 && (
+                            <div className="bg-gold-500/10 border border-gold-500/30 rounded-xl p-4 flex items-center justify-between animate-fade-in">
+                                <div>
+                                    <h4 className="text-gold-500 font-bold text-xs uppercase tracking-widest block mb-1">Chillies Points</h4>
+                                    <p className="text-stone-400 text-[10px]">You have {userLoyalty.points} points (₹{Math.min(userLoyalty.points, baseTotal)} off)</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input type="checkbox" className="sr-only peer" checked={redeemPoints} onChange={(e) => setRedeemPoints(e.target.checked)} />
+                                  <div className="w-9 h-5 bg-stone-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gold-500 transition-colors"></div>
+                                </label>
+                            </div>
+                        )}
                         {orderType === 'delivery' && (
                             <div className="space-y-3 pt-4">
                                 <h3 className="text-stone-600 text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2">Delivery Address</h3>
@@ -274,7 +300,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                 {cartItems.length > 0 && (
                     <div className="p-6 md:p-8 bg-stone-950/80 border-t border-white/5 space-y-6">
                     <div className="space-y-2">{!appliedCoupon ? (<div className="flex gap-2"><div className="relative flex-grow"><input type="text" value={couponInput} onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(''); }} placeholder="Coupon?" className="w-full bg-stone-900 border border-white/5 rounded-xl py-3 pl-10 pr-3 text-[10px] text-white focus:outline-none focus:border-gold-500 uppercase tracking-widest" /><Ticket size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-600" /></div><button onClick={handleApplyCoupon} className="bg-stone-800 text-stone-300 hover:bg-gold-500 hover:text-black px-5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Apply</button></div>) : (<div className="flex items-center justify-between bg-gold-500/5 border border-gold-500/20 rounded-xl p-3.5"><div className="flex items-center gap-3"><Tag size={16} className="text-gold-500" /><div><span className="text-[10px] text-gold-500 font-black block uppercase tracking-widest">{appliedCoupon.code}</span><span className="text-[9px] text-stone-500 uppercase tracking-widest">Active Discount</span></div></div><button onClick={handleRemoveCoupon} className="text-stone-600 hover:text-red-500 transition-colors"><X size={16} /></button></div>)}{couponError && <p className="text-red-500 text-[9px] pl-1 font-bold uppercase tracking-widest">{couponError}</p>}</div>
-                    <div className="space-y-3 text-stone-400 text-sm"><div className="flex justify-between text-[10px] font-black uppercase tracking-widest"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>{orderType === 'delivery' && (<div className="flex justify-between text-[10px] text-stone-500 font-black uppercase tracking-widest"><span>Delivery</span><span>+₹{DELIVERY_FEE.toFixed(2)}</span></div>)}{appliedCoupon && <div className="flex justify-between text-[10px] text-green-600 font-black uppercase tracking-widest"><span>Savings</span><span>-₹{discountAmount.toFixed(2)}</span></div>}<div className="flex justify-between pt-4 border-t border-white/10 text-xl md:text-2xl font-serif text-white"><span>Total</span><span className="text-gold-400">₹{total.toFixed(2)}</span></div></div>
+                    <div className="space-y-3 text-stone-400 text-sm"><div className="flex justify-between text-[10px] font-black uppercase tracking-widest"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>{orderType === 'delivery' && (<div className="flex justify-between text-[10px] text-stone-500 font-black uppercase tracking-widest"><span>Delivery</span><span>+₹{DELIVERY_FEE.toFixed(2)}</span></div>)}{appliedCoupon && <div className="flex justify-between text-[10px] text-green-600 font-black uppercase tracking-widest"><span>Savings</span><span>-₹{discountAmount.toFixed(2)}</span></div>}{pointsRedeemed > 0 && <div className="flex justify-between text-[10px] text-gold-500 font-black uppercase tracking-widest"><span>Points Redeemed</span><span>-₹{pointsRedeemed.toFixed(2)}</span></div>}<div className="flex justify-between pt-4 border-t border-white/10 text-xl md:text-2xl font-serif text-white"><span>Total</span><span className="text-gold-400">₹{total.toFixed(2)}</span></div></div>
                     <button onClick={() => setStep('details')} className="w-full py-5 bg-gold-500 text-stone-950 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 transition-all hover:bg-gold-400 shadow-xl active:scale-[0.98]"><span>Next Step</span><ArrowRight size={18} /></button>
                     </div>
                 )}

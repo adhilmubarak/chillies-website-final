@@ -71,6 +71,8 @@ export interface Order {
   trackingLink?: string; // Added to persist the tracking link
   deliveryRating?: number; // Added to track customer rating
   paymentMethod?: 'Cash' | 'UPI' | 'Online';
+  pointsRedeemed?: number;
+  pointsEarned?: number;
 }
 
 export interface FoodRating {
@@ -80,4 +82,11 @@ export interface FoodRating {
   rating: number;
   comment: string;
   createdAt: number;
+}
+
+export interface LoyaltyAccount {
+  id?: string;
+  phone: string;
+  points: number;
+  lastUpdated: number;
 }

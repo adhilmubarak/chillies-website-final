@@ -9,6 +9,7 @@ import HappyHourView from './components/HappyHourView';
 import CartSidebar from './components/CartSidebar';
 import AdminPanel from './components/AdminPanel';
 import DeliveryPanel from './components/DeliveryPanel';
+import RewardsPage from './components/RewardsPage';
 import Footer from './components/Footer';
 import OrderTrackerModal from './components/OrderTrackerModal';
 import SmartSuggestion from './components/SmartSuggestion';
@@ -18,7 +19,7 @@ import BottomNav from './components/BottomNav';
 import FeedbackModal from './components/FeedbackModal';
 import OffersPage from './components/OffersPage';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
-import { MenuItem, CartItem, Category, Order, Coupon, CategoryConfig, FoodRating, CustomOffer } from './types';
+import { MenuItem, CategoryConfig, CartItem, Order, Coupon, CustomOffer, FoodRating, LoyaltyAccount, Category } from './types';
 import { Search } from 'lucide-react';
 
 import { db } from './firebase';
@@ -140,6 +141,7 @@ function App() {
   ]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [customOffers, setCustomOffers] = useState<CustomOffer[]>([]);
+  const [loyaltyAccounts, setLoyaltyAccounts] = useState<LoyaltyAccount[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   
   const [activeSection, setActiveSection] = useState('home');
@@ -301,6 +303,14 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const q = query(collection(db, 'loyalty'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setLoyaltyAccounts(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as LoyaltyAccount)));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const settingsRef = doc(db, 'settings', 'general');
     const unsubscribe = onSnapshot(settingsRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -343,6 +353,25 @@ function App() {
   const handleAddOrder = async (order: Order) => {
     try {
       await addDoc(collection(db, 'orders'), order);
+      
+      if (order.contactNumber && order.contactNumber.length === 10) {
+          const account = loyaltyAccounts.find(l => l.phone === order.contactNumber);
+          const pointsEarned = Math.floor(order.total / 10); // 1 point per Rs 10
+          
+          if (account && account.id) {
+              const newPoints = account.points - (order.pointsRedeemed || 0) + pointsEarned;
+              await updateDoc(doc(db, 'loyalty', account.id), { 
+                  points: newPoints, 
+                  lastUpdated: Date.now() 
+              });
+          } else if (pointsEarned > 0) {
+              await addDoc(collection(db, 'loyalty'), { 
+                  phone: order.contactNumber, 
+                  points: pointsEarned, 
+                  lastUpdated: Date.now() 
+              });
+          }
+      }
     } catch (error) {
       console.error("Error adding order: ", error);
     }
@@ -434,6 +463,7 @@ function App() {
           customOffers={customOffers}
         />
       } />
+      <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} />} />
       <Route path="/feedback" element={<FeedbackModal />} />
       <Route path="/*" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden">
@@ -596,6 +626,7 @@ function App() {
             setIsCartOpen(false);
             setIsTrackerOpen(true);
         }} coupons={coupons}
+        loyaltyAccounts={loyaltyAccounts}
       />
 
         </div>

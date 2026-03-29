@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Home, UtensilsCrossed, ShoppingBag, Search, Phone } from 'lucide-react';
+import { Home, UtensilsCrossed, ShoppingBag, Search, Sparkles } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface BottomNavProps {
   cartItemCount: number;
@@ -10,12 +11,27 @@ interface BottomNavProps {
 }
 
 const BottomNav: React.FC<BottomNavProps> = ({ cartItemCount, onOpenCart, onOpenTracker, activeSection }) => {
-  const scrollTo = (id: string) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavClick = (id: string) => {
+    if (id === 'offers') {
+        navigate('/offers');
+        return;
+    }
+    
+    if (location.pathname !== '/') {
+        navigate('/');
+        setTimeout(() => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            else if (id === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+        return;
+    }
+
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -26,15 +42,15 @@ const BottomNav: React.FC<BottomNavProps> = ({ cartItemCount, onOpenCart, onOpen
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-stone-950/90 backdrop-blur-2xl border-t border-white/5 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-      <div className="flex items-center justify-around h-16 px-2">
-        <button onClick={() => scrollTo('home')} className={navItemClass('home')}>
-          <Home size={20} className={activeSection === 'home' ? 'fill-gold-400/10' : ''} />
-          <span className="text-[9px] font-black uppercase tracking-tighter">Home</span>
+      <div className="flex items-center justify-around h-16 px-1">
+        <button onClick={() => handleNavClick('home')} className={navItemClass('home')}>
+          <Home size={18} className={activeSection === 'home' ? 'fill-gold-400/10' : ''} />
+          <span className="text-[8px] font-black uppercase tracking-tighter">Home</span>
         </button>
 
-        <button onClick={() => scrollTo('menu')} className={navItemClass('menu')}>
-          <UtensilsCrossed size={20} />
-          <span className="text-[9px] font-black uppercase tracking-tighter">Menu</span>
+        <button onClick={() => handleNavClick('menu')} className={navItemClass('menu')}>
+          <UtensilsCrossed size={18} />
+          <span className="text-[8px] font-black uppercase tracking-tighter">Menu</span>
         </button>
 
         <div className="relative -mt-8">
@@ -52,14 +68,15 @@ const BottomNav: React.FC<BottomNavProps> = ({ cartItemCount, onOpenCart, onOpen
         </div>
 
         <button onClick={onOpenTracker} className={navItemClass('track')}>
-          <Search size={20} />
-          <span className="text-[9px] font-black uppercase tracking-tighter">Track</span>
+          <Search size={18} />
+          <span className="text-[8px] font-black uppercase tracking-tighter">Track</span>
         </button>
 
-        <a href="tel:+918301032794" className={navItemClass('call')}>
-          <Phone size={20} />
-          <span className="text-[9px] font-black uppercase tracking-tighter">Call</span>
-        </a>
+        <button onClick={() => handleNavClick('offers')} className={navItemClass('offers')}>
+          <Sparkles size={18} />
+          <span className="text-[8px] font-black uppercase tracking-tighter">Offers</span>
+        </button>
+
       </div>
     </div>
   );
