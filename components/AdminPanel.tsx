@@ -67,6 +67,7 @@ interface AdminPanelProps {
   onAddCustomOffer?: (offer: CustomOffer) => void;
   onUpdateCustomOffer?: (offer: CustomOffer) => void;
   onDeleteCustomOffer?: (id: string) => void;
+  onReorderCategory?: (direction: 'up' | 'down', index: number) => void;
 }
 
 const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => void }> = ({ onScan, onClose }) => {
@@ -173,7 +174,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
 const AdminPanel: React.FC<AdminPanelProps> = ({
   isOpen, onClose, items, categories, orders, coupons = [], customOffers = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings, riderLocation,
   onAddItem, onUpdateItem, onDeleteItem, onAddCategory, onUpdateCategory, onDeleteCategory, onUpdateOrderStatus,
-  onAddCoupon, onDeleteCoupon, onAddCustomOffer, onUpdateCustomOffer, onDeleteCustomOffer, onUpdateStoreSettings, onUpdatePromos, onAddOrder
+  onAddCoupon, onDeleteCoupon, onAddCustomOffer, onUpdateCustomOffer, onDeleteCustomOffer, onReorderCategory, onUpdateStoreSettings, onUpdatePromos, onAddOrder
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -804,10 +805,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                             <button onClick={() => { if(newCatInput.trim()) { onAddCategory(newCatInput.trim()); setNewCatInput(''); } }} className="bg-gold-500 text-stone-950 px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2 transition-all shadow-lg"> <Plus size={18} /> Add </button>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {categories.map((cat) => (
+                        <div className="grid grid-cols-1 gap-4">
+                            {categories.map((cat, index) => (
                                 <div key={cat.id} className={`flex items-center justify-between p-6 bg-stone-950/50 rounded-2xl border transition-all group ${cat.isUnavailable ? 'border-red-500/20 opacity-60 grayscale' : 'border-white/5 hover:border-gold-500/30'}`}>
                                     <div className="flex items-center gap-4">
+                                        
+                                        <div className="flex flex-col items-center justify-center -ml-2 mr-2 opacity-50 hover:opacity-100 transition-opacity">
+                                            <button 
+                                                disabled={index === 0} 
+                                                onClick={() => onReorderCategory && onReorderCategory('up', index)} 
+                                                className="p-1 text-stone-500 hover:text-gold-500 disabled:opacity-20 transition-all rounded"
+                                            >
+                                                <ChevronUp size={20} className="stroke-[3]" />
+                                            </button>
+                                            <button 
+                                                disabled={index === categories.length - 1} 
+                                                onClick={() => onReorderCategory && onReorderCategory('down', index)} 
+                                                className="p-1 text-stone-500 hover:text-gold-500 disabled:opacity-20 transition-all rounded"
+                                            >
+                                                <ChevronDown size={20} className="stroke-[3]" />
+                                            </button>
+                                        </div>
+
                                         <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-gold-500 group-hover:scale-110 transition-transform"><Tag size={18} /></div>
                                         <div>
                                             <div className="flex items-center gap-2">

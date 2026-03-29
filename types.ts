@@ -32,6 +32,7 @@ export interface CategoryConfig {
   startTime?: string; // Format "HH:MM" (24h)
   endTime?: string;   // Format "HH:MM" (24h)
   isUnavailable?: boolean;
+  order?: number;
 }
 
 export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'out_for_delivery' | 'delivered' | 'cancelled';

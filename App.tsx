@@ -251,7 +251,7 @@ function App() {
     const q = query(collection(db, 'categories'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CategoryConfig));
-      if (fetched.length > 0) setDbCategories(fetched);
+      if (fetched.length > 0) setDbCategories(fetched.sort((a,b) => (a.order || 0) - (b.order || 0)));
     });
     return () => unsubscribe();
   }, []);
@@ -390,9 +390,19 @@ function App() {
             onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
             onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
             onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
-            onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59', isUnavailable: false})}
+            onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59', isUnavailable: false, order: dbCategories.length})}
             onUpdateCategory={c => updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59', isUnavailable: c.isUnavailable || false})}
             onDeleteCategory={async n => { const q = query(collection(db, 'categories'), where("name", "==", n)); const s = await getDocs(q); s.forEach(d => deleteDoc(d.ref)); }}
+            onReorderCategory={async (dir: 'up' | 'down', index: number) => {
+              const newArray = [...dbCategories];
+              if (dir === 'up' && index > 0) {
+                [newArray[index], newArray[index - 1]] = [newArray[index - 1], newArray[index]];
+              } else if (dir === 'down' && index < newArray.length - 1) {
+                [newArray[index], newArray[index + 1]] = [newArray[index + 1], newArray[index]];
+              } else return;
+              setDbCategories(newArray);
+              await Promise.all(newArray.map((cat, i) => updateDoc(doc(db, 'categories', cat.id), { order: i })));
+            }}
             onUpdateOrderStatus={async (id, s, pm) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, pm ? {status: s, paymentMethod: pm} : {status: s})); }}
             onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
             onAddCustomOffer={o => addDoc(collection(db, 'customOffers'), o)}
