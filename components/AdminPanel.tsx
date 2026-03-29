@@ -293,14 +293,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleStatusChange = (order: Order, newStatus: Order['status']) => {
     onUpdateOrderStatus(order.id, newStatus);
-    const phone = order.contactNumber.replace(/\D/g, '');
-    const formattedPhone = phone.length === 10 ? `91${phone}` : phone;
-    let msg = `Hi ${order.customerName}, your order #${order.id} is now ${newStatus.replace('_', ' ')}.`;
-    if (newStatus === 'out_for_delivery') msg += " Our rider is on the way! 🛵";
-    if (newStatus === 'ready') msg += " Please collect it from the counter. 🛍️";
-    if (newStatus !== 'pending') {
-        window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-    }
   };
 
   const copyOrderBrief = (order: Order) => {
