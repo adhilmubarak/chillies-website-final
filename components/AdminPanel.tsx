@@ -5,7 +5,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer } from '../types';
 import { printThermalBill } from '../App';
@@ -48,7 +48,7 @@ interface AdminPanelProps {
     happyHourStartTime: string;
     happyHourEndTime: string;
   };
-  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean };
+  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number };
   onAddItem: (item: MenuItem) => void;
   onUpdateItem: (item: MenuItem) => void;
   onDeleteItem: (id: string) => void;
@@ -59,7 +59,7 @@ interface AdminPanelProps {
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
-  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean }) => void;
+  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
   foodRatings?: FoodRating[];
@@ -1081,6 +1081,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <label className="text-[8px] text-stone-600 uppercase tracking-[0.2em] block font-black">Closing</label>
                                         <input type="time" value={storeSettings.endTime} onChange={e => onUpdateStoreSettings({ ...storeSettings, endTime: e.target.value })} className="w-full bg-transparent text-white font-mono focus:outline-none [color-scheme:dark]" />
                                     </div>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-6">
+                                <h5 className="text-white text-base font-bold flex items-center gap-3"><Gift size={20} className="text-brand-500" /> Loyalty Program</h5>
+                                <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-3">
+                                    <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2">Points Ratio (₹ per Point)</label>
+                                    <input 
+                                        type="number" 
+                                        min="1"
+                                        value={storeSettings.loyaltyPointsRatio || 10}
+                                        onChange={e => onUpdateStoreSettings({ ...storeSettings, loyaltyPointsRatio: Math.max(1, Number(e.target.value)) })}
+                                        className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm outline-none focus:border-brand-500 font-mono"
+                                    />
+                                    <p className="text-[10px] text-stone-500 max-w-sm leading-relaxed">Determine how many Rupees a customer must spend to earn 1 loyalty point. Current logic: 1 point per ₹{storeSettings.loyaltyPointsRatio || 10}.</p>
                                 </div>
                             </div>
                             

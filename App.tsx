@@ -164,7 +164,8 @@ function App() {
       endTime: '23:00',
       deliveryUpiId: '',
       announcement: '',
-      isAnnouncementActive: false
+      isAnnouncementActive: false,
+      loyaltyPointsRatio: 10
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -330,7 +331,8 @@ function App() {
                 endTime: data.endTime || '23:00',
                 deliveryUpiId: data.deliveryUpiId || '',
                 announcement: data.announcement || '',
-                isAnnouncementActive: data.isAnnouncementActive || false
+                isAnnouncementActive: data.isAnnouncementActive || false,
+                loyaltyPointsRatio: data.loyaltyPointsRatio || 10
             });
         }
     });
@@ -356,7 +358,8 @@ function App() {
       
       if (order.contactNumber && order.contactNumber.length === 10) {
           const account = loyaltyAccounts.find(l => l.phone === order.contactNumber);
-          const pointsEarned = Math.floor(order.total / 10); // 1 point per Rs 10
+          const ratio = storeSettings.loyaltyPointsRatio || 10;
+          const pointsEarned = Math.floor(order.total / ratio);
           
           if (account && account.id) {
               const newPoints = account.points - (order.pointsRedeemed || 0) + pointsEarned;
@@ -613,6 +616,7 @@ function App() {
             setInitialTrackId('');
         }} 
         initialOrderId={initialTrackId}
+        riderLocation={riderLocation}
       />
       {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
       

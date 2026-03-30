@@ -1,18 +1,38 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User, Star } from 'lucide-react';
+import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User, Star, Navigation, MapPin } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { Order } from '../types';
 import SafeImage from './SafeImage';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+const riderIcon = new L.Icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
+    className: 'drop-shadow-xl saturate-200'
+});
+
+function MapUpdater({ center }: { center: [number, number] }) {
+    const map = useMap();
+    React.useEffect(() => {
+        map.setView(center, map.getZoom() || 16, { animate: true });
+        setTimeout(() => map.invalidateSize(), 200);
+    }, [center, map]);
+    return null;
+}
 
 interface OrderTrackerModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialOrderId?: string;
+  riderLocation?: {lat: number, lng: number, timestamp: number} | null;
 }
 
-const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, initialOrderId = '' }) => {
+const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, initialOrderId = '', riderLocation }) => {
   const [orderId, setOrderId] = useState(initialOrderId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -117,6 +137,42 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                             return (<><div className={`p-4 rounded-full ${status.bg} mb-3 shadow-lg`}>{status.icon}</div><h3 className={`text-xl font-bold ${status.color} mb-1`}>{status.title}</h3><p className="text-stone-400 text-xs max-w-[200px]">{status.desc}</p></>);
                         })()}
                     </div>
+                    
+                    {foundOrder.status === 'out_for_delivery' && foundOrder.type === 'delivery' && riderLocation && (
+                        <div className="mb-6 rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.1)] relative bg-stone-950 animate-fade-in">
+                            <div className="p-3 bg-stone-950 border-b border-white/5 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 relative shrink-0">
+                                        <Bike size={16} />
+                                        <div className="absolute top-0 right-0 w-2 h-2 bg-purple-500 rounded-full animate-ping"></div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-white font-bold text-xs uppercase tracking-widest leading-none mb-1">Live Rider Tracking</h4>
+                                        <p className="text-stone-500 text-[9px] uppercase tracking-[0.2em] font-mono leading-none">Last Synced: {new Date(riderLocation.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                    </div>
+                                </div>
+                                <a href={`https://www.google.com/maps/search/?api=1&query=${riderLocation.lat},${riderLocation.lng}`} target="_blank" rel="noreferrer" className="text-purple-500 hover:text-white transition-colors p-2 bg-stone-900 rounded-lg shrink-0">
+                                    <MapPin size={16} />
+                                </a>
+                            </div>
+                            <div className="w-full h-48 relative z-0">
+                                <MapContainer 
+                                    center={[riderLocation.lat, riderLocation.lng]} 
+                                    zoom={16} 
+                                    scrollWheelZoom={false} 
+                                    style={{ height: '100%', width: '100%' }}
+                                    zoomControl={false}
+                                >
+                                    <TileLayer 
+                                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                    />
+                                    <MapUpdater center={[riderLocation.lat, riderLocation.lng]} />
+                                    <Marker position={[riderLocation.lat, riderLocation.lng]} icon={riderIcon} />
+                                </MapContainer>
+                            </div>
+                        </div>
+                    )}
+                    
                     <div className="bg-stone-950/50 rounded-xl border border-white/5 p-4 space-y-3">
                         <div className="flex items-center gap-3 border-b border-white/5 pb-3 mb-1">
                           <div className="w-8 h-8 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center text-gold-500">
