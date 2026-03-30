@@ -87,6 +87,7 @@ export interface FoodRating {
 export interface LoyaltyAccount {
   id?: string;
   phone: string;
+  customerName?: string;
   points: number;
   lastUpdated: number;
 }

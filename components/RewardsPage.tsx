@@ -5,13 +5,15 @@ import { LoyaltyAccount } from '../types';
 
 interface RewardsPageProps {
   loyaltyAccounts: LoyaltyAccount[];
-  onEnrollLoyalty: (phone: string) => Promise<void>;
+  onEnrollLoyalty: (phone: string, name: string) => Promise<void>;
 }
 
 const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoyalty }) => {
   const navigate = useNavigate();
   const [phoneInput, setPhoneInput] = useState('');
   const [searchedAccount, setSearchedAccount] = useState<LoyaltyAccount | null | undefined>(undefined);
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [enrollName, setEnrollName] = useState('');
 
   const handleCheckBalance = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,6 +95,7 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                     const val = e.target.value.replace(/\D/g, '').slice(0, 10);
                                     setPhoneInput(val);
                                     setSearchedAccount(undefined);
+                                    setIsEnrolling(false);
                                 }} 
                                 placeholder="10-digit number"
                                 maxLength={10}
@@ -124,15 +127,40 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                     <p className="text-stone-500 text-[10px] mt-4 uppercase font-black tracking-widest">Scan at Checkout</p>
                                 </div>
                             </div>
+                        ) : isEnrolling ? (
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                if(enrollName.trim()) {
+                                    await onEnrollLoyalty(phoneInput, enrollName.trim());
+                                    setIsEnrolling(false);
+                                }
+                            }} className="text-center space-y-4 animate-fade-in">
+                                <div className="space-y-2 mb-4">
+                                    <h3 className="text-white font-serif text-xl">Join Elite Rewards</h3>
+                                    <p className="text-stone-400 text-xs">Complete your profile to start earning.</p>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    placeholder="Your Full Name" 
+                                    value={enrollName}
+                                    onChange={e => setEnrollName(e.target.value)}
+                                    required
+                                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-gold-500 shadow-inner font-bold text-center"
+                                />
+                                <div className="flex gap-2">
+                                    <button type="button" onClick={() => setIsEnrolling(false)} className="w-1/3 py-4 bg-stone-900 border border-white/5 text-stone-400 hover:text-white hover:bg-stone-800 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all shadow-inner">Cancel</button>
+                                    <button type="submit" className="w-2/3 py-4 bg-gold-500 border border-gold-400 text-stone-950 font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all hover:bg-gold-400 shadow-[0_0_15px_rgba(212,175,55,0.3)]">Complete Setup</button>
+                                </div>
+                            </form>
                         ) : (
-                            <div className="text-center space-y-4">
+                            <div className="text-center space-y-4 animate-fade-in">
                                 <div className="space-y-2">
                                     <span className="block text-stone-500 text-sm">No account found for {phoneInput}.</span>
                                     <p className="text-stone-600 text-[10px] uppercase font-bold tracking-widest">Join the elite tier today to start earning!</p>
                                 </div>
                                 <button 
-                                    onClick={async () => await onEnrollLoyalty(phoneInput)}
-                                    className="px-8 py-4 bg-stone-900 border border-gold-500/30 text-gold-500 hover:bg-gold-500 hover:text-stone-950 transition-all font-black uppercase tracking-widest text-xs rounded-2xl shadow-lg"
+                                    onClick={() => setIsEnrolling(true)}
+                                    className="px-8 py-4 bg-stone-900 border border-gold-500/30 text-gold-500 hover:bg-gold-500 hover:text-stone-950 transition-all font-black uppercase tracking-widest text-xs rounded-2xl shadow-[0_0_15px_rgba(212,175,55,0.15)]"
                                 >
                                     Enroll Now
                                 </button>

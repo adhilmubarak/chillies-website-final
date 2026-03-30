@@ -469,7 +469,7 @@ function App() {
           customOffers={customOffers}
         />
       } />
-      <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} onEnrollLoyalty={async (phone: string) => { await addDoc(collection(db, 'loyalty'), { phone, points: 0, lastUpdated: Date.now() }); }} />} />
+      <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} onEnrollLoyalty={async (phone: string, name: string) => { await addDoc(collection(db, 'loyalty'), { phone, customerName: name, points: 0, lastUpdated: Date.now() }); }} />} />
       <Route path="/feedback" element={<FeedbackModal />} />
       <Route path="/*" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden">
