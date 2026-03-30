@@ -392,6 +392,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 { id: 'categories', icon: Tag, label: 'Categories' },
                 { id: 'coupons', icon: Ticket, label: 'Coupons' },
                 { id: 'promotions', icon: Zap, label: 'Marketing' },
+                { id: 'loyalty', icon: Award, label: 'Loyalty Program' },
                 { id: 'reviews', icon: Star, label: 'Feedback' },
                 { id: 'payment', icon: Wallet, label: 'Payment' },
                 { id: 'settings', icon: Settings, label: 'Operations' }
