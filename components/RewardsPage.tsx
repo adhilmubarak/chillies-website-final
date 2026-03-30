@@ -5,9 +5,10 @@ import { LoyaltyAccount } from '../types';
 
 interface RewardsPageProps {
   loyaltyAccounts: LoyaltyAccount[];
+  onEnrollLoyalty: (phone: string) => Promise<void>;
 }
 
-const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts }) => {
+const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoyalty }) => {
   const navigate = useNavigate();
   const [phoneInput, setPhoneInput] = useState('');
   const [searchedAccount, setSearchedAccount] = useState<LoyaltyAccount | null | undefined>(undefined);
@@ -19,6 +20,13 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts }) => {
       setSearchedAccount(account || null);
     }
   };
+
+  React.useEffect(() => {
+    if (phoneInput.length === 10 && searchedAccount === null) {
+      const account = loyaltyAccounts.find(l => l.phone === phoneInput);
+      if (account) setSearchedAccount(account);
+    }
+  }, [loyaltyAccounts, phoneInput, searchedAccount]);
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-200 font-sans selection:bg-gold-500/30 selection:text-gold-200 relative overflow-hidden">
@@ -109,11 +117,25 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts }) => {
                                 <span className="block text-stone-400 text-[10px] uppercase font-black tracking-widest">Available Balance</span>
                                 <span className="block text-4xl font-serif text-gold-400 font-bold">{searchedAccount.points} <span className="text-xl text-stone-500 font-sans tracking-normal font-medium italic">pts</span></span>
                                 <p className="text-stone-300 text-xs pt-2">That's ₹{searchedAccount.points} off your next order!</p>
+                                <div className="pt-6 pb-2">
+                                    <div className="bg-white p-3 inline-block rounded-2xl shadow-xl">
+                                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${searchedAccount.id}&bgcolor=ffffff&color=000000&margin=0`} alt="Loyalty QR" className="w-32 h-32 rounded-lg" />
+                                    </div>
+                                    <p className="text-stone-500 text-[10px] mt-4 uppercase font-black tracking-widest">Scan at Checkout</p>
+                                </div>
                             </div>
                         ) : (
-                            <div className="text-center space-y-2">
-                                <span className="block text-stone-500 text-sm">No points found for {phoneInput}.</span>
-                                <p className="text-stone-600 text-xs">Place an order with this number to start earning!</p>
+                            <div className="text-center space-y-4">
+                                <div className="space-y-2">
+                                    <span className="block text-stone-500 text-sm">No account found for {phoneInput}.</span>
+                                    <p className="text-stone-600 text-[10px] uppercase font-bold tracking-widest">Join the elite tier today to start earning!</p>
+                                </div>
+                                <button 
+                                    onClick={async () => await onEnrollLoyalty(phoneInput)}
+                                    className="px-8 py-4 bg-stone-900 border border-gold-500/30 text-gold-500 hover:bg-gold-500 hover:text-stone-950 transition-all font-black uppercase tracking-widest text-xs rounded-2xl shadow-lg"
+                                >
+                                    Enroll Now
+                                </button>
                             </div>
                         )}
                     </div>

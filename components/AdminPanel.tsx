@@ -1,13 +1,12 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   X, Plus, Trash2, Tag, List, 
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award
 } from 'lucide-react';
-import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer } from '../types';
+import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount } from '../types';
 import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
@@ -68,6 +67,9 @@ interface AdminPanelProps {
   onUpdateCustomOffer?: (offer: CustomOffer) => void;
   onDeleteCustomOffer?: (id: string) => void;
   onReorderCategory?: (direction: 'up' | 'down', index: number) => void;
+  loyaltyAccounts?: LoyaltyAccount[];
+  onAddLoyaltyAccount?: (phone: string, points: number) => Promise<void>;
+  onUpdateLoyaltyAccount?: (id: string, points: number) => Promise<void>;
 }
 
 const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => void }> = ({ onScan, onClose }) => {
@@ -174,12 +176,13 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
 const AdminPanel: React.FC<AdminPanelProps> = ({
   isOpen, onClose, items, categories, orders, coupons = [], customOffers = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings, riderLocation,
   onAddItem, onUpdateItem, onDeleteItem, onAddCategory, onUpdateCategory, onDeleteCategory, onUpdateOrderStatus,
-  onAddCoupon, onDeleteCoupon, onAddCustomOffer, onUpdateCustomOffer, onDeleteCustomOffer, onReorderCategory, onUpdateStoreSettings, onUpdatePromos, onAddOrder
+  onAddCoupon, onDeleteCoupon, onAddCustomOffer, onUpdateCustomOffer, onDeleteCustomOffer, onReorderCategory, onUpdateStoreSettings, onUpdatePromos, onAddOrder,
+  loyaltyAccounts, onAddLoyaltyAccount, onUpdateLoyaltyAccount
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty'>('dashboard');
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
   const [isOfferFormOpen, setIsOfferFormOpen] = useState(false);
@@ -199,6 +202,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [editingCategory, setEditingCategory] = useState<CategoryConfig | null>(null);
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponVal, setNewCouponVal] = useState(0);
+  const [loyaltySearchPhone, setLoyaltySearchPhone] = useState('');
   const [openingCountdown, setOpeningCountdown] = useState<string>('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -1018,6 +1022,66 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {activeTab === 'loyalty' && (
+                <div className="max-w-4xl animate-fade-in space-y-12 mx-auto pb-12">
+                     <div className="bg-stone-900/80 border border-white/5 rounded-[3rem] p-12 space-y-8 shadow-2xl">
+                         <div className="flex items-center gap-4 mb-4">
+                             <div className="w-12 h-12 bg-gold-500/10 rounded-2xl flex items-center justify-center text-gold-500 border border-gold-500/20"><Award size={24} /></div>
+                             <div>
+                                 <h4 className="text-2xl font-serif text-white">Loyalty Management</h4>
+                                 <p className="text-stone-500 text-xs uppercase tracking-widest font-bold">Manage Points & Accounts</p>
+                             </div>
+                         </div>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                             <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                                 <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2"><Phone size={14} className="text-gold-500" /> Customer Search</label>
+                                 <input 
+                                     type="tel"
+                                     value={loyaltySearchPhone}
+                                     onChange={e => setLoyaltySearchPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                     placeholder="10-digit number"
+                                     className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm outline-none focus:border-gold-500 font-mono tracking-widest text-center"
+                                 />
+                                 
+                                 {loyaltySearchPhone.length === 10 && (() => {
+                                     const account = loyaltyAccounts?.find(a => a.phone === loyaltySearchPhone);
+                                     if (account) {
+                                         return (
+                                             <div className="pt-4 border-t border-white/5 text-center space-y-4">
+                                                 <div><h5 className="text-gold-500 font-serif text-3xl font-bold">{account.points} <span className="text-sm text-stone-500 font-sans italic font-normal">pts</span></h5></div>
+                                                 <div className="grid grid-cols-2 gap-2">
+                                                     <button onClick={() => { const pts = prompt('Add how many points?'); if(pts && !isNaN(Number(pts)) && onUpdateLoyaltyAccount && account.id) { onUpdateLoyaltyAccount(account.id, account.points + Number(pts)); } }} className="bg-green-500/10 hover:bg-green-500/20 text-green-500 py-3 rounded-xl font-bold text-xs transition-colors">Add Points</button>
+                                                     <button onClick={() => { const pts = prompt('Redeem how many points?'); if(pts && !isNaN(Number(pts)) && onUpdateLoyaltyAccount && account.id) { onUpdateLoyaltyAccount(account.id, Math.max(0, account.points - Number(pts))); } }} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 py-3 rounded-xl font-bold text-xs transition-colors">Redeem</button>
+                                                 </div>
+                                             </div>
+                                         )
+                                     } else {
+                                         return (
+                                              <div className="pt-4 border-t border-white/5 text-center space-y-4">
+                                                 <p className="text-stone-500 text-xs">No account found.</p>
+                                                 <button onClick={() => { if(onAddLoyaltyAccount) onAddLoyaltyAccount(loyaltySearchPhone, 0); }} className="w-full bg-stone-800 hover:bg-gold-500 hover:text-stone-950 text-white py-3 rounded-xl font-bold text-xs transition-all uppercase tracking-widest">Create Account</button>
+                                              </div>
+                                         )
+                                     }
+                                 })()}
+                             </div>
+                             
+                             <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-4 max-h-[300px] overflow-y-auto">
+                                 <h5 className="text-[10px] text-stone-600 uppercase tracking-widest font-black mb-4">Top Members</h5>
+                                 {loyaltyAccounts?.sort((a, b) => b.points - a.points).slice(0, 5).map((acc, i) => (
+                                     <div key={acc.id} className="flex items-center justify-between p-3 bg-stone-900 rounded-xl border border-white/5 relative overflow-hidden">
+                                        {i === 0 && <div className="absolute top-0 right-0 w-2 h-full bg-gold-500"></div>}
+                                        <div className="font-mono text-stone-300 tracking-wider text-sm">{acc.phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')}</div>
+                                        <div className="font-bold text-gold-500 text-sm">{acc.points} <span className="text-[10px] text-stone-500 uppercase">pts</span></div>
+                                     </div>
+                                 ))}
+                                 {(!loyaltyAccounts || loyaltyAccounts.length === 0) && <p className="text-stone-500 text-xs text-center py-4">No enrolled members.</p>}
+                             </div>
+                         </div>
+                     </div>
                 </div>
             )}
 
