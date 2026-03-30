@@ -165,7 +165,8 @@ function App() {
       deliveryUpiId: '',
       announcement: '',
       isAnnouncementActive: false,
-      loyaltyPointsRatio: 10
+      loyaltyPointsRatio: 10,
+      minimumPointsToRedeem: 50
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -326,13 +327,14 @@ function App() {
                 happyHourEndTime: data.happyHourEndTime || '18:00'
             });
             setStoreSettings({
-                acceptingOrders: data.acceptingOrders ?? true,
+                acceptingOrders: data.acceptingOrders !== false,
                 startTime: data.startTime || '07:00',
                 endTime: data.endTime || '23:00',
                 deliveryUpiId: data.deliveryUpiId || '',
                 announcement: data.announcement || '',
                 isAnnouncementActive: data.isAnnouncementActive || false,
-                loyaltyPointsRatio: data.loyaltyPointsRatio || 10
+                loyaltyPointsRatio: data.loyaltyPointsRatio || 10,
+                minimumPointsToRedeem: data.minimumPointsToRedeem || 50
             });
         }
     });
@@ -634,6 +636,7 @@ function App() {
             setIsTrackerOpen(true);
         }} coupons={coupons}
         loyaltyAccounts={loyaltyAccounts}
+        storeSettings={storeSettings}
       />
 
         </div>

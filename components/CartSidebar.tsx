@@ -17,6 +17,7 @@ interface CartSidebarProps {
   onTrackOrder: () => void;
   coupons?: Coupon[];
   loyaltyAccounts?: LoyaltyAccount[];
+  storeSettings?: { minimumPointsToRedeem?: number; loyaltyPointsRatio?: number; [key:string]: any };
 }
 
 const DELIVERY_FEE = 20;
@@ -32,7 +33,8 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   onAddOrder,
   onTrackOrder,
   coupons = [],
-  loyaltyAccounts = []
+  loyaltyAccounts = [],
+  storeSettings
 }) => {
   const [step, setStep] = useState<'cart' | 'details' | 'confirmation'>('cart');
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
@@ -257,18 +259,26 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                             <input type="text" placeholder="Your Name" value={customerName} onChange={(e) => { setCustomerName(e.target.value); setErrors(p => ({...p, name: false})); }} className={`w-full bg-stone-900 border rounded-xl py-4 px-4 text-sm text-white focus:outline-none transition-all ${errors.name ? 'border-red-500' : 'border-white/5 focus:border-gold-500'}`} />
                             <input type="tel" placeholder="WhatsApp Number" value={contactNumber} maxLength={10} onChange={(e) => { const val = e.target.value.replace(/\D/g, '').slice(0, 10); setContactNumber(val); setErrors(p => ({...p, contact: false})); }} className={`w-full bg-stone-900 border rounded-xl py-4 px-4 text-sm text-white focus:outline-none transition-all ${errors.contact ? 'border-red-500' : 'border-white/5 focus:border-gold-500'}`} />
                         </div>
-                        {contactNumber.length === 10 && userLoyalty && userLoyalty.points > 0 && (
-                            <div className="bg-gold-500/10 border border-gold-500/30 rounded-xl p-4 flex items-center justify-between animate-fade-in">
-                                <div>
-                                    <h4 className="text-gold-500 font-bold text-xs uppercase tracking-widest block mb-1">Chillies Points</h4>
-                                    <p className="text-stone-400 text-[10px]">You have {userLoyalty.points} points (₹{Math.min(userLoyalty.points, baseTotal)} off)</p>
+                        {contactNumber.length === 10 && userLoyalty && userLoyalty.points > 0 && (() => {
+                            const minRequired = storeSettings?.minimumPointsToRedeem || 50;
+                            const isEligible = userLoyalty.points >= minRequired;
+                            
+                            return (
+                                <div className={`border rounded-xl p-4 flex items-center justify-between animate-fade-in transition-all ${isEligible ? 'bg-gold-500/10 border-gold-500/30' : 'bg-stone-900/40 border-white/5 opacity-60 grayscale'}`}>
+                                    <div>
+                                        <h4 className="text-gold-500 font-bold text-xs uppercase tracking-widest block mb-1">Chillies Points</h4>
+                                        <p className="text-stone-400 text-[10px]">
+                                            You have {userLoyalty.points} points <br/>
+                                            {isEligible ? `(₹${Math.min(userLoyalty.points, baseTotal)} off max)` : <span className="text-red-400 font-bold">Needs {minRequired} pts minimum</span>}
+                                        </p>
+                                    </div>
+                                    <label className={`relative inline-flex items-center ${isEligible ? 'cursor-pointer' : 'cursor-not-allowed hidden'}`}>
+                                      <input type="checkbox" className="sr-only peer" checked={redeemPoints} onChange={(e) => { if (isEligible) setRedeemPoints(e.target.checked); }} disabled={!isEligible} />
+                                      <div className="w-9 h-5 bg-stone-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gold-500 transition-colors"></div>
+                                    </label>
                                 </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                  <input type="checkbox" className="sr-only peer" checked={redeemPoints} onChange={(e) => setRedeemPoints(e.target.checked)} />
-                                  <div className="w-9 h-5 bg-stone-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gold-500 transition-colors"></div>
-                                </label>
-                            </div>
-                        )}
+                            );
+                        })()}
                         {orderType === 'delivery' && (
                             <div className="space-y-3 pt-4">
                                 <h3 className="text-stone-600 text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2">Delivery Address</h3>

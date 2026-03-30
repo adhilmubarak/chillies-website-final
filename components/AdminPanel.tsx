@@ -47,7 +47,7 @@ interface AdminPanelProps {
     happyHourStartTime: string;
     happyHourEndTime: string;
   };
-  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number };
+  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number };
   onAddItem: (item: MenuItem) => void;
   onUpdateItem: (item: MenuItem) => void;
   onDeleteItem: (id: string) => void;
@@ -58,7 +58,7 @@ interface AdminPanelProps {
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
-  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number }) => void;
+  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
   foodRatings?: FoodRating[];
@@ -1082,6 +1082,33 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                  {(!loyaltyAccounts || loyaltyAccounts.length === 0) && <p className="text-stone-500 text-xs text-center py-4">No enrolled members.</p>}
                              </div>
                          </div>
+                         <div className="pt-8 border-t border-white/5 space-y-6">
+                             <h5 className="text-white text-base font-bold flex items-center gap-3"><Settings size={20} className="text-gold-500" /> Program Configurations</h5>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-3">
+                                     <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2">Points Ratio (₹ per Point)</label>
+                                     <input 
+                                         type="number" 
+                                         min="1"
+                                         value={storeSettings.loyaltyPointsRatio || 10}
+                                         onChange={e => onUpdateStoreSettings({ ...storeSettings, loyaltyPointsRatio: Math.max(1, Number(e.target.value)) })}
+                                         className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm outline-none focus:border-brand-500 font-mono"
+                                     />
+                                     <p className="text-[10px] text-stone-500 leading-relaxed">Spend required to earn 1 point.</p>
+                                 </div>
+                                 <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-3">
+                                     <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2">Minimum Redemption Balance</label>
+                                     <input 
+                                         type="number" 
+                                         min="0"
+                                         value={storeSettings.minimumPointsToRedeem !== undefined ? storeSettings.minimumPointsToRedeem : 50}
+                                         onChange={e => onUpdateStoreSettings({ ...storeSettings, minimumPointsToRedeem: Math.max(0, Number(e.target.value)) })}
+                                         className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm outline-none focus:border-gold-500 font-mono"
+                                     />
+                                     <p className="text-[10px] text-stone-500 leading-relaxed">Balance required before points can be applied to orders.</p>
+                                 </div>
+                             </div>
+                         </div>
                      </div>
                 </div>
             )}
@@ -1149,20 +1176,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 </div>
                             </div>
                             
-                            <div className="space-y-6">
-                                <h5 className="text-white text-base font-bold flex items-center gap-3"><Gift size={20} className="text-brand-500" /> Loyalty Program</h5>
-                                <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-3">
-                                    <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2">Points Ratio (₹ per Point)</label>
-                                    <input 
-                                        type="number" 
-                                        min="1"
-                                        value={storeSettings.loyaltyPointsRatio || 10}
-                                        onChange={e => onUpdateStoreSettings({ ...storeSettings, loyaltyPointsRatio: Math.max(1, Number(e.target.value)) })}
-                                        className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm outline-none focus:border-brand-500 font-mono"
-                                    />
-                                    <p className="text-[10px] text-stone-500 max-w-sm leading-relaxed">Determine how many Rupees a customer must spend to earn 1 loyalty point. Current logic: 1 point per ₹{storeSettings.loyaltyPointsRatio || 10}.</p>
-                                </div>
-                            </div>
                             
                             <div className="space-y-6">
                                 <h5 className="text-white text-base font-bold flex items-center gap-3"><MessageCircle size={20} className="text-gold-500" /> Feedback Portal</h5>
