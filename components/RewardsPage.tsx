@@ -115,16 +115,73 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                 {searchedAccount !== undefined && (
                     <div className={`mt-8 p-6 rounded-2xl border transition-all animate-fade-in ${searchedAccount ? 'bg-gold-500/10 border-gold-500/30' : 'bg-stone-950/80 border-white/5'}`}>
                         {searchedAccount ? (
-                            <div className="text-center space-y-2">
-                                <CheckCircle size={24} className="text-gold-500 mx-auto mb-2" />
-                                <span className="block text-stone-400 text-[10px] uppercase font-black tracking-widest">Available Balance</span>
-                                <span className="block text-4xl font-serif text-gold-400 font-bold">{searchedAccount.points} <span className="text-xl text-stone-500 font-sans tracking-normal font-medium italic">pts</span></span>
-                                <p className="text-stone-300 text-xs pt-2">That's ₹{searchedAccount.points} off your next order!</p>
-                                <div className="pt-6 pb-2">
-                                    <div className="bg-white p-3 inline-block rounded-2xl shadow-xl">
-                                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${searchedAccount.id}&bgcolor=ffffff&color=000000&margin=0`} alt="Loyalty QR" className="w-32 h-32 rounded-lg" />
+                            <div className="flex flex-col items-center gap-8 animate-fade-in">
+                                {/* The Premium Card */}
+                                <div className="relative w-full max-w-[360px] aspect-[1.586/1] rounded-2xl p-6 md:p-8 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden group hover:scale-[1.02] transition-transform duration-500 ease-out">
+                                    {/* Card Background gradient */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-stone-800 via-stone-900 to-black z-0"></div>
+                                    
+                                    {/* Geometric/Luxury Accents */}
+                                    <div className="absolute top-[-50%] right-[-20%] w-[120%] h-[120%] bg-gradient-to-br from-gold-500/20 to-transparent rounded-full blur-[50px] z-0 pointer-events-none"></div>
+                                    <div className="absolute bottom-[-20%] left-[-20%] w-[80%] h-[80%] bg-gradient-to-tr from-stone-600/30 to-transparent rounded-full blur-[40px] z-0 pointer-events-none"></div>
+                                    
+                                    {/* Card Edge Highlights */}
+                                    <div className="absolute inset-0 border border-white/10 rounded-2xl z-10 pointer-events-none"></div>
+                                    <div className="absolute top-0 right-0 w-full h-[1px] bg-gradient-to-l from-transparent via-gold-500/50 to-transparent z-10"></div>
+                                    
+                                    {/* Card Content */}
+                                    <div className="flex flex-col justify-between h-full relative z-20">
+                                        {/* Header */}
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center gap-2">
+                                                <Award size={28} className="text-gold-500 drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
+                                                <span className="font-serif text-2xl text-white font-bold tracking-widest uppercase drop-shadow-md">Chillies</span>
+                                            </div>
+                                            <span className="text-[9px] text-gold-400 font-black uppercase tracking-[0.3em] px-2.5 py-1 bg-stone-950/50 backdrop-blur-md rounded-sm border border-gold-500/20 shadow-inner">Elite Tier</span>
+                                        </div>
+                                        
+                                        {/* Card Number & Chip */}
+                                        <div className="mt-6 flex flex-col gap-2 text-left">
+                                            <div className="w-10 h-8 rounded bg-gradient-to-br from-yellow-100/90 via-yellow-400/90 to-yellow-600/90 shadow-inner border border-yellow-700/50 relative overflow-hidden">
+                                                <div className="absolute top-1/2 left-0 w-full h-[1px] bg-yellow-800/40"></div>
+                                                <div className="absolute left-1/2 top-0 w-[1px] h-full bg-yellow-800/40"></div>
+                                                <div className="absolute w-6 h-4 border border-yellow-800/40 rounded-[2px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                                                <div className="absolute w-4 h-2 border border-yellow-800/40 rounded-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                                            </div>
+                                            <div className="font-mono text-xl md:text-2xl mt-1 tracking-[0.25em] text-stone-200 drop-shadow-md font-medium text-shadow font-bold">
+                                                {searchedAccount.phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')}
+                                            </div>
+                                        </div>
+
+                                        {/* Footer */}
+                                        <div className="flex justify-between items-end mt-4 pt-1">
+                                            <div className="text-left w-1/2 truncate">
+                                                <span className="block text-[8px] text-stone-400 uppercase tracking-widest mb-1">Cardholder</span>
+                                                <span className="text-sm md:text-md font-black text-white tracking-[0.1em] uppercase drop-shadow-md truncate block mr-2">{searchedAccount.customerName || 'Loyal Diner'}</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="block text-[8px] text-stone-400 uppercase tracking-widest mb-1">Points Balance</span>
+                                                <span className="font-serif text-3xl text-gold-500 font-bold drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] leading-none">{searchedAccount.points}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <p className="text-stone-500 text-[10px] mt-4 uppercase font-black tracking-widest">Scan at Checkout</p>
+                                    
+                                    {/* Interactive Glare overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-30 mix-blend-overlay pointer-events-none"></div>
+                                </div>
+
+                                <div className="text-center w-full max-w-[360px] px-2 flex items-center justify-between gap-4">
+                                   <div className="text-left flex-1">
+                                        <p className="text-stone-300 text-sm mb-1">Your reward is active.</p>
+                                        <p className="text-stone-400 text-xs">Enjoy <strong className="text-gold-400">₹{searchedAccount.points} off</strong> on your next order!</p>
+                                   </div>
+                                    
+                                   <div className="bg-stone-900 border border-white/5 rounded-2xl p-3 shrink-0 flex flex-col items-center group relative overflow-hidden hover:border-gold-500/20 transition-all">
+                                        <div className="bg-white p-1.5 rounded-lg mb-2 shadow-lg ring-2 ring-white/5 group-hover:ring-gold-500/20 transition-all">
+                                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${searchedAccount.id}&bgcolor=ffffff&color=000000&margin=0`} alt="Loyalty QR" className="w-16 h-16 rounded object-contain" />
+                                        </div>
+                                        <p className="text-stone-500 text-[8px] uppercase font-black tracking-[0.2em] px-1">Scan to Use</p>
+                                   </div>
                                 </div>
                             </div>
                         ) : isEnrolling ? (

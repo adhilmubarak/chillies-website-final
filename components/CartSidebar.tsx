@@ -133,7 +133,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
         createdAt: now.getTime(),
         trackingLink: trackingLink,
         pointsRedeemed,
-        pointsEarned: Math.floor(total / 10)
+        pointsEarned: userLoyalty ? Math.floor(total / 10) : 0
     };
 
     setConfirmedOrder(currentOrder);
@@ -150,8 +150,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     if (pointsRedeemed > 0) message += `Points Redeemed: -₹${pointsRedeemed.toFixed(2)}\n`;
     message += `*TOTAL PAYABLE:* ₹${total.toFixed(2)}\n`;
     
-    const pointsEarned = Math.floor(total / 10);
-    if (pointsEarned > 0) message += `_You earned ${pointsEarned} Chillies Points!_`;
+    if (userLoyalty) {
+        const pointsEarned = Math.floor(total / 10);
+        if (pointsEarned > 0) message += `_You earned ${pointsEarned} Chillies Points!_`;
+    }
 
     setWhatsappMsg(message);
     setStep('confirmation');

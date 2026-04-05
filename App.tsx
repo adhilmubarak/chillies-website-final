@@ -369,12 +369,6 @@ function App() {
                   points: newPoints, 
                   lastUpdated: Date.now() 
               });
-          } else if (pointsEarned > 0) {
-              await addDoc(collection(db, 'loyalty'), { 
-                  phone: order.contactNumber, 
-                  points: pointsEarned, 
-                  lastUpdated: Date.now() 
-              });
           }
       }
     } catch (error) {
