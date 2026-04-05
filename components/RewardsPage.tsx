@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowLeft, Search, CheckCircle, Award, Gift } from 'lucide-react';
+import { Sparkles, ArrowLeft, Search, CheckCircle, Award, Gift, Wifi } from 'lucide-react';
 import { LoyaltyAccount } from '../types';
 
 interface RewardsPageProps {
@@ -117,57 +117,65 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                         {searchedAccount ? (
                             <div className="flex flex-col items-center gap-8 animate-fade-in">
                                 {/* The Premium Card */}
-                                <div className="relative w-full max-w-[360px] aspect-[1.586/1] rounded-2xl p-6 md:p-8 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden group hover:scale-[1.02] transition-transform duration-500 ease-out">
-                                    {/* Card Background gradient */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-stone-800 via-stone-900 to-black z-0"></div>
+                                <div className="relative w-full max-w-[360px] aspect-[1.586/1] rounded-2xl p-6 md:p-8 border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(212,175,55,0.1)] overflow-hidden group hover:scale-[1.03] hover:-translate-y-2 transition-all duration-500 ease-out">
+                                    {/* Card Structural Gradients & Metallic Feel */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] via-[#0d0d0d] to-black z-0"></div>
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gold-500/20 via-transparent to-transparent z-0 opacity-60"></div>
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-stone-500/20 via-transparent to-transparent z-0 opacity-40"></div>
                                     
-                                    {/* Geometric/Luxury Accents */}
-                                    <div className="absolute top-[-50%] right-[-20%] w-[120%] h-[120%] bg-gradient-to-br from-gold-500/20 to-transparent rounded-full blur-[50px] z-0 pointer-events-none"></div>
-                                    <div className="absolute bottom-[-20%] left-[-20%] w-[80%] h-[80%] bg-gradient-to-tr from-stone-600/30 to-transparent rounded-full blur-[40px] z-0 pointer-events-none"></div>
+                                    {/* Delicate Texture Pattern */}
+                                    <div className="absolute inset-0 z-0 opacity-20 mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px)', backgroundSize: '4px 4px' }}></div>
                                     
-                                    {/* Card Edge Highlights */}
-                                    <div className="absolute inset-0 border border-white/10 rounded-2xl z-10 pointer-events-none"></div>
-                                    <div className="absolute top-0 right-0 w-full h-[1px] bg-gradient-to-l from-transparent via-gold-500/50 to-transparent z-10"></div>
+                                    {/* Card Edge Highlights (Metallic rim) */}
+                                    <div className="absolute inset-0 rounded-2xl border-[1.5px] border-transparent bg-gradient-to-br from-gold-500/50 via-white/5 to-white/5 mask-image:linear-gradient(white,white) pointer-events-none z-10" style={{ WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude', padding: '1.5px' }}></div>
+                                    <div className="absolute top-0 right-0 w-[150%] h-[1px] bg-gradient-to-l from-transparent via-gold-300/80 to-transparent z-10 opacity-70 transform rotate-[-5deg] translate-x-10"></div>
                                     
                                     {/* Card Content */}
                                     <div className="flex flex-col justify-between h-full relative z-20">
                                         {/* Header */}
                                         <div className="flex justify-between items-start">
                                             <div className="flex items-center gap-2">
-                                                <Award size={28} className="text-gold-500 drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
-                                                <span className="font-serif text-2xl text-white font-bold tracking-widest uppercase drop-shadow-md">Chillies</span>
+                                                <Award size={28} className="text-gold-400 drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]" strokeWidth={1.5} />
+                                                <span className="font-serif text-2xl text-stone-50 tracking-widest uppercase drop-shadow-lg" style={{textShadow: '0 2px 10px rgba(0,0,0,0.8)'}}>Chillies</span>
                                             </div>
-                                            <span className="text-[9px] text-gold-400 font-black uppercase tracking-[0.3em] px-2.5 py-1 bg-stone-950/50 backdrop-blur-md rounded-sm border border-gold-500/20 shadow-inner">Elite Tier</span>
+                                            <span className="text-[10px] text-stone-900 font-black uppercase tracking-[0.3em] px-3 py-1.5 bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 rounded-sm shadow-[0_0_15px_rgba(212,175,55,0.3)]">Elite</span>
                                         </div>
                                         
                                         {/* Card Number & Chip */}
-                                        <div className="mt-6 flex flex-col gap-2 text-left">
-                                            <div className="w-10 h-8 rounded bg-gradient-to-br from-yellow-100/90 via-yellow-400/90 to-yellow-600/90 shadow-inner border border-yellow-700/50 relative overflow-hidden">
-                                                <div className="absolute top-1/2 left-0 w-full h-[1px] bg-yellow-800/40"></div>
-                                                <div className="absolute left-1/2 top-0 w-[1px] h-full bg-yellow-800/40"></div>
-                                                <div className="absolute w-6 h-4 border border-yellow-800/40 rounded-[2px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-                                                <div className="absolute w-4 h-2 border border-yellow-800/40 rounded-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                                        <div className="mt-6 flex flex-col gap-3 text-left">
+                                            <div className="flex items-center gap-4">
+                                                {/* Fancy Chip */}
+                                                <div className="w-11 h-8 rounded-md bg-gradient-to-br from-yellow-200 via-yellow-500 to-yellow-600 shadow-[inset_0_1px_3px_rgba(255,255,255,0.5),0_2px_5px_rgba(0,0,0,0.5)] border border-yellow-800/60 relative overflow-hidden">
+                                                    <div className="absolute top-[35%] left-0 w-full h-[0.5px] bg-yellow-900/50"></div>
+                                                    <div className="absolute top-[65%] left-0 w-full h-[0.5px] bg-yellow-900/50"></div>
+                                                    <div className="absolute left-[30%] top-0 w-[0.5px] h-full bg-yellow-900/50"></div>
+                                                    <div className="absolute left-[70%] top-0 w-[0.5px] h-full bg-yellow-900/50"></div>
+                                                    <div className="absolute w-5 h-4 border-[0.5px] border-yellow-900/40 rounded-[2px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                                                </div>
+                                                {/* Contactless Symbol */}
+                                                <Wifi size={24} className="text-stone-400/80 rotate-90 drop-shadow-md" strokeWidth={1.5} />
                                             </div>
-                                            <div className="font-mono text-xl md:text-2xl mt-1 tracking-[0.25em] text-stone-200 drop-shadow-md font-medium text-shadow font-bold">
+                                            
+                                            <div className="font-mono text-xl md:text-2xl mt-1 tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-b from-stone-200 to-stone-400 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-black">
                                                 {searchedAccount.phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')}
                                             </div>
                                         </div>
 
                                         {/* Footer */}
-                                        <div className="flex justify-between items-end mt-4 pt-1">
-                                            <div className="text-left w-1/2 truncate">
-                                                <span className="block text-[8px] text-stone-400 uppercase tracking-widest mb-1">Cardholder</span>
-                                                <span className="text-sm md:text-md font-black text-white tracking-[0.1em] uppercase drop-shadow-md truncate block mr-2">{searchedAccount.customerName || 'Loyal Diner'}</span>
+                                        <div className="flex justify-between items-end mt-2 pt-1 border-t border-white/5 relative">
+                                            <div className="text-left w-1/2 truncate pt-3">
+                                                <span className="block text-[7px] text-stone-400/80 uppercase tracking-[0.2em] mb-1 font-medium">Cardholder Name</span>
+                                                <span className="text-xs md:text-sm font-black text-stone-200 tracking-[0.1em] uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] truncate block mr-2">{searchedAccount.customerName || 'Loyal Diner'}</span>
                                             </div>
-                                            <div className="text-right">
-                                                <span className="block text-[8px] text-stone-400 uppercase tracking-widest mb-1">Points Balance</span>
-                                                <span className="font-serif text-3xl text-gold-500 font-bold drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] leading-none">{searchedAccount.points}</span>
+                                            <div className="text-right pt-2 relative">
+                                                <span className="block text-[7px] text-stone-400/80 uppercase tracking-[0.2em] mb-1 font-medium transform translate-y-2">Remaining Points</span>
+                                                <span className="font-serif text-3xl md:text-4xl text-transparent bg-clip-text bg-gradient-to-b from-gold-300 via-gold-400 to-gold-600 font-bold drop-shadow-[0_0_15px_rgba(212,175,55,0.4)] leading-none italic">{searchedAccount.points}</span>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    {/* Interactive Glare overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-30 mix-blend-overlay pointer-events-none"></div>
+                                    {/* Sweeping Interactive Glare */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 z-30 mix-blend-overlay pointer-events-none transform -translate-x-full group-hover:translate-x-full"></div>
                                 </div>
 
                                 <div className="text-center w-full max-w-[360px] px-2 flex items-center justify-between gap-4">
