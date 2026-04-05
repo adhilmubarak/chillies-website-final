@@ -208,7 +208,15 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                   <div className="flex-1 flex flex-col items-center px-6 md:px-8 text-center overflow-y-auto scrollbar-hide">
                       <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-6 relative border border-green-500/20"><CheckCircle className="text-green-500 w-8 h-8" /></div>
                       <h2 className="font-serif text-2xl md:text-3xl text-white mb-2">Order Created</h2>
-                      <p className="text-stone-400 text-xs md:text-sm mb-8 leading-relaxed">Check WhatsApp for confirmation.</p>
+                      <p className="text-stone-400 text-xs md:text-sm mb-4 leading-relaxed">Check WhatsApp for confirmation.</p>
+
+                      <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 mb-8 flex gap-3 items-start text-left w-full">
+                          <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={16} />
+                          <div className="text-[9px] text-stone-300 leading-relaxed uppercase tracking-wide">
+                              <span className="font-black text-orange-500 mb-1 block">Important Note</span>
+                              Because orders are processed via WhatsApp, restaurant staff might be busy during rush hours. <strong className="text-white">Please make a call to the restaurant to confirm your order.</strong>
+                          </div>
+                      </div>
 
                       <button 
                         onClick={() => window.location.assign(getWhatsAppUrl(whatsappMsg))}
@@ -288,6 +296,13 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                       </div>
                   </div>
                   <div className="p-6 md:p-8 border-t border-white/5 bg-stone-950/50 space-y-4">
+                      <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 flex gap-3 items-start">
+                          <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={16} />
+                          <div className="text-[9px] text-stone-300 leading-relaxed uppercase tracking-wide">
+                              <span className="font-black text-orange-500 mb-1 block">Important Note</span>
+                              Because orders are processed via WhatsApp, restaurant staff might be busy during rush hours. <strong className="text-white">Please make a call to the restaurant to confirm your order</strong> after placing it.
+                          </div>
+                      </div>
                       <div className="bg-gold-500/5 border border-gold-500/20 rounded-xl p-4 flex gap-3 items-start">
                           <AlertCircle className="text-gold-500 shrink-0 mt-0.5" size={16} />
                           <p className="text-[9px] text-stone-400 leading-relaxed uppercase tracking-wide">Final step: Press <strong>Send</strong> in WhatsApp.</p>
