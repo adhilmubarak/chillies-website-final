@@ -181,13 +181,22 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    const isStandalone = ('standalone' in window.navigator) && !!(window.navigator as any).standalone;
+    
+    if (isIOSDevice && !isStandalone) {
+      setIsIOS(true);
+      setShowInstallBanner(true);
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Wait a moment before showing the banner to let the user settle in
-      setTimeout(() => setShowInstallBanner(true), 5000);
+      setShowInstallBanner(true);
     };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -733,7 +742,7 @@ function App() {
       } />
     </Routes>
     
-    {showInstallBanner && deferredPrompt && (
+    {showInstallBanner && (deferredPrompt || isIOS) && (
         <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-8 md:bottom-8 md:w-96 bg-stone-900 border border-brand-500/50 rounded-2xl p-4 shadow-2xl z-[100] animate-fade-in flex flex-col gap-3">
             <div className="flex justify-between items-start">
                 <div className="flex gap-3 items-center">
@@ -745,9 +754,15 @@ function App() {
                 </div>
                 <button onClick={() => setShowInstallBanner(false)} className="text-stone-500 hover:text-white p-1 transition-colors"><X size={16} /></button>
             </div>
-            <button onClick={handleInstallClick} className="w-full bg-brand-500 hover:bg-brand-400 text-white font-black uppercase tracking-widest text-[10px] py-3 rounded-xl transition-all shadow-lg active:scale-95">
-                Install Now
-            </button>
+            {isIOS ? (
+                <div className="mt-2 text-center text-xs text-stone-300 bg-stone-800 p-3 rounded-xl border border-stone-700">
+                    To install, tap the <strong className="text-white">Share</strong> icon below, then select <strong className="text-white">Add to Home Screen</strong>.
+                </div>
+            ) : (
+                <button onClick={handleInstallClick} className="w-full bg-brand-500 hover:bg-brand-400 text-white font-black uppercase tracking-widest text-[10px] py-3 rounded-xl transition-all shadow-lg active:scale-95">
+                    Install Now
+                </button>
+            )}
         </div>
     )}
     </>
