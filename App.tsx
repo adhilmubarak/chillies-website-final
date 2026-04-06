@@ -507,6 +507,7 @@ function App() {
             onDeleteCustomOffer={async id => await deleteDoc(doc(db, 'customOffers', id))}
             onUpdateStoreSettings={s => setDoc(doc(db, 'settings', 'general'), s, {merge: true})}
             onUpdatePromos={p => setDoc(doc(db, 'settings', 'general'), p, {merge: true})}
+            onTestNotification={() => fireNotification('System Alert', { body: 'Push Notifications are enabled and working correctly on this device!', icon: '/pwa-icon.svg', vibrate: [200, 100, 200] })}
             loyaltyAccounts={loyaltyAccounts}
             onAddLoyaltyAccount={async (phone: string, points: number) => { await addDoc(collection(db, 'loyalty'), { phone, points, lastUpdated: Date.now() }); }}
             onUpdateLoyaltyAccount={async (id: string, points: number) => { await updateDoc(doc(db, 'loyalty', id), { points, lastUpdated: Date.now() }); }}
