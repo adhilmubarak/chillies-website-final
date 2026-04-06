@@ -187,14 +187,28 @@ function App() {
     }
   };
 
+  const fireNotification = async (title: string, options: any) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        // Find active service worker (Required for mobile Android/PWA notifications)
+        const registration = await navigator.serviceWorker.ready;
+        if (registration && registration.showNotification) {
+          await registration.showNotification(title, options);
+        } else {
+          new Notification(title, options); // Fallback for desktop web
+        }
+      } catch (e) {
+        new Notification(title, options); // Ultimate fallback
+      }
+    }
+  };
+
   // Push Notification logic for Flash Sales
   const prevPromoRef = React.useRef<any>(null);
   useEffect(() => {
     if (prevPromoRef.current) {
        if (!prevPromoRef.current.isFlashSaleActive && promoSettings.isFlashSaleActive) {
-          if ('Notification' in window && Notification.permission === 'granted') {
-             new Notification('⚡ Flash Sale is LIVE!', { body: 'Special discounts are active right now. Order before they are gone!', icon: '/pwa-icon.svg' });
-          }
+          fireNotification('⚡ Flash Sale is LIVE!', { body: 'Special discounts are active right now. Order before they are gone!', icon: '/pwa-icon.svg', vibrate: [200, 100, 200] });
        }
     }
     prevPromoRef.current = promoSettings;
@@ -207,18 +221,16 @@ function App() {
     orders.forEach(order => {
        const prevStatus = prevOrdersRef.current[order.id];
        if (myOrderIds.includes(order.id) && prevStatus && prevStatus !== order.status) {
-          if ('Notification' in window && Notification.permission === 'granted') {
-             const messages: Record<string, string> = {
-                preparing: '👨‍🍳 Your order is now being prepared.',
-                ready: '🥡 Your order is ready!',
-                out_for_delivery: '🛵 Your order is out for delivery! Track it live.',
-                delivered: '✨ Your order is complete. Enjoy!',
-                cancelled: '❌ Your order was cancelled.'
-             };
-             if (messages[order.status]) {
-                 new Notification(`Order #${order.id} Update`, { body: messages[order.status], icon: '/pwa-icon.svg' });
-             }
-          }
+           const messages: Record<string, string> = {
+              preparing: '👨‍🍳 Your order is now being prepared.',
+              ready: '🥡 Your order is ready!',
+              out_for_delivery: '🛵 Your order is out for delivery! Track it live.',
+              delivered: '✨ Your order is complete. Enjoy!',
+              cancelled: '❌ Your order was cancelled.'
+           };
+           if (messages[order.status]) {
+               fireNotification(`Order #${order.id} Update`, { body: messages[order.status], icon: '/pwa-icon.svg', vibrate: [200, 100, 200] });
+           }
        }
        prevOrdersRef.current[order.id] = order.status;
     });
