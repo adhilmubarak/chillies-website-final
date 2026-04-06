@@ -7,6 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: { enabled: true },
       includeAssets: ['pwa-icon.svg'],
       manifest: {
         name: 'Chillies Restaurant',

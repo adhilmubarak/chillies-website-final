@@ -190,15 +190,20 @@ function App() {
   const fireNotification = async (title: string, options: any) => {
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
-        // Find active service worker (Required for mobile Android/PWA notifications)
-        const registration = await navigator.serviceWorker.ready;
-        if (registration && registration.showNotification) {
-          await registration.showNotification(title, options);
-        } else {
-          new Notification(title, options); // Fallback for desktop web
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          if (regs.length > 0) {
+            const registration = await navigator.serviceWorker.ready;
+            if (registration && registration.showNotification) {
+              await registration.showNotification(title, options);
+              return;
+            }
+          }
         }
+        // Fallback for desktop web or dev mode without SW
+        new Notification(title, options);
       } catch (e) {
-        new Notification(title, options); // Ultimate fallback
+        new Notification(title, options);
       }
     }
   };
