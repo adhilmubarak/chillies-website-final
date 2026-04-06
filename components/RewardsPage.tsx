@@ -32,10 +32,10 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-200 font-sans selection:bg-gold-500/30 selection:text-gold-200 relative overflow-hidden">
-      {/* Background Effects */}
+      {/* Background Effects (Optimized) */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-gold-500/5 rounded-full blur-[150px]"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-stone-500/10 rounded-full blur-[120px]"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-full md:w-[60%] h-[50%] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_60%)]"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-full md:w-[50%] h-[50%] bg-[radial-gradient(circle_at_center,_rgba(120,113,108,0.12)_0%,_transparent_60%)]"></div>
       </div>
 
       <nav className="fixed top-0 w-full z-50 bg-stone-950/80 backdrop-blur-md border-b border-white/5 pb-4 pt-6 px-6">
@@ -79,8 +79,8 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
         </div>
 
         <div className="md:w-1/2 mt-8 md:mt-0 animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <div className="bg-stone-900/50 backdrop-blur-xl border border-white/5 p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/10 blur-[50px] rounded-full"></div>
+            <div className="bg-stone-900/95 md:bg-stone-900/50 md:backdrop-blur-xl border border-white/5 p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.15)_0%,_transparent_70%)] rounded-full translate-x-12 -translate-y-12"></div>
                 
                 <h2 className="text-2xl font-serif text-white mb-2">Check Balance</h2>
                 <p className="text-stone-400 text-xs mb-8">Enter your registered WhatsApp number</p>
@@ -124,7 +124,7 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-stone-500/20 via-transparent to-transparent z-0 opacity-40"></div>
                                     
                                     {/* Delicate Texture Pattern */}
-                                    <div className="absolute inset-0 z-0 opacity-20 mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px)', backgroundSize: '4px 4px' }}></div>
+                                    <div className="absolute inset-0 z-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '4px 4px' }}></div>
                                     
                                     {/* Card Edge Highlights (Metallic rim) */}
                                     <div className="absolute inset-0 rounded-2xl border-[1.5px] border-transparent bg-gradient-to-br from-gold-500/50 via-white/5 to-white/5 mask-image:linear-gradient(white,white) pointer-events-none z-10" style={{ WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude', padding: '1.5px' }}></div>
@@ -175,7 +175,7 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                     </div>
                                     
                                     {/* Sweeping Interactive Glare */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 z-30 mix-blend-overlay pointer-events-none transform -translate-x-full group-hover:translate-x-full"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 z-30 pointer-events-none transform -translate-x-full group-hover:translate-x-full"></div>
                                 </div>
 
                                 <div className="text-center w-full max-w-[360px] px-2 flex items-center justify-between gap-4">

@@ -30,15 +30,17 @@ interface OrderTrackerModalProps {
   onClose: () => void;
   initialOrderId?: string;
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
+  orders?: Order[];
 }
 
-const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, initialOrderId = '', riderLocation }) => {
+const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, initialOrderId = '', riderLocation, orders = [] }) => {
   const [orderId, setOrderId] = useState(initialOrderId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [foundOrder, setFoundOrder] = useState<Order | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
+  const [myHistory, setMyHistory] = useState<Order[]>([]);
 
   useEffect(() => {
     if(initialOrderId) {
@@ -46,8 +48,22 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
         if(isOpen) {
             fetchOrderDetails(initialOrderId);
         }
+    } else if (isOpen) {
+        setFoundOrder(null);
     }
   }, [initialOrderId, isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+        try {
+            const savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
+            if (savedIds.length > 0) {
+                const history = orders.filter(o => savedIds.includes(o.id)).sort((a, b) => b.createdAt - a.createdAt);
+                setMyHistory(history);
+            }
+        } catch(e) { console.error('Error loading history:', e); }
+    }
+  }, [isOpen, orders]);
 
   if (!isOpen) return null;
 
@@ -124,11 +140,39 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
             <form onSubmit={handleTrack} className="mb-6">
                 <div className="relative flex items-center">
                     <input type="text" value={orderId} onChange={(e) => setOrderId(e.target.value.toUpperCase())} placeholder="Order ID (e.g. A1234)" className="w-full bg-stone-950 border border-stone-800 rounded-lg py-3 pl-4 pr-12 text-white placeholder-stone-600 focus:border-gold-500 focus:outline-none transition-colors uppercase tracking-widest font-mono" />
-                    <button type="submit" disabled={loading} className="absolute right-2 p-1.5 bg-stone-800 rounded-md text-gold-500 hover:bg-gold-500 hover:text-stone-950 transition-colors disabled:opacity-50"><Search size={18} /></button>
+                    <button type="submit" disabled={loading || !orderId.trim()} className="absolute right-2 p-1.5 bg-stone-800 rounded-md text-gold-500 hover:bg-gold-500 hover:text-stone-950 transition-colors disabled:opacity-50"><Search size={18} /></button>
                 </div>
                 {error && <p className="text-red-500 text-xs mt-2 pl-1 flex items-center gap-1"><XCircle size={10} /> {error}</p>}
             </form>
             {loading && (<div className="flex flex-col items-center py-8"><div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mb-2"></div><span className="text-stone-500 text-xs uppercase tracking-widest">Searching...</span></div>)}
+            
+            {!foundOrder && !loading && myHistory.length > 0 && (
+                <div className="animate-fade-in-up">
+                    <h3 className="text-stone-400 text-xs uppercase tracking-[0.2em] font-bold mb-4 flex items-center gap-2"><Clock size={14}/> Recent Orders</h3>
+                    <div className="space-y-3 max-h-[60vh] overflow-y-auto scrollbar-hide">
+                        {myHistory.map(histOrder => (
+                            <div key={histOrder.id} onClick={() => fetchOrderDetails(histOrder.id)} className="p-4 bg-stone-950/50 border border-white/5 rounded-xl cursor-pointer hover:border-gold-500/30 transition-all flex justify-between items-center group">
+                                <div>
+                                    <h4 className="text-white font-mono font-bold tracking-wider">{histOrder.id}</h4>
+                                    <p className="text-stone-500 text-[10px] uppercase tracking-widest mt-1">
+                                        {new Date(histOrder.createdAt).toLocaleDateString()} • ₹{histOrder.total}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    {(() => {
+                                        const status = getStatusDisplay(histOrder.status, histOrder.type);
+                                        return (
+                                            <span className={`text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded border border-current ${status.color} bg-stone-900 flex items-center gap-1`}>
+                                                {histOrder.status.replace(/_/g, ' ')}
+                                            </span>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
             {foundOrder && (
                 <div className="animate-fade-in-up">
                     <div className="flex flex-col items-center text-center mb-6">

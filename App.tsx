@@ -668,6 +668,7 @@ function App() {
         }} 
         initialOrderId={initialTrackId}
         riderLocation={riderLocation}
+        orders={orders}
       />
       {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
       
