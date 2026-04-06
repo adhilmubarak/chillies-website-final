@@ -184,6 +184,16 @@ function App() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tid = params.get('tid');
+    if (tid) {
+      setInitialTrackId(tid);
+      setIsTrackerOpen(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [location.search]);
+
+  useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
     const isStandalone = ('standalone' in window.navigator) && !!(window.navigator as any).standalone;
