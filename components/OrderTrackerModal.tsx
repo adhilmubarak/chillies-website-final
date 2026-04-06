@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { Order } from '../types';
 import SafeImage from './SafeImage';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -211,6 +211,9 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                                         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                                     />
                                     <MapUpdater center={[riderLocation.lat, riderLocation.lng]} />
+                                    <CircleMarker center={[9.4818520, 76.3307510]} pathOptions={{ color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.5, weight: 2 }} radius={8}>
+                                        <Tooltip permanent direction="top" className="bg-stone-900 border-none text-green-500 font-bold uppercase tracking-widest text-[9px] shadow-lg">Shop</Tooltip>
+                                    </CircleMarker>
                                     <Marker position={[riderLocation.lat, riderLocation.lng]} icon={riderIcon} />
                                 </MapContainer>
                             </div>

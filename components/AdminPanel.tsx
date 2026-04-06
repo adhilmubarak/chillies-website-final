@@ -10,7 +10,7 @@ import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, Loyal
 import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -1623,6 +1623,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         attribution="&copy; <a href='https://carto.com/'>CARTO</a>"
                     />
                     <MapUpdater center={[riderLocation.lat, riderLocation.lng]} />
+                    <CircleMarker center={[9.4818520, 76.3307510]} pathOptions={{ color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.5, weight: 2 }} radius={8}>
+                        <Tooltip permanent direction="top" className="bg-stone-900 border-none text-green-500 font-bold uppercase tracking-widest text-[9px] shadow-lg">Shop</Tooltip>
+                    </CircleMarker>
                     <Marker position={[riderLocation.lat, riderLocation.lng]} icon={riderIcon} />
                 </MapContainer>
             </div>
