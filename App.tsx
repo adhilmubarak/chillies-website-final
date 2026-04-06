@@ -574,7 +574,18 @@ function App() {
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
           <DeliveryPanel 
             orders={orders}
-            onUpdateOrderStatus={async (id, s, pm) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, pm ? {status: s, paymentMethod: pm} : {status: s})); }}
+            onUpdateOrderStatus={async (id, s, pm) => { 
+                const q = query(collection(db, 'orders'), where("id", "==", id)); 
+                const snap = await getDocs(q); 
+                snap.forEach(d => {
+                  const updates: any = { status: s };
+                  if (pm) updates.paymentMethod = pm;
+                  if (s === 'ready' || s === 'out_for_delivery') {
+                      updates.assignedAt = Date.now();
+                  }
+                  updateDoc(d.ref, updates);
+                }); 
+            }}
             onUpdateRiderLocation={async (lat, lng) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }}
             deliveryUpiId={storeSettings.deliveryUpiId}
           />
