@@ -534,7 +534,18 @@ function App() {
               setDbCategories(newArray);
               await Promise.all(newArray.map((cat, i) => updateDoc(doc(db, 'categories', cat.id), { order: i })));
             }}
-            onUpdateOrderStatus={async (id, s, pm) => { const q = query(collection(db, 'orders'), where("id", "==", id)); const snap = await getDocs(q); snap.forEach(d => updateDoc(d.ref, pm ? {status: s, paymentMethod: pm} : {status: s})); }}
+            onUpdateOrderStatus={async (id, s, pm) => { 
+              const q = query(collection(db, 'orders'), where("id", "==", id)); 
+              const snap = await getDocs(q); 
+              snap.forEach(d => {
+                const updates: any = { status: s };
+                if (pm) updates.paymentMethod = pm;
+                if (s === 'ready' || s === 'out_for_delivery') {
+                  updates.assignedAt = Date.now();
+                }
+                updateDoc(d.ref, updates);
+              }); 
+            }}
             onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
             onAddCustomOffer={o => addDoc(collection(db, 'customOffers'), o)}
             onUpdateCustomOffer={async o => { if(o.id) await updateDoc(doc(db, 'customOffers', o.id), {...o}); }}

@@ -620,7 +620,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 <span className="text-[9px] text-stone-600 uppercase font-black tracking-[0.2em]">Grand Total</span>
                                                 <div className="text-3xl font-serif text-white font-bold leading-none">₹{order.total}</div>
                                             </div>
-                                            <button onClick={() => handleStatusChange(order, order.status)} className="p-4 bg-green-500/10 text-green-500 rounded-2xl border border-green-500/20 hover:bg-green-500 hover:text-white transition-all">
+                                            <button onClick={() => {
+                                                const newStatus = order.type === 'delivery' ? 'out_for_delivery' : 'ready';
+                                                handleStatusChange(order, newStatus);
+                                            }} className="p-4 bg-green-500/10 text-green-500 rounded-2xl border border-green-500/20 hover:bg-green-500 hover:text-white transition-all">
                                                 <Send size={18} />
                                             </button>
                                         </div>
