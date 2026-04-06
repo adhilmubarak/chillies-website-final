@@ -213,6 +213,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [manualContact, setManualContact] = useState('');
   const [manualAddress, setManualAddress] = useState('');
   const [manualOrderType, setManualOrderType] = useState<'delivery'|'pickup'>('pickup');
+  const [manualDeliveryCharge, setManualDeliveryCharge] = useState(20);
   const [manualOrderSearch, setManualOrderSearch] = useState('');
 
   useEffect(() => {
@@ -1054,9 +1055,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                          return (
                                              <div className="pt-4 border-t border-white/5 text-center space-y-4">
                                                  <div><h5 className="text-gold-500 font-serif text-3xl font-bold">{account.points} <span className="text-sm text-stone-500 font-sans italic font-normal">pts</span></h5></div>
-                                                 <div className="grid grid-cols-2 gap-2">
-                                                     <button onClick={() => { const pts = prompt('Add how many points?'); if(pts && !isNaN(Number(pts)) && onUpdateLoyaltyAccount && account.id) { onUpdateLoyaltyAccount(account.id, account.points + Number(pts)); } }} className="bg-green-500/10 hover:bg-green-500/20 text-green-500 py-3 rounded-xl font-bold text-xs transition-colors">Add Points</button>
-                                                     <button onClick={() => { const pts = prompt('Redeem how many points?'); if(pts && !isNaN(Number(pts)) && onUpdateLoyaltyAccount && account.id) { onUpdateLoyaltyAccount(account.id, Math.max(0, account.points - Number(pts))); } }} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 py-3 rounded-xl font-bold text-xs transition-colors">Redeem</button>
+                                                 <div className="flex flex-col gap-3 mt-4">
+                                                     <div className="flex items-center gap-2">
+                                                         <input type="number" placeholder="Qty" id={`pts-${account.id}`} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-white text-sm outline-none focus:border-gold-500 text-center font-mono" />
+                                                         <button onClick={() => { const input = document.getElementById(`pts-${account.id}`) as HTMLInputElement; const pts = Number(input.value); if(pts && !isNaN(pts) && onUpdateLoyaltyAccount && account.id) { onUpdateLoyaltyAccount(account.id, account.points + pts); input.value = ''; } }} className="bg-green-500/10 hover:bg-green-500/20 text-green-500 px-5 py-3 rounded-xl font-bold text-xs transition-colors whitespace-nowrap">Add</button>
+                                                         <button onClick={() => { const input = document.getElementById(`pts-${account.id}`) as HTMLInputElement; const pts = Number(input.value); if(pts && !isNaN(pts) && onUpdateLoyaltyAccount && account.id) { onUpdateLoyaltyAccount(account.id, Math.max(0, account.points - pts)); input.value = ''; } }} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-5 py-3 rounded-xl font-bold text-xs transition-colors whitespace-nowrap">Deduct</button>
+                                                     </div>
                                                  </div>
                                              </div>
                                          )
@@ -1321,12 +1325,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             {manualOrderType === 'delivery' && (
                                 <div className="flex justify-between items-center text-white mb-3">
                                     <span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Delivery Fee</span>
-                                    <span className="font-mono text-sm">₹20</span>
+                                    <input 
+                                        type="number"
+                                        min="0"
+                                        value={manualDeliveryCharge}
+                                        onChange={(e) => setManualDeliveryCharge(Number(e.target.value))}
+                                        className="w-20 bg-stone-900 border border-stone-800 rounded-lg p-2 text-right text-xs font-mono focus:border-gold-500 outline-none"
+                                    />
                                 </div>
                             )}
                             <div className="flex justify-between items-center text-gold-500 text-2xl font-serif pt-4 border-t border-white/5 mt-2">
                                 <span>Total Payable</span>
-                                <span>₹{manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0) + (manualOrderType === 'delivery' ? 20 : 0)}</span>
+                                <span>₹{manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0) + (manualOrderType === 'delivery' ? manualDeliveryCharge : 0)}</span>
                             </div>
                         </div>
                     </div>
@@ -1339,7 +1349,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         onClick={() => {
                             if (!onAddOrder) return;
                             const subtotal = manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0);
-                            const total = subtotal + (manualOrderType === 'delivery' ? 20 : 0);
+                            const total = subtotal + (manualOrderType === 'delivery' ? manualDeliveryCharge : 0);
                             const newOrderId = `CHILL${Math.floor(10000 + Math.random() * 90000)}`;
                             const now = new Date();
                             const baseUrl = window.location.href.split('?')[0].split('#')[0].replace(/\/$/, "");
@@ -1347,7 +1357,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 id: newOrderId,
                                 items: manualOrderItems.map(i => ({...i.item, quantity: i.quantity, selectedVariations: {}} as any)),
                                 subtotal,
-                                deliveryCharge: manualOrderType === 'delivery' ? 20 : 0,
+                                deliveryCharge: manualOrderType === 'delivery' ? manualDeliveryCharge : 0,
                                 total,
                                 customerName: manualCustomerName.trim() || 'Walk-in Guest',
                                 contactNumber: manualContact,
