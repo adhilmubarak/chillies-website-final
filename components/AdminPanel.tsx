@@ -61,6 +61,7 @@ interface AdminPanelProps {
   onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
+  onTestNotification?: () => void;
   foodRatings?: FoodRating[];
   customOffers?: CustomOffer[];
   onAddCustomOffer?: (offer: CustomOffer) => void;
@@ -177,7 +178,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   isOpen, onClose, items, categories, orders, coupons = [], customOffers = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings, riderLocation,
   onAddItem, onUpdateItem, onDeleteItem, onAddCategory, onUpdateCategory, onDeleteCategory, onUpdateOrderStatus,
   onAddCoupon, onDeleteCoupon, onAddCustomOffer, onUpdateCustomOffer, onDeleteCustomOffer, onReorderCategory, onUpdateStoreSettings, onUpdatePromos, onAddOrder,
-  loyaltyAccounts, onAddLoyaltyAccount, onUpdateLoyaltyAccount
+  loyaltyAccounts, onAddLoyaltyAccount, onUpdateLoyaltyAccount, onTestNotification
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -1192,6 +1193,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     <p className="text-[10px] text-stone-500 max-w-xs leading-relaxed">Share this link directly with customers to collect their dining experience ratings.</p>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                            <h5 className="text-white text-base font-bold flex items-center gap-3"><MessageCircle size={20} className="text-gold-500" /> System Diagnostics</h5>
+                            <button 
+                                onClick={() => { if(onTestNotification) onTestNotification(); }} 
+                                className="px-8 py-4 bg-stone-950 border border-white/10 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] hover:border-gold-500 hover:text-gold-500 transition-all shadow-inner"
+                            >
+                                Test Push Notifications
+                            </button>
+                            <p className="text-stone-500 text-xs mt-3">Click to verify that your browser has granted permission and the ServiceWorker is capable of dispatching local Push Notification alerts.</p>
                         </div>
                     </div>
                 </div>
