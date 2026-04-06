@@ -180,6 +180,50 @@ function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(location.pathname === '/admin');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Request notifications gracefully when the user interacts
+  const requestNotifications = () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  };
+
+  // Push Notification logic for Flash Sales
+  const prevPromoRef = React.useRef<any>(null);
+  useEffect(() => {
+    if (prevPromoRef.current) {
+       if (!prevPromoRef.current.isFlashSaleActive && promoSettings.isFlashSaleActive) {
+          if ('Notification' in window && Notification.permission === 'granted') {
+             new Notification('⚡ Flash Sale is LIVE!', { body: 'Special discounts are active right now. Order before they are gone!', icon: '/pwa-icon.svg' });
+          }
+       }
+    }
+    prevPromoRef.current = promoSettings;
+  }, [promoSettings.isFlashSaleActive]);
+
+  // Push Notification logic for Local Orders
+  const prevOrdersRef = React.useRef<Record<string, string>>({});
+  useEffect(() => {
+    const myOrderIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
+    orders.forEach(order => {
+       const prevStatus = prevOrdersRef.current[order.id];
+       if (myOrderIds.includes(order.id) && prevStatus && prevStatus !== order.status) {
+          if ('Notification' in window && Notification.permission === 'granted') {
+             const messages: Record<string, string> = {
+                preparing: '👨‍🍳 Your order is now being prepared.',
+                ready: '🥡 Your order is ready!',
+                out_for_delivery: '🛵 Your order is out for delivery! Track it live.',
+                delivered: '✨ Your order is complete. Enjoy!',
+                cancelled: '❌ Your order was cancelled.'
+             };
+             if (messages[order.status]) {
+                 new Notification(`Order #${order.id} Update`, { body: messages[order.status], icon: '/pwa-icon.svg' });
+             }
+          }
+       }
+       prevOrdersRef.current[order.id] = order.status;
+    });
+  }, [orders]);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -356,6 +400,14 @@ function App() {
 
   const handleAddOrder = async (order: Order) => {
     try {
+      requestNotifications(); // Ask for notification permission during checkout interaction
+      
+      const myOrders = JSON.parse(localStorage.getItem('myOrders') || '[]');
+      if (!myOrders.includes(order.id)) {
+          myOrders.push(order.id);
+          localStorage.setItem('myOrders', JSON.stringify(myOrders));
+      }
+
       await addDoc(collection(db, 'orders'), order);
       
       if (order.contactNumber && order.contactNumber.length === 10) {
