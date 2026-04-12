@@ -180,7 +180,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   onAddCoupon, onDeleteCoupon, onAddCustomOffer, onUpdateCustomOffer, onDeleteCustomOffer, onReorderCategory, onUpdateStoreSettings, onUpdatePromos, onAddOrder,
   loyaltyAccounts, onAddLoyaltyAccount, onUpdateLoyaltyAccount, onTestNotification
 }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('chillies_admin_auth') === 'true';
+  });
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty'>('dashboard');
@@ -316,6 +318,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordInput === 'admin123') {
+        localStorage.setItem('chillies_admin_auth', 'true');
         setIsAuthenticated(true);
         setAuthError(false);
         setPasswordInput('');
@@ -370,7 +373,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   const handleExit = () => {
-    setIsAuthenticated(false);
     onClose();
   };
 
@@ -439,7 +441,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             ))}
         </nav>
         <div className="p-6 border-t border-white/5 space-y-2">
-            <button onClick={() => setIsAuthenticated(false)} className="w-full flex items-center gap-3 px-4 py-3 text-red-500 text-sm font-bold hover:bg-red-500/5 rounded-xl transition-colors"><LogOut size={16} /> Logout</button>
+            <button onClick={() => { localStorage.removeItem('chillies_admin_auth'); setIsAuthenticated(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-red-500 text-sm font-bold hover:bg-red-500/5 rounded-xl transition-colors"><LogOut size={16} /> Logout</button>
             <button onClick={handleExit} className="w-full flex items-center gap-3 px-4 py-3 text-stone-500 text-sm font-bold hover:text-white transition-colors"><X size={16} /> Exit Panel</button>
         </div>
       </aside>
