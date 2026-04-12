@@ -4,7 +4,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount } from '../types';
 import { printThermalBill } from '../App';
@@ -237,6 +237,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       }
       prevPendingCountRef.current = currentPendingCount;
   }, [orders]);
+
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    }
+  };
 
   useEffect(() => {
       if (isRinging) {
@@ -1237,6 +1258,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     <p className="text-[10px] text-stone-500 max-w-xs leading-relaxed">Share this link directly with customers to collect their dining experience ratings.</p>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                            <h5 className="text-white text-base font-bold flex items-center gap-3"><Smartphone size={20} className="text-brand-500" /> App Installation</h5>
+                            {deferredPrompt ? (
+                                <button 
+                                    onClick={handleInstallClick}
+                                    className="px-8 py-4 bg-brand-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-brand-400 transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center gap-2 w-fit"
+                                >
+                                    <Download size={16} /> Install Admin App
+                                </button>
+                            ) : (
+                                <div className="bg-stone-950 border border-white/5 p-4 rounded-2xl w-fit">
+                                    <p className="text-stone-500 text-[10px] uppercase font-black tracking-[0.1em]">Install option unavailable</p>
+                                    <p className="text-stone-600 text-xs mt-1 max-w-xs">If on iOS, tap 'Share' then 'Add to Home Screen'. Otherwise, app may already be installed.</p>
+                                </div>
+                            )}
                         </div>
 
                         <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
