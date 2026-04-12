@@ -219,13 +219,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [manualOrderSearch, setManualOrderSearch] = useState('');
 
   const [isRinging, setIsRinging] = useState(false);
+  const [latestNewOrderId, setLatestNewOrderId] = useState<string | null>(null);
   const prevPendingCountRef = useRef(orders.filter(o => o.status === 'pending').length);
   const ringAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-      const currentPendingCount = orders.filter(o => o.status === 'pending').length;
+      const pendingOrders = orders.filter(o => o.status === 'pending');
+      const currentPendingCount = pendingOrders.length;
       if (currentPendingCount > prevPendingCountRef.current) {
           setIsRinging(true);
+          const latestOrder = pendingOrders[currentPendingCount - 1];
+          if (latestOrder) setLatestNewOrderId(latestOrder.id);
+      }
+      if (currentPendingCount === 0) {
+          setIsRinging(false);
+          setLatestNewOrderId(null);
       }
       prevPendingCountRef.current = currentPendingCount;
   }, [orders]);
@@ -233,7 +241,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   useEffect(() => {
       if (isRinging) {
          if (!ringAudioRef.current) {
-            ringAudioRef.current = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
+            ringAudioRef.current = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
             ringAudioRef.current.loop = true;
          }
          ringAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
@@ -1678,12 +1686,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <h3 className="font-serif text-xl font-bold">New Order Received!</h3>
                     <p className="text-red-100 text-xs uppercase tracking-widest font-black mt-1">Check Pending Queue</p>
                 </div>
-                <button 
-                    onClick={() => setIsRinging(false)} 
-                    className="ml-4 flex items-center gap-2 bg-stone-950 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-stone-900 transition-all shadow-lg active:scale-95"
-                >
-                    <VolumeX size={16} /> Silence
-                </button>
+                <div className="flex gap-2 ml-4">
+                  {latestNewOrderId && (
+                      <button 
+                          onClick={() => {
+                              onUpdateOrderStatus(latestNewOrderId, 'preparing');
+                              setIsRinging(false);
+                          }} 
+                          className="flex items-center gap-2 bg-white text-red-600 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-stone-100 transition-all shadow-lg active:scale-95"
+                      >
+                          <Check size={16} className="stroke-[3]" /> Accept
+                      </button>
+                  )}
+                  <button 
+                      onClick={() => setIsRinging(false)} 
+                      className="flex items-center gap-2 bg-stone-950 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-stone-900 transition-all shadow-lg active:scale-95 border border-red-500/50"
+                  >
+                      <VolumeX size={16} /> Silence
+                  </button>
+                </div>
             </div>
         </div>
       )}
