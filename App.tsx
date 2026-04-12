@@ -284,6 +284,23 @@ function App() {
     });
   }, [orders]);
 
+  // Abandoned Cart Notification logic
+  useEffect(() => {
+    let timer: number;
+    if (cartItems.length > 0 && !isCartOpen) {
+      timer = window.setTimeout(() => {
+        fireNotification('Hungry? 😋', { 
+            body: 'Your delicious food is waiting in the cart! Complete your order before the kitchen closes.', 
+            icon: '/pwa-192x192.png', 
+            vibrate: [200, 100, 200] 
+        });
+      }, 15 * 60 * 1000); // 15 minutes
+    }
+    return () => {
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [cartItems, isCartOpen]);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);

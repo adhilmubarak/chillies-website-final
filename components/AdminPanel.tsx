@@ -4,7 +4,7 @@ import {
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount } from '../types';
 import { printThermalBill } from '../App';
@@ -215,6 +215,33 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [manualOrderType, setManualOrderType] = useState<'delivery'|'pickup'>('pickup');
   const [manualDeliveryCharge, setManualDeliveryCharge] = useState(20);
   const [manualOrderSearch, setManualOrderSearch] = useState('');
+
+  const [isRinging, setIsRinging] = useState(false);
+  const prevPendingCountRef = useRef(orders.filter(o => o.status === 'pending').length);
+  const ringAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+      const currentPendingCount = orders.filter(o => o.status === 'pending').length;
+      if (currentPendingCount > prevPendingCountRef.current) {
+          setIsRinging(true);
+      }
+      prevPendingCountRef.current = currentPendingCount;
+  }, [orders]);
+
+  useEffect(() => {
+      if (isRinging) {
+         if (!ringAudioRef.current) {
+            ringAudioRef.current = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
+            ringAudioRef.current.loop = true;
+         }
+         ringAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
+      } else {
+         if (ringAudioRef.current) {
+            ringAudioRef.current.pause();
+            ringAudioRef.current.currentTime = 0;
+         }
+      }
+  }, [isRinging]);
 
   useEffect(() => {
     if (isStoreOpen) {
@@ -1636,6 +1663,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </a>
             </div>
           </div>
+        </div>
+      )}
+
+      {isRinging && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[400] flex justify-center p-2 animate-fade-in pointer-events-none">
+            <div className="bg-red-500 text-white p-6 rounded-3xl shadow-[0_10px_50px_rgba(239,68,68,0.5)] flex items-center gap-6 pointer-events-auto border border-red-400">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                    <BellRing size={24} />
+                </div>
+                <div>
+                    <h3 className="font-serif text-xl font-bold">New Order Received!</h3>
+                    <p className="text-red-100 text-xs uppercase tracking-widest font-black mt-1">Check Pending Queue</p>
+                </div>
+                <button 
+                    onClick={() => setIsRinging(false)} 
+                    className="ml-4 flex items-center gap-2 bg-stone-950 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-stone-900 transition-all shadow-lg active:scale-95"
+                >
+                    <VolumeX size={16} /> Silence
+                </button>
+            </div>
         </div>
       )}
     </div>
