@@ -41,6 +41,49 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
   const [myHistory, setMyHistory] = useState<Order[]>([]);
+  const [isPagerActive, setIsPagerActive] = useState(false);
+
+  // Audio ref for the pager
+  const pagerAudio = React.useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (isPagerActive) {
+      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 500, 200, 500, 100, 200, 100, 500]);
+      
+      const audio = new Audio('https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg');
+      audio.loop = true;
+      pagerAudio.current = audio;
+      
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+         playPromise.catch(e => console.log('Audio blocked:', e));
+      }
+    } else {
+      if (pagerAudio.current) {
+        pagerAudio.current.pause();
+        pagerAudio.current.currentTime = 0;
+      }
+      if ('vibrate' in navigator) navigator.vibrate(0);
+    }
+    
+    return () => {
+      if (pagerAudio.current) {
+         pagerAudio.current.pause();
+      }
+    };
+  }, [isPagerActive]);
+
+  useEffect(() => {
+      if (foundOrder) {
+          const updatedOrder = orders.find(o => o.id === foundOrder.id);
+          if (updatedOrder) {
+              if (updatedOrder.type === 'pickup' && updatedOrder.status === 'ready' && foundOrder.status !== 'ready') {
+                  setIsPagerActive(true);
+              }
+              setFoundOrder(updatedOrder);
+          }
+      }
+  }, [orders]);
 
   useEffect(() => {
     if(initialOrderId) {
@@ -67,25 +110,29 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
 
   if (!isOpen) return null;
 
-  const fetchOrderDetails = async (idToFetch: string) => {
+  const fetchOrderDetails = (idToFetch: string) => {
     if (!idToFetch.trim()) return;
-    setLoading(true);
     setError('');
-    setFoundOrder(null);
-    try {
-      const q = query(collection(db, 'orders'), where('id', '==', idToFetch.trim()));
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
+    
+    const targetId = idToFetch.trim().toUpperCase();
+    const found = orders.find(o => o.id === targetId);
+    
+    if (!found) {
         setError('Order not found. Please check your Order ID.');
-      } else {
-        const data = querySnapshot.docs[0].data() as Order;
-        setFoundOrder(data);
-      }
-    } catch (err) {
-      console.error(err);
-      setError('Unable to fetch order details. Please try again.');
-    } finally {
-      setLoading(false);
+        setFoundOrder(null);
+    } else {
+        setFoundOrder(found);
+        
+        // Also save to standard history if not present
+        try {
+            const savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
+            if (!savedIds.includes(targetId)) {
+                savedIds.push(targetId);
+                localStorage.setItem('myOrders', JSON.stringify(savedIds));
+                const history = orders.filter(o => savedIds.includes(o.id)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                setMyHistory(history);
+            }
+        } catch(e) {}
     }
   };
 
@@ -130,6 +177,19 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/90 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      {isPagerActive && (
+         <div className="fixed inset-0 z-[110] bg-green-500 flex flex-col items-center justify-center p-6 animate-pulse" onClick={e => e.stopPropagation()}>
+            <ShoppingBag size={120} className="text-stone-950 mb-8 animate-bounce" />
+            <h1 className="text-4xl md:text-6xl font-black text-stone-950 text-center uppercase tracking-tighter mb-4">Your Order is Ready!</h1>
+            <p className="text-stone-900 text-lg md:text-2xl font-bold mb-12 text-center uppercase tracking-widest">Please collect it at the counter.</p>
+            <button 
+               onClick={() => setIsPagerActive(false)}
+               className="bg-stone-950 text-green-500 w-full max-w-sm py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] active:scale-95 transition-all"
+            >
+               Dismiss Alarm
+            </button>
+         </div>
+      )}
       <div className="bg-stone-900 border border-gold-500/30 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent"></div>
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-stone-950/50">
