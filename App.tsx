@@ -166,7 +166,8 @@ function App() {
       announcement: '',
       isAnnouncementActive: false,
       loyaltyPointsRatio: 10,
-      minimumPointsToRedeem: 50
+      minimumPointsToRedeem: 50,
+      latestBroadcast: null as { title: string; body: string; timestamp: number } | null
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -261,6 +262,21 @@ function App() {
     }
     prevPromoRef.current = promoSettings;
   }, [promoSettings.isFlashSaleActive]);
+
+  // Push Notification logic for Broadcasts
+  const prevBroadcastRef = React.useRef<any>(null);
+  useEffect(() => {
+    if (storeSettings.latestBroadcast) {
+       if (!prevBroadcastRef.current || prevBroadcastRef.current.timestamp !== storeSettings.latestBroadcast.timestamp) {
+          fireNotification(storeSettings.latestBroadcast.title, { 
+              body: storeSettings.latestBroadcast.body, 
+              icon: '/pwa-icon.svg', 
+              vibrate: [200, 100, 200] 
+          });
+       }
+       prevBroadcastRef.current = storeSettings.latestBroadcast;
+    }
+  }, [storeSettings.latestBroadcast]);
 
   // Push Notification logic for Local Orders
   const prevOrdersRef = React.useRef<Record<string, string>>({});
@@ -455,7 +471,8 @@ function App() {
                 announcement: data.announcement || '',
                 isAnnouncementActive: data.isAnnouncementActive || false,
                 loyaltyPointsRatio: data.loyaltyPointsRatio || 10,
-                minimumPointsToRedeem: data.minimumPointsToRedeem || 50
+                minimumPointsToRedeem: data.minimumPointsToRedeem || 50,
+                latestBroadcast: data.latestBroadcast || null
             });
         }
     });

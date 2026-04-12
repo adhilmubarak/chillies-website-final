@@ -47,7 +47,7 @@ interface AdminPanelProps {
     happyHourStartTime: string;
     happyHourEndTime: string;
   };
-  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number };
+  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null };
   onAddItem: (item: MenuItem) => void;
   onUpdateItem: (item: MenuItem) => void;
   onDeleteItem: (id: string) => void;
@@ -58,7 +58,7 @@ interface AdminPanelProps {
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
-  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number }) => void;
+  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
   onTestNotification?: () => void;
@@ -217,6 +217,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [manualOrderType, setManualOrderType] = useState<'delivery'|'pickup'>('pickup');
   const [manualDeliveryCharge, setManualDeliveryCharge] = useState(20);
   const [manualOrderSearch, setManualOrderSearch] = useState('');
+
+  const [pushTitle, setPushTitle] = useState('Chillies Update');
+  const [pushBody, setPushBody] = useState('We have some exciting news for you. Open the app to see!');
 
   const [isRinging, setIsRinging] = useState(false);
   const [latestNewOrderId, setLatestNewOrderId] = useState<string | null>(null);
@@ -1275,6 +1278,44 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     <p className="text-stone-600 text-xs mt-1 max-w-xs">If on iOS, tap 'Share' then 'Add to Home Screen'. Otherwise, app may already be installed.</p>
                                 </div>
                             )}
+                        </div>
+
+                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                            <h5 className="text-white text-base font-bold flex items-center gap-3"><Send size={20} className="text-brand-500" /> Dispatch Push Notification</h5>
+                            <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black">Notification Title</label>
+                                    <input 
+                                        type="text"
+                                        value={pushTitle}
+                                        onChange={e => setPushTitle(e.target.value)}
+                                        className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-white text-sm focus:border-brand-500 outline-none transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black">Message Body</label>
+                                    <textarea 
+                                        value={pushBody}
+                                        onChange={e => setPushBody(e.target.value)}
+                                        className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-white text-sm focus:border-brand-500 outline-none h-20 resize-none transition-all"
+                                    />
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        if (pushTitle && pushBody) {
+                                            onUpdateStoreSettings({ 
+                                                ...storeSettings, 
+                                                latestBroadcast: { title: pushTitle, body: pushBody, timestamp: Date.now() }
+                                            });
+                                            alert("Push notification broadcasted to all connected devices!");
+                                        }
+                                    }}
+                                    className="w-full bg-brand-500 text-white font-black py-4 rounded-xl uppercase tracking-widest text-[10px] hover:bg-brand-400 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                                >
+                                    <Send size={16} /> Broadcast Now
+                                </button>
+                                <p className="text-[10px] text-stone-500 max-w-xs leading-relaxed text-center w-full">This directly prompts all active, opted-in users who have notifications enabled.</p>
+                            </div>
                         </div>
 
                         <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
