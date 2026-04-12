@@ -9,6 +9,7 @@ import HappyHourView from './components/HappyHourView';
 import CartSidebar from './components/CartSidebar';
 import AdminPanel from './components/AdminPanel';
 import DeliveryPanel from './components/DeliveryPanel';
+import KitchenPanel from './components/KitchenPanel';
 import RewardsPage from './components/RewardsPage';
 import Footer from './components/Footer';
 import OrderTrackerModal from './components/OrderTrackerModal';
@@ -625,6 +626,20 @@ function App() {
           />
         </div>
       } />
+      <Route path="/kitchen" element={
+        <KitchenPanel 
+          orders={orders}
+          onUpdateOrderStatus={async (id, s, pm) => { 
+              const q = query(collection(db, 'orders'), where("id", "==", id)); 
+              const snap = await getDocs(q); 
+              snap.forEach(d => {
+                const updates: any = { status: s };
+                if (s === 'ready') updates.assignedAt = Date.now();
+                updateDoc(d.ref, updates);
+              }); 
+          }}
+        />
+      } />
       <Route path="/offers" element={
         <OffersPage 
           isFlashSaleActive={isFlashSaleActive}
@@ -800,6 +815,8 @@ function App() {
             setIsCartOpen(false);
             setIsTrackerOpen(true);
         }} coupons={coupons}
+        allMenuItems={menuItems}
+        onAddToCart={addToCart}
         loyaltyAccounts={loyaltyAccounts}
         storeSettings={storeSettings}
       />

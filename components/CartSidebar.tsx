@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Minus, Plus, ShoppingBag, Send, Bike, Store, User, CheckCircle, Clock, FileText, AlertCircle, Copy, Check, ArrowRight, ArrowLeft, MapPin, ExternalLink, Ticket, Tag, Printer } from 'lucide-react';
-import { CartItem, Order, Coupon, LoyaltyAccount } from '../types';
+import { CartItem, Order, Coupon, LoyaltyAccount, MenuItem } from '../types';
 import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 
@@ -18,6 +18,8 @@ interface CartSidebarProps {
   coupons?: Coupon[];
   loyaltyAccounts?: LoyaltyAccount[];
   storeSettings?: { minimumPointsToRedeem?: number; loyaltyPointsRatio?: number; [key:string]: any };
+  allMenuItems?: MenuItem[];
+  onAddToCart?: (item: MenuItem) => void;
 }
 
 const DELIVERY_FEE = 20;
@@ -34,7 +36,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   onTrackOrder,
   coupons = [],
   loyaltyAccounts = [],
-  storeSettings
+  storeSettings,
+  allMenuItems = [],
+  onAddToCart
 }) => {
   const [step, setStep] = useState<'cart' | 'details' | 'confirmation'>('cart');
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
@@ -70,6 +74,26 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   const baseTotal = subtotal - discountAmount + deliveryCharge;
   const pointsRedeemed = redeemPoints && userLoyalty ? Math.min(userLoyalty.points, baseTotal) : 0;
   const total = baseTotal - pointsRedeemed;
+
+  const suggestedItems = React.useMemo(() => {
+     if (!allMenuItems.length || cartItems.length === 0) return [];
+     const cartItemIds = new Set(cartItems.map(i => i.id));
+     
+     const hasDrink = cartItems.some(i => i.category === 'Drinks' || i.name.toLowerCase().includes('mojito'));
+     
+     let upsells = allMenuItems.filter(i => !cartItemIds.has(i.id) && !i.isExclusive);
+     
+     upsells.sort((a, b) => {
+         let scoreA = 0; let scoreB = 0;
+         if (!hasDrink && a.category === 'Drinks') scoreA += 10;
+         if (!hasDrink && b.category === 'Drinks') scoreB += 10;
+         if (a.isChefChoice) scoreA += 5;
+         if (b.isChefChoice) scoreB += 5;
+         return scoreB - scoreA;
+     });
+     
+     return upsells.slice(0, 4);
+  }, [allMenuItems, cartItems]);
 
   useEffect(() => {
     if (cartItems.length === 0 && step === 'details') {
@@ -318,11 +342,41 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
             <>
                 <div className="p-6 md:p-8 pb-4 border-b border-white/5 flex justify-between items-center bg-stone-950/50"><h2 className="font-serif text-2xl md:text-3xl text-white">Your Selection</h2><button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-950/5 rounded-full"><X size={24} /></button></div>
                 <div className="px-6 md:px-8 py-6 border-b border-white/5 bg-stone-950/30"><div className="grid grid-cols-2 gap-2 p-1 bg-stone-900/50 rounded-xl border border-white/5 shadow-inner"><button onClick={() => setOrderType('delivery')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'delivery' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Bike size={16} /><span>Delivery</span></button><button onClick={() => setOrderType('pickup')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'pickup' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Store size={16} /><span>Pickup</span></button></div></div>
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 scrollbar-hide min-h-0">
-                    {cartItems.length === 0 ? (<div className="h-full flex flex-col items-center justify-center text-stone-500 space-y-6 animate-fade-in"><ShoppingBag size={32} className="opacity-20" /><p className="font-light tracking-widest uppercase text-[10px]">Cart is empty</p><button onClick={() => { onClose(); document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gold-400 hover:text-gold-300 uppercase text-[10px] tracking-widest font-black border-b border-gold-400/30 pb-1 transition-all">Explore Menu</button></div>) : (cartItems.map((item) => (
+                <div className="flex-1 overflow-y-auto pt-6 md:pt-8 bg-stone-950/30 space-y-6 scrollbar-hide min-h-0">
+                    <div className="px-6 md:px-8 space-y-4">
+                    {cartItems.length === 0 ? (<div className="h-full flex flex-col items-center justify-center text-stone-500 space-y-6 animate-fade-in py-10"><ShoppingBag size={32} className="opacity-20" /><p className="font-light tracking-widest uppercase text-[10px]">Cart is empty</p><button onClick={() => { onClose(); document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gold-400 hover:text-gold-300 uppercase text-[10px] tracking-widest font-black border-b border-gold-400/30 pb-1 transition-all">Explore Menu</button></div>) : (cartItems.map((item) => (
                         <div key={item.id} className="flex gap-4 items-center bg-stone-900 border border-white/5 p-4 rounded-2xl group hover:border-gold-500/20 transition-all">
                           <SafeImage src={item.image} containerClassName="w-14 h-14 md:w-16 md:h-16 rounded-xl shrink-0" className="w-full h-full object-cover" />
                           <div className="flex-grow min-w-0"><h4 className="text-stone-200 font-medium text-xs md:text-sm truncate">{item.name}</h4><p className="text-gold-400 text-xs mt-1 font-bold">₹{item.price}</p></div><div className="flex items-center bg-stone-950 rounded-xl border border-white/10 p-1"><button onClick={() => onUpdateQuantity(item.id, -1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Minus size={12} /></button><span className="w-6 text-center text-[10px] font-bold text-white">{item.quantity}</span><button onClick={() => onUpdateQuantity(item.id, 1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Plus size={12} /></button></div></div>)))}
+                    </div>
+
+                    {cartItems.length > 0 && suggestedItems.length > 0 && (
+                        <div className="px-6 md:px-8 mt-10 mb-6">
+                            <div className="text-[10px] text-stone-500 font-black uppercase tracking-[0.2em] mb-4">Complete Your Meal</div>
+                            <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide snap-x">
+                                {suggestedItems.map(item => (
+                                    <div key={item.id} className="snap-start shrink-0 w-44 bg-stone-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col hover:border-gold-500/30 transition-all group">
+                                        <div className="h-28 w-full relative">
+                                            <SafeImage src={item.image} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent"></div>
+                                        </div>
+                                        <div className="p-4 flex-1 flex flex-col justify-between -mt-12 relative z-10">
+                                            <div>
+                                                <h5 className="text-white text-xs font-bold truncate drop-shadow-md">{item.name}</h5>
+                                                <p className="text-gold-500 text-[10px] font-black mt-1">₹{item.price}</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => onAddToCart && onAddToCart(item)}
+                                                className="mt-4 py-2.5 w-full bg-stone-950 border border-white/10 text-stone-300 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-gold-500 hover:text-gold-500 transition-all active:scale-95 flex items-center justify-center gap-1"
+                                            >
+                                                <Plus size={10} /> Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
                 {cartItems.length > 0 && (
                     <div className="p-6 md:p-8 bg-stone-950/80 border-t border-white/5 space-y-6">
