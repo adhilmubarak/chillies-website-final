@@ -136,10 +136,11 @@ function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [dbCategories, setDbCategories] = useState<CategoryConfig[]>([
-      { id: '1', name: 'Starters' },
-      { id: '2', name: 'Main Course' },
-      { id: '3', name: 'Desserts' },
-      { id: '4', name: 'Drinks' }
+      { id: '1', name: 'Breads' },
+      { id: '2', name: 'Starters' },
+      { id: '3', name: 'Main Course' },
+      { id: '4', name: 'Desserts' },
+      { id: '5', name: 'Drinks' }
   ]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [customOffers, setCustomOffers] = useState<CustomOffer[]>([]);
@@ -176,7 +177,7 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [initialTrackId, setInitialTrackId] = useState('');
-  const [activeCategory, setActiveCategory] = useState<Category>('All');
+  const [activeCategory, setActiveCategory] = useState<Category>('Breads');
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestion, setSuggestion] = useState<MenuItem | null>(null);
   const navigate = useNavigate();
@@ -536,9 +537,9 @@ function App() {
 
   useEffect(() => {
     if (activeCategory === 'Flash Sale' && !isFlashSaleActive) {
-      setActiveCategory('All');
+      setActiveCategory('Breads');
     } else if (activeCategory === 'Happy Hour' && !isHappyHourActive) {
-      setActiveCategory('All');
+      setActiveCategory('Breads');
     }
   }, [isFlashSaleActive, isHappyHourActive, activeCategory]);
 

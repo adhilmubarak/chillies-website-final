@@ -62,7 +62,7 @@ const ChefsChoice: React.FC<ChefsChoiceProps> = ({
                  
                  <div className="relative transform transition-transform duration-500 hover:-translate-y-2 h-full">
                     {/* Badge */}
-                    <div className="absolute -top-3 -right-3 z-30 bg-gold-500 text-stone-950 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-1">
+                    <div className="absolute top-3 right-3 z-30 bg-gold-500 text-stone-950 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-1">
                         <Star size={10} fill="currentColor" /> Signature
                     </div>
                     
