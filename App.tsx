@@ -279,9 +279,12 @@ function App() {
 
   // Push Notification logic for Broadcasts
   const prevBroadcastRef = React.useRef<any>(null);
+  const isInitialBroadcastLoad = React.useRef<boolean>(true);
   useEffect(() => {
     if (storeSettings.latestBroadcast) {
-       if (!prevBroadcastRef.current || prevBroadcastRef.current.timestamp !== storeSettings.latestBroadcast.timestamp) {
+       if (isInitialBroadcastLoad.current) {
+           isInitialBroadcastLoad.current = false;
+       } else if (!prevBroadcastRef.current || prevBroadcastRef.current.timestamp !== storeSettings.latestBroadcast.timestamp) {
           fireNotification(storeSettings.latestBroadcast.title, { 
               body: storeSettings.latestBroadcast.body, 
               icon: '/pwa-icon.svg', 
@@ -900,7 +903,7 @@ function App() {
     </Routes>
     
     {showInstallBanner && (deferredPrompt || isIOS) && (
-        <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-8 md:bottom-8 md:w-96 bg-stone-900 border border-brand-500/50 rounded-2xl p-4 shadow-2xl z-[100] animate-fade-in flex flex-col gap-3">
+        <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-8 md:bottom-8 md:w-96 bg-stone-900 border border-brand-500/50 rounded-2xl p-4 shadow-2xl z-[9999] animate-fade-in flex flex-col gap-3">
             <div className="flex justify-between items-start">
                 <div className="flex gap-3 items-center">
                     <img src="/pwa-192x192.png" alt="App Icon" className="w-10 h-10 rounded-xl object-contain drop-shadow-md" onError={(e) => { (e.target as HTMLImageElement).src = 'https://cdn-icons-png.flaticon.com/512/3132/3132693.png'; }} />

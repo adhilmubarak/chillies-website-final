@@ -269,8 +269,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   useEffect(() => {
       if (isRinging) {
          if (!ringAudioRef.current) {
-            ringAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
+            ringAudioRef.current = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
             ringAudioRef.current.loop = true;
+            ringAudioRef.current.volume = 1.0;
          }
          ringAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
       } else {
