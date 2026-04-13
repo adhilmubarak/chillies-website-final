@@ -61,12 +61,12 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
           const isAllCrossed = orderCrossed.length === order.items.length && order.items.length > 0;
           const isPending = order.status === 'pending';
           const timeElapsed = getElapsedTime(order.createdAt);
-          const isLate = order.createdAt && (currentTime.getTime() - order.createdAt) > 15 * 60000; // > 15 mins
+          const isDelayed = order.createdAt && (currentTime.getTime() - order.createdAt) > 10 * 60000; // > 10 mins
 
           return (
-            <div key={order.id} className={`flex flex-col bg-stone-900 rounded-3xl overflow-hidden border shadow-2xl transition-all ${isAllCrossed ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)]' : isLate ? 'border-red-500/30' : 'border-white/10'}`}>
+            <div key={order.id} className={`flex flex-col bg-stone-900 rounded-3xl overflow-hidden border shadow-2xl transition-all ${isAllCrossed ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)]' : isDelayed ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.15)] opacity-90 animate-[shake_0.5s_ease-in-out_infinite]' : 'border-white/10'}`}>
               
-              <div className={`p-4 md:p-5 flex justify-between items-center ${isAllCrossed ? 'bg-green-500 text-stone-950' : isLate ? 'bg-red-500 text-white' : 'bg-stone-800 text-white'}`}>
+              <div className={`p-4 md:p-5 flex justify-between items-center ${isAllCrossed ? 'bg-green-500 text-stone-950' : isDelayed ? 'bg-red-500/90 text-white' : 'bg-stone-800 text-white'}`}>
                 <div>
                   <h2 className="text-2xl font-black tracking-tighter">#{order.id.slice(-4)}</h2>
                   <div className="flex items-center gap-2 mt-1 opacity-80">
@@ -106,8 +106,8 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
               <div className="p-4 bg-stone-950 border-t border-white/10 mt-auto flex flex-col gap-3">
                 <div className="flex items-center justify-between px-2 text-stone-500">
                   <span className="text-[10px] uppercase font-black tracking-widest">Status</span>
-                  <span className={`text-[10px] uppercase font-black tracking-widest px-3 py-1 rounded-full ${isPending ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-brand-500/10 text-brand-500 border border-brand-500/20'}`}>
-                     {isPending ? 'Pending' : 'Preparing'}
+                  <span className={`text-[10px] uppercase font-black tracking-widest px-3 py-1 rounded-full ${isDelayed ? 'bg-red-500/10 text-red-500 border border-red-500/20 animate-pulse' : isPending ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-brand-500/10 text-brand-500 border border-brand-500/20'}`}>
+                     {isDelayed ? 'Delayed' : isPending ? 'Pending' : 'Preparing'}
                   </span>
                 </div>
                 <button 
