@@ -543,6 +543,45 @@ function App() {
     }
   }, [isFlashSaleActive, isHappyHourActive, activeCategory]);
 
+  const orderedCats = useMemo(() => [
+    ...dbCategories.filter(c => !c.isUnavailable && (c.name.toLowerCase() === 'breads' || c.name.toLowerCase() === 'bread')).map(c => c.name),
+    ...(isFlashSaleActive ? ['Flash Sale'] : []), 
+    ...(isHappyHourActive ? ['Happy Hour'] : []), 
+    ...dbCategories.filter(c => !c.isUnavailable && c.name.toLowerCase() !== 'breads' && c.name.toLowerCase() !== 'bread').map(c => c.name),
+    'All'
+  ], [dbCategories, isFlashSaleActive, isHappyHourActive]);
+
+  const observerTarget = React.useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const el = observerTarget.current;
+    if (!el) return;
+    
+    let isInitialRender = true;
+    const observer = new IntersectionObserver(
+        (entries) => {
+            if (isInitialRender) {
+                isInitialRender = false;
+                return;
+            }
+            if (entries[0].isIntersecting) {
+               const currentIndex = orderedCats.indexOf(activeCategory);
+               if (currentIndex !== -1 && currentIndex < orderedCats.length - 2) {
+                   const nextCat = orderedCats[currentIndex + 1];
+                   setActiveCategory(nextCat);
+                   setTimeout(() => {
+                       document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' });
+                   }, 50);
+               }
+            }
+        }, 
+        { threshold: 0.1 }
+    );
+    
+    const t = setTimeout(() => observer.observe(el), 800);
+    return () => { clearTimeout(t); observer.disconnect(); };
+  }, [activeCategory, orderedCats]);
+
   const filteredItems = menuItems.filter(item => {
     const parentCategory = dbCategories.find(c => c.name === item.category);
     if (parentCategory?.isUnavailable) return false;
@@ -740,13 +779,7 @@ function App() {
 
         <div className="flex flex-col items-center gap-6 mb-12">
             <div className="flex w-full overflow-x-auto scrollbar-hide md:flex-wrap md:justify-center gap-2 px-4 pb-4">
-                {[
-                  ...dbCategories.filter(c => !c.isUnavailable && (c.name.toLowerCase() === 'breads' || c.name.toLowerCase() === 'bread')).map(c => c.name),
-                  ...(isFlashSaleActive ? ['Flash Sale'] : []), 
-                  ...(isHappyHourActive ? ['Happy Hour'] : []), 
-                  ...dbCategories.filter(c => !c.isUnavailable && c.name.toLowerCase() !== 'breads' && c.name.toLowerCase() !== 'bread').map(c => c.name),
-                  'All'
-                ].map(cat => (
+                {orderedCats.map(cat => (
                     <button key={cat} onClick={() => setActiveCategory(cat)}
                         className={`flex-shrink-0 px-6 md:px-8 py-3 rounded-full border transition-all text-[10px] md:text-xs font-bold uppercase tracking-widest ${
                             activeCategory === cat ? 'bg-brand-500 border-brand-500 text-white' : 'bg-transparent border-stone-800 text-stone-500'
@@ -790,6 +823,7 @@ function App() {
                 />
               )}
               {activeCategory !== 'Flash Sale' && activeCategory !== 'Happy Hour' && (
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                     {filteredItems.map((item, index) => (
                         <MenuItemCard 
@@ -801,6 +835,15 @@ function App() {
                         />
                     ))}
                 </div>
+                {orderedCats.indexOf(activeCategory) !== -1 && orderedCats.indexOf(activeCategory) < orderedCats.length - 2 && (
+                    <div ref={observerTarget} className="w-full h-32 flex justify-center items-center opacity-70">
+                        <div className="flex flex-col items-center animate-pulse">
+                            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-stone-500 mb-4">Scroll to next</span>
+                            <div className="w-px h-12 bg-gradient-to-b from-stone-600 to-transparent"></div>
+                        </div>
+                    </div>
+                )}
+                </>
               )}
             </>
         )}
