@@ -19,8 +19,9 @@ import StoreStatusAlert from './components/StoreStatusAlert';
 import BottomNav from './components/BottomNav';
 import FeedbackModal from './components/FeedbackModal';
 import OffersPage from './components/OffersPage';
+import ComplaintsPage from './components/ComplaintsPage';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
-import { MenuItem, CategoryConfig, CartItem, Order, Coupon, CustomOffer, FoodRating, LoyaltyAccount, Category } from './types';
+import { MenuItem, CategoryConfig, CartItem, Order, Coupon, CustomOffer, FoodRating, LoyaltyAccount, Category, Complaint } from './types';
 import { Search, X } from 'lucide-react';
 
 import { db } from './firebase';
@@ -147,6 +148,7 @@ function App() {
   
   const [activeSection, setActiveSection] = useState('home');
   const [foodRatings, setFoodRatings] = useState<FoodRating[]>([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [riderLocation, setRiderLocation] = useState<{lat: number, lng: number, timestamp: number} | null>(null);
 
   const [promoSettings, setPromoSettings] = useState({
@@ -451,6 +453,15 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const q = query(collection(db, 'complaints'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetched = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Complaint));
+      setComplaints(fetched.sort((a, b) => b.createdAt - a.createdAt));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const settingsRef = doc(db, 'settings', 'general');
     const unsubscribe = onSnapshot(settingsRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -559,6 +570,7 @@ function App() {
             coupons={coupons}
             customOffers={customOffers}
             foodRatings={foodRatings}
+            complaints={complaints}
             isStoreOpen={isStoreOpen}
             promoSettings={promoSettings}
             storeSettings={storeSettings}
@@ -601,6 +613,8 @@ function App() {
             loyaltyAccounts={loyaltyAccounts}
             onAddLoyaltyAccount={async (phone: string, points: number) => { await addDoc(collection(db, 'loyalty'), { phone, points, lastUpdated: Date.now() }); }}
             onUpdateLoyaltyAccount={async (id: string, points: number) => { await updateDoc(doc(db, 'loyalty', id), { points, lastUpdated: Date.now() }); }}
+            onUpdateComplaint={async (id: string, st: 'open' | 'resolved') => { await updateDoc(doc(db, 'complaints', id), { status: st }); }}
+            onDeleteComplaint={async (id: string) => await deleteDoc(doc(db, 'complaints', id))}
             onAddOrder={handleAddOrder}
           />
         </div>
@@ -652,6 +666,7 @@ function App() {
       } />
       <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} onEnrollLoyalty={async (phone: string, name: string) => { await addDoc(collection(db, 'loyalty'), { phone, customerName: name, points: 0, lastUpdated: Date.now() }); }} />} />
       <Route path="/feedback" element={<FeedbackModal />} />
+      <Route path="/complaints" element={<ComplaintsPage />} />
       <Route path="/*" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden">
           <div className="fixed inset-0 bg-stone-950 -z-10" />

@@ -91,3 +91,14 @@ export interface LoyaltyAccount {
   points: number;
   lastUpdated: number;
 }
+
+export interface Complaint {
+  id?: string;
+  customerName: string;
+  phone: string;
+  orderId?: string;
+  subject: string;
+  description: string;
+  status: 'open' | 'resolved';
+  createdAt: number;
+}

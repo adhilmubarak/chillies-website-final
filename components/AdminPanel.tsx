@@ -6,7 +6,7 @@ import {
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
   Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone
 } from 'lucide-react';
-import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount } from '../types';
+import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount, Complaint } from '../types';
 import { printThermalBill } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
@@ -71,6 +71,9 @@ interface AdminPanelProps {
   loyaltyAccounts?: LoyaltyAccount[];
   onAddLoyaltyAccount?: (phone: string, points: number) => Promise<void>;
   onUpdateLoyaltyAccount?: (id: string, points: number) => Promise<void>;
+  complaints?: Complaint[];
+  onUpdateComplaint?: (id: string, status: 'open' | 'resolved') => Promise<void>;
+  onDeleteComplaint?: (id: string) => Promise<void>;
 }
 
 const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => void }> = ({ onScan, onClose }) => {
@@ -178,14 +181,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   isOpen, onClose, items, categories, orders, coupons = [], customOffers = [], foodRatings = [], isStoreOpen, promoSettings, storeSettings, riderLocation,
   onAddItem, onUpdateItem, onDeleteItem, onAddCategory, onUpdateCategory, onDeleteCategory, onUpdateOrderStatus,
   onAddCoupon, onDeleteCoupon, onAddCustomOffer, onUpdateCustomOffer, onDeleteCustomOffer, onReorderCategory, onUpdateStoreSettings, onUpdatePromos, onAddOrder,
-  loyaltyAccounts, onAddLoyaltyAccount, onUpdateLoyaltyAccount, onTestNotification
+  loyaltyAccounts, onAddLoyaltyAccount, onUpdateLoyaltyAccount, onTestNotification,
+  complaints = [], onUpdateComplaint, onDeleteComplaint
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('chillies_admin_auth') === 'true';
   });
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty' | 'complaints'>('dashboard');
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
   const [isOfferFormOpen, setIsOfferFormOpen] = useState(false);
@@ -457,6 +461,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 { id: 'promotions', icon: Zap, label: 'Marketing' },
                 { id: 'loyalty', icon: Award, label: 'Loyalty Program' },
                 { id: 'reviews', icon: Star, label: 'Feedback' },
+                { id: 'complaints', icon: AlertTriangle, label: 'Complaints' },
                 { id: 'payment', icon: Wallet, label: 'Payment' },
                 { id: 'settings', icon: Settings, label: 'Operations' }
             ].map(tab => (
@@ -1017,6 +1022,79 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'complaints' && (
+                <div className="max-w-4xl animate-fade-in space-y-12 mx-auto pb-12">
+                    <div className="bg-stone-900 border border-white/5 p-10 rounded-[3rem] shadow-xl">
+                        <div className="flex items-center gap-4 mb-10">
+                            <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 border border-red-500/20"><AlertTriangle size={24} /></div>
+                            <div>
+                                <h4 className="text-2xl font-serif text-white">Registered Complaints</h4>
+                                <p className="text-stone-500 text-xs mt-1">Review and resolve customer issues</p>
+                            </div>
+                        </div>
+
+                        {complaints.length === 0 ? (
+                            <div className="text-center py-20 border-2 border-dashed border-stone-800 rounded-3xl">
+                                <Check className="mx-auto text-stone-600 mb-4" size={48} />
+                                <p className="text-stone-400 font-bold uppercase tracking-widest text-xs">Zero Complaints! Great job.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {complaints.map(complaint => (
+                                    <div key={complaint.id} className="bg-stone-950 border border-white/5 p-6 rounded-[2rem] flex flex-col md:flex-row gap-6">
+                                        <div className="flex-1 space-y-4">
+                                            <div className="flex items-start justify-between">
+                                                <div>
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <span className="font-bold text-white text-lg">{complaint.customerName}</span>
+                                                        <span className={`text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-full ${complaint.status === 'resolved' ? 'bg-green-500/20 text-green-500' : 'bg-orange-500/20 text-orange-500'}`}>
+                                                            {complaint.status}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-stone-500 text-xs font-mono mb-2">
+                                                        {complaint.phone} {complaint.orderId && `• Order #${complaint.orderId}`} • {new Date(complaint.createdAt).toLocaleString()}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-stone-900 p-4 rounded-2xl border border-white/5">
+                                                <h5 className="text-white font-bold text-sm mb-2">{complaint.subject}</h5>
+                                                <p className="text-stone-400 text-sm leading-relaxed">{complaint.description}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex md:flex-col gap-2 shrink-0 md:w-32 justify-end">
+                                            {complaint.status === 'open' ? (
+                                                <button 
+                                                    onClick={() => onUpdateComplaint && complaint.id && onUpdateComplaint(complaint.id, 'resolved')}
+                                                    className="flex-1 md:flex-none p-3 bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white rounded-xl transition-all border border-green-500/20 flex items-center justify-center gap-2"
+                                                    title="Mark Resolved"
+                                                >
+                                                    <Check size={18} /> <span className="text-xs font-bold md:hidden">Resolve</span>
+                                                </button>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => onUpdateComplaint && complaint.id && onUpdateComplaint(complaint.id, 'open')}
+                                                    className="flex-1 md:flex-none p-3 bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white rounded-xl transition-all border border-orange-500/20 flex items-center justify-center gap-2"
+                                                    title="Reopen"
+                                                >
+                                                    <AlertTriangle size={18} /> <span className="text-xs font-bold md:hidden">Reopen</span>
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => onDeleteComplaint && complaint.id && onDeleteComplaint(complaint.id)}
+                                                className="flex-1 md:flex-none p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all border border-red-500/20 flex items-center justify-center gap-2"
+                                                title="Delete Record"
+                                            >
+                                                <Trash2 size={18} /> <span className="text-xs font-bold md:hidden">Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
