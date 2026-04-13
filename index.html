@@ -117,9 +117,37 @@
     "firebase/": "https://esm.sh/firebase@^12.7.0/",
     "vite": "https://esm.sh/vite@^7.3.0",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "html5-qrcode": "https://esm.sh/html5-qrcode@^2.3.8"
   }
 }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.startsWith('/admin')) {
+      const manifestLink = document.querySelector('link[rel="manifest"]');
+      if (manifestLink) {
+        fetch(manifestLink.href)
+          .then(res => res.json())
+          .then(manifest => {
+            manifest.start_url = '/admin';
+            manifest.name = 'Chillies Admin';
+            manifest.short_name = 'Admin';
+            
+            // Fix icon paths because blob URLs cannot resolve relative paths
+            if (manifest.icons) {
+              manifest.icons.forEach(icon => {
+                if (!icon.src.startsWith('http') && !icon.src.startsWith('/')) {
+                  icon.src = '/' + icon.src;
+                }
+              });
+            }
+            
+            const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            manifestLink.href = URL.createObjectURL(blob);
+          })
+          .catch(err => console.error('Error rewriting manifest:', err));
+      }
+    }
+  });
 </script>
 </head>
   <body>
