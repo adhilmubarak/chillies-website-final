@@ -185,6 +185,15 @@ function App() {
   const location = useLocation();
   const [isAdminOpen, setIsAdminOpen] = useState(location.pathname === '/admin');
   const [isLoading, setIsLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3000);
+    return () => clearTimeout(splashTimer);
+  }, []);
+  
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -792,7 +801,7 @@ function App() {
             </div>
         </div>
 
-        {isLoading ? (
+        {(isLoading || showSplash) ? (
             <ShawarmaLoader />
         ) : (
             <>
