@@ -12,7 +12,7 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // update every minute
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000); // update every second
     return () => clearInterval(timer);
   }, []);
 
@@ -37,9 +37,21 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
   };
 
   const getElapsedTime = (timestamp?: number) => {
-    if (!timestamp) return '0m';
-    const diff = Math.floor((currentTime.getTime() - timestamp) / 60000);
-    return `${diff}m`;
+    if (!timestamp) return '00:00';
+    const diffMs = currentTime.getTime() - timestamp;
+    if (diffMs < 0) return '00:00';
+    
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (minutes >= 60) {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -64,9 +76,9 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
           const isDelayed = order.createdAt && (currentTime.getTime() - order.createdAt) > 10 * 60000; // > 10 mins
 
           return (
-            <div key={order.id} className={`flex flex-col bg-stone-900 rounded-3xl overflow-hidden border shadow-2xl transition-all ${isAllCrossed ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)]' : isDelayed ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.15)] opacity-90 animate-[shake_0.5s_ease-in-out_infinite]' : 'border-white/10'}`}>
+            <div key={order.id} className={`flex flex-col bg-stone-900 rounded-3xl overflow-hidden border shadow-2xl transition-all ${isAllCrossed ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)]' : isDelayed ? 'border-red-500/80 shadow-[0_0_40px_rgba(239,68,68,0.3)] animate-pulse' : 'border-white/10'}`}>
               
-              <div className={`p-4 md:p-5 flex justify-between items-center ${isAllCrossed ? 'bg-green-500 text-stone-950' : isDelayed ? 'bg-red-500/90 text-white' : 'bg-stone-800 text-white'}`}>
+              <div className={`p-4 md:p-5 flex justify-between items-center ${isAllCrossed ? 'bg-green-500 text-stone-950' : isDelayed ? 'bg-red-500 text-white' : 'bg-stone-800 text-white'}`}>
                 <div>
                   <h2 className="text-2xl font-black tracking-tighter">#{order.id.slice(-4)}</h2>
                   <div className="flex items-center gap-2 mt-1 opacity-80">
@@ -75,7 +87,7 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
                   </div>
                 </div>
                 <div className="text-right">
-                    <div className="text-lg font-black">{timeElapsed}</div>
+                    <div className="text-xl font-mono tracking-tighter font-black">{timeElapsed}</div>
                     <span className="text-[9px] uppercase tracking-widest font-bold opacity-80">{order.type}</span>
                 </div>
               </div>
