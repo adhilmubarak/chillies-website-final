@@ -52,11 +52,11 @@ const ChefsChoice: React.FC<ChefsChoiceProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+        <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-6 pb-8 px-4 -mx-4 md:px-0 md:mx-0">
           {items.map((item, index) => {
             const availability = checkAvailability ? checkAvailability(item.category) : { isAvailable: true };
             return (
-              <div key={item.id} className="relative group">
+              <div key={item.id} className="relative group shrink-0 w-[85vw] sm:w-[340px] snap-center">
                  {/* Gold Glow Effect behind cards */}
                  <div className="absolute inset-0 bg-gold-500/20 blur-2xl rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10"></div>
                  

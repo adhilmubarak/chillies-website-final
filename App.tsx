@@ -579,7 +579,13 @@ function App() {
             onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
             onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
             onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59', isUnavailable: false, order: dbCategories.length})}
-            onUpdateCategory={c => updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59', isUnavailable: c.isUnavailable || false})}
+            onUpdateCategory={async c => {
+              await updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59', isUnavailable: c.isUnavailable || false});
+              if (c.isUnavailable) {
+                const snap = await getDocs(query(collection(db, 'menuItems'), where('category', '==', c.name)));
+                snap.forEach(d => updateDoc(d.ref, {isUnavailable: true}));
+              }
+            }}
             onDeleteCategory={async n => { const q = query(collection(db, 'categories'), where("name", "==", n)); const s = await getDocs(q); s.forEach(d => deleteDoc(d.ref)); }}
             onReorderCategory={async (dir: 'up' | 'down', index: number) => {
               const newArray = [...dbCategories];
@@ -734,10 +740,11 @@ function App() {
         <div className="flex flex-col items-center gap-6 mb-12">
             <div className="flex w-full overflow-x-auto scrollbar-hide md:flex-wrap md:justify-center gap-2 px-4 pb-4">
                 {[
-                  'All', 
+                  ...dbCategories.filter(c => !c.isUnavailable && (c.name.toLowerCase() === 'breads' || c.name.toLowerCase() === 'bread')).map(c => c.name),
                   ...(isFlashSaleActive ? ['Flash Sale'] : []), 
                   ...(isHappyHourActive ? ['Happy Hour'] : []), 
-                  ...dbCategories.filter(c => !c.isUnavailable).map(c => c.name)
+                  ...dbCategories.filter(c => !c.isUnavailable && c.name.toLowerCase() !== 'breads' && c.name.toLowerCase() !== 'bread').map(c => c.name),
+                  'All'
                 ].map(cat => (
                     <button key={cat} onClick={() => setActiveCategory(cat)}
                         className={`flex-shrink-0 px-6 md:px-8 py-3 rounded-full border transition-all text-[10px] md:text-xs font-bold uppercase tracking-widest ${
