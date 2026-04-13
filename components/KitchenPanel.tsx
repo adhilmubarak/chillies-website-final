@@ -103,22 +103,19 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
                 </div>
               </div>
 
-              <div className="p-4 bg-stone-950 border-t border-white/10 mt-auto">
-                {isAllCrossed ? (
-                   <button 
-                     onClick={() => onUpdateOrderStatus(order.id, 'ready')}
-                     className="w-full py-5 bg-green-500 text-stone-950 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-2 shadow-[0_10px_40px_rgba(34,197,94,0.3)] animate-pulse hover:bg-green-400 active:scale-95 transition-all"
-                   >
-                     <CheckCircle size={20} className="stroke-[3]" /> Mark as Ready
-                   </button>
-                ) : (
-                   <div className="flex items-center justify-between px-2 text-stone-500">
-                     <span className="text-[10px] uppercase font-black tracking-widest">Status</span>
-                     <span className={`text-[10px] uppercase font-black tracking-widest px-3 py-1 rounded-full ${isPending ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-brand-500/10 text-brand-500 border border-brand-500/20'}`}>
-                        {isPending ? 'Pending' : 'Preparing'}
-                     </span>
-                   </div>
-                )}
+              <div className="p-4 bg-stone-950 border-t border-white/10 mt-auto flex flex-col gap-3">
+                <div className="flex items-center justify-between px-2 text-stone-500">
+                  <span className="text-[10px] uppercase font-black tracking-widest">Status</span>
+                  <span className={`text-[10px] uppercase font-black tracking-widest px-3 py-1 rounded-full ${isPending ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-brand-500/10 text-brand-500 border border-brand-500/20'}`}>
+                     {isPending ? 'Pending' : 'Preparing'}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => onUpdateOrderStatus(order.id, 'ready')}
+                  className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-2 transition-all active:scale-95 ${isAllCrossed ? 'bg-green-500 text-stone-950 shadow-[0_10px_40px_rgba(34,197,94,0.3)] animate-pulse hover:bg-green-400' : 'bg-stone-800 text-white hover:bg-stone-700 hover:text-green-400'}`}
+                >
+                  <CheckCircle size={20} className={isAllCrossed ? "stroke-[3]" : ""} /> Mark as Ready
+                </button>
               </div>
             </div>
           );
