@@ -1428,7 +1428,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             const permission = await Notification.requestPermission();
                                             if (permission === 'granted') {
                                                 const { getToken } = await import('firebase/messaging');
-                                                const token = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_HERE' });
+                                                const token = await getToken(messaging, { vapidKey: 'BHpj_oVMoUijqh0RYq84o9RHm9HQVYQ2DMmrfATuLP_1VnJP32D6YUzW_F5ywGJockkUMeGfTuEC_HbRdwtFrWw' });
                                                 const updatedTokens = Array.from(new Set([...(storeSettings.adminTokens || []), token]));
                                                 onUpdateStoreSettings({ ...storeSettings, adminTokens: updatedTokens });
                                                 alert('Device registered successfully! This device will now wake up for incoming orders.');
