@@ -233,12 +233,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   useEffect(() => {
       const pendingOrders = orders.filter(o => o.status === 'pending');
       const currentPendingCount = pendingOrders.length;
-      if (currentPendingCount > prevPendingCountRef.current) {
+      
+      if (currentPendingCount > 0) {
           setIsRinging(true);
-          const latestOrder = pendingOrders[currentPendingCount - 1];
-          if (latestOrder) setLatestNewOrderId(latestOrder.id);
-      }
-      if (currentPendingCount === 0) {
+          const oldestPending = pendingOrders[pendingOrders.length - 1];
+          setLatestNewOrderId(oldestPending.id);
+      } else {
           setIsRinging(false);
           setLatestNewOrderId(null);
       }
@@ -442,8 +442,80 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     );
   }
 
+  const currentPendingOrder = latestNewOrderId ? orders.find(o => o.id === latestNewOrderId) : null;
+
   return (
     <div className="fixed inset-0 z-[200] bg-stone-950 flex overflow-hidden font-sans text-stone-200">
+      {currentPendingOrder && currentPendingOrder.status === 'pending' && (
+         <div className="fixed inset-0 z-[1000] bg-stone-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 animate-fade-in">
+             <div className="absolute top-10 flex flex-col items-center animate-pulse">
+                  <BellRing className="text-red-500 mb-4" size={48} />
+                  <h2 className="text-3xl font-serif text-white uppercase tracking-widest font-black">INCOMING ORDER</h2>
+                  <p className="text-stone-400 mt-2 tracking-widest text-sm uppercase">Please accept to start preparation</p>
+             </div>
+             
+             <div className="w-full max-w-2xl bg-stone-900 border border-gold-500/50 rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(212,175,55,0.15)] relative mt-16 max-h-[60vh] overflow-y-auto scrollbar-hide flex flex-col">
+                  <div className="p-8 border-b border-white/5 flex justify-between items-start bg-stone-950/30">
+                      <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                              <span className="text-gold-400 font-mono font-bold text-2xl tracking-tighter">#{currentPendingOrder.id}</span>
+                              <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${currentPendingOrder.type === 'delivery' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>{currentPendingOrder.type}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-stone-500 font-bold uppercase tracking-widest text-[10px]">
+                              <Calendar size={12} /> {currentPendingOrder.date} <span className="opacity-30 mx-1">|</span> {currentPendingOrder.timestamp}
+                          </div>
+                      </div>
+                      <div className="text-right">
+                          <span className="text-[9px] text-stone-600 uppercase font-black tracking-[0.2em] block mb-1">Total</span>
+                          <span className="text-3xl font-serif text-white font-bold leading-none">₹{currentPendingOrder.total}</span>
+                      </div>
+                  </div>
+                  
+                  <div className="p-8 space-y-6 flex-1">
+                      <div className="grid grid-cols-2 gap-6">
+                           <div className="space-y-2">
+                               <span className="text-[10px] text-stone-600 uppercase tracking-widest font-black block">Customer</span>
+                               <p className="text-sm font-bold text-white">{currentPendingOrder.customerName}</p>
+                           </div>
+                           <div className="space-y-2">
+                               <span className="text-[10px] text-stone-600 uppercase tracking-widest font-black block">Contact</span>
+                               <p className="text-sm font-mono text-stone-300">{currentPendingOrder.contactNumber}</p>
+                           </div>
+                      </div>
+                      
+                      {currentPendingOrder.address && (
+                          <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 space-y-2">
+                              <span className="text-[9px] text-stone-600 uppercase tracking-[0.2em] font-black block">Delivery Location</span>
+                              <p className="text-stone-400 text-xs flex items-start gap-3 leading-relaxed">
+                                  <MapPin size={16} className="text-gold-500 shrink-0 mt-0.5" /> {currentPendingOrder.address}
+                              </p>
+                          </div>
+                      )}
+                      
+                      <div className="bg-stone-950 rounded-[1.5rem] border border-white/5 p-6 shadow-inner space-y-4">
+                           {currentPendingOrder.items.map((it: any, idx: number) => (
+                               <div key={idx} className="flex justify-between items-center text-sm border-b border-white/5 pb-3 last:border-0 last:pb-0">
+                                   <div className="flex items-center gap-4 overflow-hidden">
+                                       <span className="text-gold-500 font-black">{it.quantity}x</span>
+                                       <span className="text-stone-200 font-medium">{it.name}</span>
+                                   </div>
+                               </div>
+                           ))}
+                      </div>
+                  </div>
+             </div>
+             
+             <button 
+                 onClick={() => {
+                     handleStatusChange(currentPendingOrder, 'preparing');
+                 }}
+                 className="mt-10 w-full max-w-sm bg-green-500 hover:bg-green-400 text-stone-950 text-lg font-black uppercase tracking-widest py-5 rounded-2xl shadow-[0_0_50px_rgba(34,197,94,0.3)] transition-all active:scale-95 flex justify-center items-center gap-3"
+             >
+                 <Check size={24} /> Accept & Start
+             </button>
+         </div>
+      )}
+
       <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-stone-900 border-r border-white/5 flex flex-col shrink-0 h-full transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-8 border-b border-white/5 flex items-center gap-3">
             <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center font-serif text-stone-950 font-bold text-xl shadow-lg shadow-gold-500/20">C</div>
