@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getMessaging } from 'firebase/messaging';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDaF9QwsQBuBuz_blvJCPQQspxIlA-ldio",
@@ -14,3 +15,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+
+// Initialize Messaging (only in supported browser environments)
+let messagingInstance = null;
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    try {
+        messagingInstance = getMessaging(app);
+    } catch(e) {
+        console.warn("Firebase Messaging not supported or failed to initialize", e);
+    }
+}
+export const messaging = messagingInstance;

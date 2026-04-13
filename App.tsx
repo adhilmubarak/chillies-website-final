@@ -172,7 +172,8 @@ function App() {
       isAnnouncementActive: false,
       loyaltyPointsRatio: 10,
       minimumPointsToRedeem: 50,
-      latestBroadcast: null as { title: string; body: string; timestamp: number } | null
+      latestBroadcast: null as { title: string; body: string; timestamp: number } | null,
+      adminTokens: [] as string[]
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -498,7 +499,8 @@ function App() {
                 isAnnouncementActive: data.isAnnouncementActive || false,
                 loyaltyPointsRatio: data.loyaltyPointsRatio || 10,
                 minimumPointsToRedeem: data.minimumPointsToRedeem || 50,
-                latestBroadcast: data.latestBroadcast || null
+                latestBroadcast: data.latestBroadcast || null,
+                adminTokens: data.adminTokens || []
             });
         }
     });

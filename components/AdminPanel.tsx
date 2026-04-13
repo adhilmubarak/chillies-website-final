@@ -13,7 +13,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
+import { messaging } from '../firebase';
 const riderIcon = new L.Icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
     iconSize: [42, 42],
@@ -1413,6 +1413,40 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 </div>
                             </div>
                         </div>
+
+                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                            <h5 className="text-white text-base font-bold flex items-center gap-3"><BellRing size={20} className="text-brand-500" /> Background Notifications</h5>
+                            <div className="bg-stone-950 p-6 rounded-2xl border border-brand-500/20 space-y-4">
+                                <p className="text-[10px] text-stone-500 max-w-sm leading-relaxed mb-4">Register this device to receive secure Web Push Notifications for new orders, even if the browser/app is completely closed.</p>
+                                <button 
+                                    onClick={async () => {
+                                        if (!messaging) {
+                                            alert('Push notifications are not natively supported in this browser Environment (such as iOS unsupported versions or incognito mode).');
+                                            return;
+                                        }
+                                        try {
+                                            const permission = await Notification.requestPermission();
+                                            if (permission === 'granted') {
+                                                const { getToken } = await import('firebase/messaging');
+                                                const token = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_HERE' });
+                                                const updatedTokens = Array.from(new Set([...(storeSettings.adminTokens || []), token]));
+                                                onUpdateStoreSettings({ ...storeSettings, adminTokens: updatedTokens });
+                                                alert('Device registered successfully! This device will now wake up for incoming orders.');
+                                            } else {
+                                                alert('Notification permission denied by the system.');
+                                            }
+                                        } catch (e: any) {
+                                            console.error("VAPID error logging: ", e);
+                                            alert('Failed to subscribe: You need to implement your actual VAPID key in the code.');
+                                        }
+                                    }} 
+                                    className="px-6 py-4 bg-brand-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-brand-400 transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center gap-2 w-fit"
+                                >
+                                    <BellRing size={16} /> Subscribe Device
+                                </button>
+                            </div>
+                        </div>
+
 
                         <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
                             <h5 className="text-white text-base font-bold flex items-center gap-3"><Smartphone size={20} className="text-brand-500" /> App Installation</h5>
