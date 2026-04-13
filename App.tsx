@@ -21,6 +21,7 @@ import FeedbackModal from './components/FeedbackModal';
 import OffersPage from './components/OffersPage';
 import ComplaintsPage from './components/ComplaintsPage';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
+import ShawarmaLoader from './components/ShawarmaLoader';
 import { MenuItem, CategoryConfig, CartItem, Order, Coupon, CustomOffer, FoodRating, LoyaltyAccount, Category, Complaint } from './types';
 import { Search, X } from 'lucide-react';
 
@@ -792,9 +793,7 @@ function App() {
         </div>
 
         {isLoading ? (
-            <div className="flex flex-col items-center py-20 gap-4">
-                <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
+            <ShawarmaLoader />
         ) : (
             <>
               {activeCategory === 'Flash Sale' && (
