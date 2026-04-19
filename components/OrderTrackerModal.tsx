@@ -235,11 +235,69 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
             )}
             {foundOrder && (
                 <div className="animate-fade-in-up">
-                    <div className="flex flex-col items-center text-center mb-6">
-                        {(() => {
-                            const status = getStatusDisplay(foundOrder.status, foundOrder.type);
-                            return (<><div className={`p-4 rounded-full ${status.bg} mb-3 shadow-lg`}>{status.icon}</div><h3 className={`text-xl font-bold ${status.color} mb-1`}>{status.title}</h3><p className="text-stone-400 text-xs max-w-[200px]">{status.desc}</p></>);
-                        })()}
+                    <div className="mb-8">
+                        {foundOrder.status === 'cancelled' ? (
+                            <div className="flex flex-col items-center text-center">
+                                <div className="p-4 rounded-full bg-red-500/10 mb-3 shadow-lg"><XCircle size={48} className="text-red-500" /></div>
+                                <h3 className="text-xl font-bold text-red-500 mb-1">Order Cancelled</h3>
+                                <p className="text-stone-400 text-xs max-w-[200px]">Your order was cancelled by the branch.</p>
+                            </div>
+                        ) : (
+                            <div className="w-full relative px-2 animate-fade-in">
+                                {(() => {
+                                    const deliverySteps = [
+                                        { id: 'pending', title: 'Received', icon: Clock },
+                                        { id: 'preparing', title: 'Preparing', icon: Flame },
+                                        { id: 'out_for_delivery', title: 'On the Way', icon: Bike },
+                                        { id: 'delivered', title: 'Delivered', icon: CheckCircle }
+                                    ];
+                                    const pickupSteps = [
+                                        { id: 'pending', title: 'Received', icon: Clock },
+                                        { id: 'preparing', title: 'Preparing', icon: Flame },
+                                        { id: 'ready', title: 'Ready', icon: ShoppingBag },
+                                        { id: 'delivered', title: 'Collected', icon: CheckCircle }
+                                    ];
+                                    const steps = foundOrder.type === 'delivery' ? deliverySteps : pickupSteps;
+                                    const currentPhaseIndex = steps.findIndex(s => s.id === foundOrder.status);
+                                    const activeIndex = currentPhaseIndex >= 0 ? currentPhaseIndex : 0;
+
+                                    return (
+                                        <div className="relative flex justify-between items-start w-full">
+                                            {/* Connecting Line Base */}
+                                            <div className="absolute top-5 left-[12.5%] right-[12.5%] h-1 bg-stone-800 rounded-full z-0 block"></div>
+                                            
+                                            {/* Connecting Line Active */}
+                                            <div className="absolute top-5 left-[12.5%] h-1 bg-brand-500 rounded-full z-0 transition-all duration-1000 ease-in-out block" style={{ width: `${(activeIndex / (steps.length - 1)) * 75}%` }}></div>
+
+                                            {steps.map((step, index) => {
+                                                const Icon = step.icon;
+                                                const isActive = index === activeIndex;
+                                                const isCompleted = index <= activeIndex;
+                                                
+                                                return (
+                                                    <div key={step.id} className="relative z-10 flex flex-col items-center w-1/4 transition-all duration-300">
+                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-700 shadow-xl ${
+                                                            isActive ? 'bg-brand-500 text-stone-950 scale-125 ring-4 ring-brand-500/30 shadow-brand-500/40' : 
+                                                            isCompleted ? 'bg-brand-500 text-stone-950' : 
+                                                            'bg-stone-900 border border-stone-700 text-stone-600'
+                                                        }`}>
+                                                            <Icon size={isActive ? 20 : 18} className={isActive ? 'animate-pulse' : ''} />
+                                                        </div>
+                                                        <span className={`mt-4 text-[9px] md:text-[10px] uppercase tracking-widest font-black text-center leading-tight transition-colors duration-500 ${
+                                                            isActive ? 'text-brand-500 shadow-brand-500 drop-shadow-md' : 
+                                                            isCompleted ? 'text-white' : 
+                                                            'text-stone-600'
+                                                        }`}>
+                                                            {step.title}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        )}
                     </div>
                     
                     {foundOrder.status === 'out_for_delivery' && foundOrder.type === 'delivery' && riderLocation && (
