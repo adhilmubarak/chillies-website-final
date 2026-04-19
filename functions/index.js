@@ -42,6 +42,26 @@ exports.sendNewOrderNotification = functions.firestore
                 click_action: "FLUTTER_NOTIFICATION_CLICK",
                 url: "/admin"
             },
+            android: {
+                priority: "high",
+                notification: {
+                    channelId: "high_importance_channel",
+                    vibrateTimingsMillis: [500, 1000, 500, 1000, 500, 1000, 500, 1000],
+                    priority: "max",
+                    defaultSound: true
+                }
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: {
+                            critical: 1,
+                            name: "default",
+                            volume: 1.0
+                        }
+                    }
+                }
+            },
             webpush: {
                 fcmOptions: {
                     link: "/admin"
@@ -50,7 +70,7 @@ exports.sendNewOrderNotification = functions.firestore
                     icon: "/pwa-192x192.png",
                     badge: "/pwa-192x192.png",
                     requireInteraction: true,
-                    vibrate: [300, 100, 300, 100, 300]
+                    vibrate: [500, 1000, 500, 1000, 500, 1000, 500, 1000]
                 }
             }
         });
