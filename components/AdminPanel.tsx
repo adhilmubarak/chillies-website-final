@@ -47,7 +47,7 @@ interface AdminPanelProps {
     happyHourStartTime: string;
     happyHourEndTime: string;
   };
-  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null };
+  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[] };
   onAddItem: (item: MenuItem) => void;
   onUpdateItem: (item: MenuItem) => void;
   onDeleteItem: (id: string) => void;
@@ -58,7 +58,7 @@ interface AdminPanelProps {
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
-  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null }) => void;
+  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[] }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
   onTestNotification?: () => void;
