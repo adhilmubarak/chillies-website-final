@@ -26,20 +26,17 @@ exports.sendNewOrderNotification = functions.firestore
     }
 
     const payload = {
-      notification: {
+      data: {
         title: "NEW ORDER: ₹" + newOrder.total,
         body: `Order #${newOrder.id} received from ${newOrder.customerName}.`,
-      },
-      data: {
         orderId: newOrder.id,
-        click_action: "FLUTTER_NOTIFICATION_CLICK", // Standard FCM click-through parameter
+        click_action: "FLUTTER_NOTIFICATION_CLICK"
       }
     };
 
     try {
         const response = await admin.messaging().sendEachForMulticast({
             tokens: adminTokens,
-            notification: payload.notification,
             data: payload.data
         });
         
