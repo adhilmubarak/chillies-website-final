@@ -269,7 +269,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   useEffect(() => {
       if (isRinging) {
          if (!ringAudioRef.current) {
-            ringAudioRef.current = new Audio('https://actions.google.com/sounds/v1/alarms/phone_ringing.ogg');
+            ringAudioRef.current = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
             ringAudioRef.current.loop = true;
             ringAudioRef.current.volume = 1.0;
          }
