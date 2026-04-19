@@ -17,9 +17,18 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  
+  // If the payload contains a notification object, the FCM SDK handles
+  // displaying the message automatically in the background. 
+  if (payload.notification) {
+      console.log('[firebase-messaging-sw.js] Payload has notification, letting FCM handle it.');
+      return;
+  }
+
   // Support both notification object (standard) or data object containing title/body
   const title = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || 'New Notification';
   const body = (payload.notification && payload.notification.body) || (payload.data && payload.data.body) || 'You have a new update.';
+
   
   const notificationOptions = {
     body: body,

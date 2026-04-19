@@ -25,19 +25,34 @@ exports.sendNewOrderNotification = functions.firestore
         return;
     }
 
-    const payload = {
-      data: {
-        title: "NEW ORDER: ₹" + newOrder.total,
-        body: `Order #${newOrder.id} received from ${newOrder.customerName}.`,
-        orderId: newOrder.id,
-        click_action: "FLUTTER_NOTIFICATION_CLICK"
-      }
-    };
+    const title = "NEW ORDER: ₹" + newOrder.total;
+    const bodyText = `Order #${newOrder.id} received from ${newOrder.customerName}.`;
 
     try {
         const response = await admin.messaging().sendEachForMulticast({
             tokens: adminTokens,
-            data: payload.data
+            notification: {
+                title: title,
+                body: bodyText
+            },
+            data: {
+                title: title,
+                body: bodyText,
+                orderId: newOrder.id,
+                click_action: "FLUTTER_NOTIFICATION_CLICK",
+                url: "/admin"
+            },
+            webpush: {
+                fcmOptions: {
+                    link: "/admin"
+                },
+                notification: {
+                    icon: "/pwa-192x192.png",
+                    badge: "/pwa-192x192.png",
+                    requireInteraction: true,
+                    vibrate: [300, 100, 300, 100, 300]
+                }
+            }
         });
         
         console.log(response.successCount + " messages were sent successfully!");
