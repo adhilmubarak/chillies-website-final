@@ -1,11 +1,9 @@
-const functions = require("firebase-functions");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
-exports.sendNewOrderNotification = functions.firestore
-  .document("orders/{orderId}")
-  .onCreate(async (snap, context) => {
-    const newOrder = snap.data();
+exports.sendNewOrderNotification = onDocumentCreated("orders/{orderId}", async (event) => {
+    const newOrder = event.data.data();
     
     // Check if it's already accepted to prevent weird edge cases
     if (newOrder.status !== 'pending') return;

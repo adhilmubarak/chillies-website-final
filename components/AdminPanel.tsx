@@ -226,6 +226,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [pushBody, setPushBody] = useState('We have some exciting news for you. Open the app to see!');
 
   const [isRinging, setIsRinging] = useState(false);
+  const [audioBlocked, setAudioBlocked] = useState(false);
   const [latestNewOrderId, setLatestNewOrderId] = useState<string | null>(null);
   const prevPendingCountRef = useRef(orders.filter(o => o.status === 'pending').length);
   const ringAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -273,11 +274,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             ringAudioRef.current.loop = true;
             ringAudioRef.current.volume = 1.0;
          }
-         ringAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
+         const playPromise = ringAudioRef.current.play();
+         if (playPromise !== undefined) {
+            playPromise.then(() => setAudioBlocked(false)).catch(e => {
+                console.log("Audio play failed:", e);
+                setAudioBlocked(true);
+            });
+         }
       } else {
          if (ringAudioRef.current) {
             ringAudioRef.current.pause();
             ringAudioRef.current.currentTime = 0;
+            setAudioBlocked(false);
          }
       }
   }, [isRinging]);
@@ -582,7 +590,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8 bg-stone-950/50">
+        <div className="flex-1 overflow-y-auto p-8 bg-stone-950/50 relative">
+            {audioBlocked && (
+                <div onClick={() => {
+                   if (ringAudioRef.current) {
+                      ringAudioRef.current.play().then(() => setAudioBlocked(false)).catch(e => console.error(e));
+                   }
+                }} className="absolute top-4 left-6 right-6 z-50 cursor-pointer animate-bounce-slow">
+                    <div className="bg-red-500 rounded-2xl p-4 shadow-[0_0_50px_rgba(239,68,68,0.5)] border border-red-400 flex items-center justify-center gap-4 text-white hover:bg-red-600 transition-colors">
+                        <Flame size={32} className="animate-pulse" />
+                        <div>
+                            <h3 className="font-black text-xl uppercase tracking-widest">Notification Sound Blocked by Browser!</h3>
+                            <p className="text-sm font-bold opacity-90">Click here to UNMUTE loud order alerts.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
             {activeTab === 'dashboard' && (
                 <div className="space-y-8 animate-fade-in max-w-7xl mx-auto">
                     {!isStoreOpen && openingCountdown && (
