@@ -2,7 +2,7 @@ const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
-exports.sendNewOrderNotification = onDocumentCreated("orders/{orderId}", async (event) => {
+exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (event) => {
     const newOrder = event.data.data();
     
     // Check if it's already accepted to prevent weird edge cases
