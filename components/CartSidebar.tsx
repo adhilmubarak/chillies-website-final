@@ -81,7 +81,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
      
      const hasDrink = cartItems.some(i => i.category === 'Drinks' || i.name.toLowerCase().includes('mojito'));
      
-     let upsells = allMenuItems.filter(i => !cartItemIds.has(i.id) && !i.isExclusive);
+     let upsells = allMenuItems.filter(i => !cartItemIds.has(i.id) && !i.isExclusive && !i.isUnavailable);
      
      upsells.sort((a, b) => {
          let scoreA = 0; let scoreB = 0;
