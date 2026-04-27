@@ -30,6 +30,18 @@ function MapUpdater({ center }: { center: [number, number] }) {
     return null;
 }
 
+const renderAddressWithLinks = (address: string) => {
+    if (!address) return null;
+    const parts = address.split(/(https?:\/\/[^\s]+)/g);
+    return parts.map((part, i) => 
+        part.match(/^https?:\/\//) ? (
+            <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline font-bold" onClick={(e) => e.stopPropagation()}>{part}</a>
+        ) : (
+            <span key={i}>{part}</span>
+        )
+    );
+};
+
 interface AdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -500,7 +512,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                               <div className="min-w-0">
                                 <span className="text-[9px] text-stone-500 uppercase tracking-widest font-black block mb-1">Delivery Address</span>
                                 <p className="text-stone-300 text-[10px] sm:text-xs leading-relaxed truncate whitespace-normal line-clamp-3">
-                                    {currentPendingOrder.address}
+                                    {renderAddressWithLinks(currentPendingOrder.address)}
                                 </p>
                               </div>
                           </div>
@@ -775,7 +787,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 space-y-2">
                                             <span className="text-[9px] text-stone-600 uppercase tracking-[0.2em] font-black block">Location</span>
                                             <p className="text-stone-400 text-xs flex items-start gap-3 leading-relaxed">
-                                                <MapPin size={16} className="text-gold-500 shrink-0 mt-0.5" /> {order.address}
+                                                <MapPin size={16} className="text-gold-500 shrink-0 mt-0.5" /> <div>{renderAddressWithLinks(order.address)}</div>
                                             </p>
                                         </div>
                                     )}

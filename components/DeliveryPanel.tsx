@@ -78,7 +78,12 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
 
   const handleDirections = (address?: string) => {
     if (!address) return;
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+    const urlMatch = address.match(/(https?:\/\/[^\s]+)/);
+    if (urlMatch) {
+       window.open(urlMatch[0], '_blank');
+    } else {
+       window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+    }
   };
 
   if (!isAuthenticated) {
