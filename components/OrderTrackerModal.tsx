@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User, Star, Navigation, MapPin } from 'lucide-react';
+import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User, Star, Navigation, MapPin, AlertCircle } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { Order } from '../types';
@@ -337,6 +337,15 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                             </div>
                         </div>
                     )}
+                    
+                    <div className="mb-6 flex justify-center">
+                        <a 
+                            href={`/complaints?oid=${foundOrder.id}`} 
+                            className="text-[10px] text-stone-500 hover:text-gold-500 transition-colors uppercase font-black tracking-widest flex items-center gap-2 border-b border-stone-800 pb-1"
+                        >
+                            <AlertCircle size={12} /> Report a Problem with this Order
+                        </a>
+                    </div>
                     
                     <div className="bg-stone-950/50 rounded-xl border border-white/5 p-4 space-y-3">
                         <div className="flex items-center gap-3 border-b border-white/5 pb-3 mb-1">

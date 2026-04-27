@@ -176,6 +176,7 @@ const Navbar: React.FC<NavbarProps> = ({
               <a href="#menu" onClick={(e) => handleNavClick(e, 'menu')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Menu</a>
               <a href="#offers" onClick={(e) => handleNavClick(e, 'offers')} className="text-2xl text-gold-400 hover:text-gold-300 font-serif transition-colors flex items-center gap-2"><Sparkles size={20} /> Offers</a>
               <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Contact</a>
+              <a href="/complaints" className="text-xl text-stone-500 hover:text-white font-serif transition-colors uppercase tracking-[0.2em]">Help & Support</a>
             </nav>
         </div>
       </div>

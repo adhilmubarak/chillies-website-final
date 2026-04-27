@@ -15,6 +15,14 @@ const ComplaintsPage: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
 
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oid = params.get('oid');
+    if (oid) {
+        setFormData(prev => ({ ...prev, orderId: oid }));
+    }
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

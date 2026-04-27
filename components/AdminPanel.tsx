@@ -241,7 +241,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [audioBlocked, setAudioBlocked] = useState(false);
   const [latestNewOrderId, setLatestNewOrderId] = useState<string | null>(null);
   const prevPendingCountRef = useRef(orders.filter(o => o.status === 'pending').length);
+  const prevOpenComplaintsCountRef = useRef((complaints || []).filter(c => c.status === 'open').length);
   const ringAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const currentOpenCount = (complaints || []).filter(c => c.status === 'open').length;
+    if (currentOpenCount > prevOpenComplaintsCountRef.current) {
+        // Trigger alert for new complaint
+        setIsRinging(true);
+        // Play sound if possible
+        if (ringAudioRef.current && !audioBlocked) {
+            ringAudioRef.current.play().catch(e => {
+                console.log("Audio blocked:", e);
+                setAudioBlocked(true);
+            });
+        }
+    }
+    prevOpenComplaintsCountRef.current = currentOpenCount;
+  }, [complaints, audioBlocked]);
 
   useEffect(() => {
       const pendingOrders = orders.filter(o => o.status === 'pending');
@@ -571,12 +588,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button 
                     key={tab.id}
                     onClick={() => { setActiveTab(tab.id as any); setIsMobileMenuOpen(false); }}
-                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
+                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 relative group ${
                         activeTab === tab.id ? 'bg-gold-500 text-stone-950 shadow-xl' : 'text-stone-400 hover:text-white hover:bg-stone-950/5'
                     }`}
                 >
                     <tab.icon size={18} className={activeTab === tab.id ? 'stroke-[2.5]' : ''} />
-                    <span className="text-sm font-bold tracking-wide">{tab.label}</span>
+                    <span className="text-sm font-bold tracking-wide flex-1">{tab.label}</span>
+                    
+                    {tab.id === 'orders' && orders.filter(o => o.status === 'pending').length > 0 && (
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${activeTab === 'orders' ? 'bg-stone-950 text-gold-500' : 'bg-gold-500 text-stone-950 animate-pulse'}`}>
+                            {orders.filter(o => o.status === 'pending').length}
+                        </span>
+                    )}
+
+                    {tab.id === 'complaints' && (complaints || []).filter(c => c.status === 'open').length > 0 && (
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${activeTab === 'complaints' ? 'bg-stone-950 text-red-500' : 'bg-red-500 text-white animate-bounce'}`}>
+                            {(complaints || []).filter(c => c.status === 'open').length}
+                        </span>
+                    )}
                 </button>
             ))}
         </nav>
@@ -2012,11 +2041,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <BellRing size={24} />
                 </div>
                 <div>
-                    <h3 className="font-serif text-xl font-bold">New Order Received!</h3>
-                    <p className="text-red-100 text-xs uppercase tracking-widest font-black mt-1">Check Pending Queue</p>
+                    <h3 className="font-serif text-xl font-bold">
+                        {latestNewOrderId ? 'New Order Received!' : 'New Customer Complaint!'}
+                    </h3>
+                    <p className="text-red-100 text-xs uppercase tracking-widest font-black mt-1">
+                        {latestNewOrderId ? 'Check Pending Queue' : 'Check Complaints Tab'}
+                    </p>
                 </div>
                 <div className="flex gap-2 ml-4">
-                  {latestNewOrderId && (
+                  {latestNewOrderId ? (
                       <button 
                           onClick={() => {
                               onUpdateOrderStatus(latestNewOrderId, 'preparing');
@@ -2024,7 +2057,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           }} 
                           className="flex items-center gap-2 bg-white text-red-600 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-stone-100 transition-all shadow-lg active:scale-95"
                       >
-                          <Check size={16} className="stroke-[3]" /> Accept
+                          <Check size={16} className="stroke-[3]" /> Accept Order
+                      </button>
+                  ) : (
+                      <button 
+                          onClick={() => {
+                              setActiveTab('complaints');
+                              setIsRinging(false);
+                          }} 
+                          className="flex items-center gap-2 bg-white text-red-600 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-stone-100 transition-all shadow-lg active:scale-95"
+                      >
+                          <AlertTriangle size={16} /> View Complaint
                       </button>
                   )}
                   <button 

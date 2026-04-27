@@ -47,6 +47,7 @@ const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTC }) => {
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <p className="text-stone-600 text-[10px] tracking-widest uppercase">© {new Date().getFullYear()} Chillies Restaurant.</p>
                     <div className="flex items-center gap-8">
+                        <a href="/complaints" className="text-[10px] text-stone-200 hover:text-gold-500 transition-colors uppercase font-bold tracking-widest">Help & Support</a>
                         <span onClick={onOpenAdmin} className="text-[10px] text-stone-200 hover:text-stone-600 cursor-pointer uppercase font-bold tracking-widest">spread happiness</span>
                         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="p-2 bg-stone-900 rounded-full text-stone-500 hover:text-gold-400 border border-white/5 transition-all"><ArrowUp size={16} /></button>
                     </div>
