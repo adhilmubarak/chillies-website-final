@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Clock, User, ArrowRight, CheckCircle } from 'lucide-react';
+import { Check, Clock, User, ArrowRight, CheckCircle, Printer } from 'lucide-react';
 import { Order } from '../types';
+import { printKOT } from '../App';
 
 interface KitchenPanelProps {
   orders: Order[];
@@ -122,12 +123,21 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
                      {isDelayed ? 'Delayed' : isPending ? 'Pending' : 'Preparing'}
                   </span>
                 </div>
-                <button 
-                  onClick={() => onUpdateOrderStatus(order.id, 'ready')}
-                  className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-2 transition-all active:scale-95 ${isAllCrossed ? 'bg-green-500 text-stone-950 shadow-[0_10px_40px_rgba(34,197,94,0.3)] animate-pulse hover:bg-green-400' : 'bg-stone-800 text-white hover:bg-stone-700 hover:text-green-400'}`}
-                >
-                  <CheckCircle size={20} className={isAllCrossed ? "stroke-[3]" : ""} /> Mark as Ready
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => printKOT(order)} 
+                    title="Print KOT"
+                    className="p-4 bg-stone-800 text-stone-400 hover:text-white hover:bg-stone-700 rounded-2xl border border-white/10 transition-all active:scale-95"
+                  >
+                    <Printer size={20} />
+                  </button>
+                  <button 
+                    onClick={() => onUpdateOrderStatus(order.id, 'ready')}
+                    className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-2 transition-all active:scale-95 ${isAllCrossed ? 'bg-green-500 text-stone-950 shadow-[0_10px_40px_rgba(34,197,94,0.3)] animate-pulse hover:bg-green-400' : 'bg-stone-800 text-white hover:bg-stone-700 hover:text-green-400'}`}
+                  >
+                    <CheckCircle size={20} className={isAllCrossed ? "stroke-[3]" : ""} /> Mark as Ready
+                  </button>
+                </div>
               </div>
             </div>
           );

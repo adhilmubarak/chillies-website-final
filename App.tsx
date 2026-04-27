@@ -122,6 +122,68 @@ export const printThermalBill = (order: Order) => {
   }, 500);
 };
 
+export const printKOT = (order: Order) => {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return;
+
+  const itemsHtml = order.items
+    .map(item => `
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 20px; border-bottom: 1px dotted #ccc; padding-bottom: 5px;">
+        <span><strong>${item.quantity}x</strong> ${item.name}</span>
+      </div>
+    `)
+    .join('');
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>KOT #${order.id}</title>
+        <style>
+          body { font-family: 'Courier New', Courier, monospace; width: 80mm; padding: 10px; margin: 0; color: #000; background: #fff; font-weight: bold; }
+          .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 15px; }
+          .order-highlight { 
+            font-size: 32px; 
+            font-weight: 900; 
+            border: 4px solid #000; 
+            display: inline-block; 
+            padding: 10px 25px; 
+            margin: 10px 0;
+          }
+          .details { 
+            text-align: left; 
+            font-size: 18px; 
+            margin-bottom: 15px; 
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #000;
+          }
+          h2 { margin: 0; font-size: 36px; text-transform: uppercase; letter-spacing: 2px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>KOT</h2>
+          <div class="order-highlight">#${order.id}</div>
+          <p style="font-size: 16px; margin: 5px 0;">${order.date} | ${order.timestamp}</p>
+        </div>
+        <div class="details">
+          <div style="font-size: 24px; text-decoration: underline; margin-bottom: 10px;"><strong>TYPE:</strong> ${order.type.toUpperCase()}</div>
+          ${order.type === 'delivery' && order.customerName ? `<div><strong>For:</strong> ${order.customerName}</div>` : ''}
+        </div>
+        <div style="font-size: 20px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase;">Items to prepare:</div>
+        <div>${itemsHtml}</div>
+        <div style="text-align: center; margin-top: 30px; font-size: 14px; border-top: 2px solid #000; padding-top: 10px;">
+          End of Ticket
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 500);
+};
+
 function App() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
