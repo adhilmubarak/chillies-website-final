@@ -704,7 +704,7 @@ function App() {
               setDbCategories(newArray);
               await Promise.all(newArray.map((cat, i) => updateDoc(doc(db, 'categories', cat.id), { order: i })));
             }}
-            onUpdateOrderStatus={async (id, s, pm) => { 
+            onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string) => { 
               try {
                 const q = query(collection(db, 'orders'), where("id", "==", id)); 
                 const snap = await getDocs(q); 
@@ -740,7 +740,7 @@ function App() {
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
           <DeliveryPanel 
             orders={orders}
-            onUpdateOrderStatus={async (id, s, pm) => { 
+            onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string) => { 
                 try {
                   const q = query(collection(db, 'orders'), where("id", "==", id)); 
                   const snap = await getDocs(q); 
@@ -761,7 +761,7 @@ function App() {
                   alert("Error updating status: " + e.message);
                 }
             }}
-            onUpdateRiderLocation={async (lat, lng) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }}
+            onUpdateRiderLocation={async (lat: number, lng: number) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }}
             deliveryUpiId={storeSettings.deliveryUpiId}
           />
         </div>

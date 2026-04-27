@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, Lock, LogOut, ShoppingBag, MapPin, 
   Send, Check, PhoneCall, User, Navigation, ArrowRight
@@ -7,11 +7,13 @@ import { Order } from '../types';
 
 interface DeliveryPanelProps {
   orders: Order[];
-  onUpdateOrderStatus: (id: string, status: Order['status']) => void;
+  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string) => Promise<void>;
+  onUpdateRiderLocation: (lat: number, lng: number) => Promise<void>;
+  deliveryUpiId?: string;
 }
 
 const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
-  orders, onUpdateOrderStatus
+  orders, onUpdateOrderStatus, onUpdateRiderLocation, deliveryUpiId
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -24,6 +26,24 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
         ['ready', 'out_for_delivery'].includes(order.status)
     );
   }, [orders]);
+  
+  // Real-time Rider Location Tracking
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    let watchId: number;
+    if ("geolocation" in navigator) {
+        watchId = navigator.geolocation.watchPosition((position) => {
+            onUpdateRiderLocation(position.coords.latitude, position.coords.longitude);
+        }, (error) => {
+            console.error("Location tracking error:", error);
+        }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+    }
+    
+    return () => {
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isAuthenticated, onUpdateRiderLocation]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,7 +193,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                     <div className="bg-white p-4 rounded-3xl flex flex-col items-center justify-center space-y-3 mx-auto w-fit shadow-xl border-4 border-purple-500/20 animate-fade-in">
                                         <div className="w-48 h-48 bg-white overflow-hidden relative rounded-xl">
                                             <img 
-                                                src={`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(`upi://pay?pa=8301032794@ybl&pn=Chillies&am=${order.total}&cu=INR`)}`} 
+                                                src={`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(`upi://pay?pa=${deliveryUpiId || '8301032794@ybl'}&pn=Chillies&am=${order.total}&cu=INR`)}`} 
                                                 alt="UPI QR Code" 
                                                 className="w-full h-full object-cover mix-blend-multiply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.15]"
                                             />
@@ -186,7 +206,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                 )}
 
                                 <button 
-                                    onClick={() => onUpdateOrderStatus(order.id, 'delivered')} 
+                                    onClick={() => onUpdateOrderStatus(order.id, 'delivered', method)} 
                                     className="w-full py-4 bg-green-500 hover:bg-green-400 text-white rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex justify-center items-center gap-2 transition-all shadow-lg active:scale-95"
                                 > 
                                     <Check size={18} /> Mark as Delivered 
