@@ -1691,7 +1691,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 contactNumber: manualContact,
                                 address: manualOrderType === 'delivery' ? manualAddress : '',
                                 type: manualOrderType,
-                                status: 'pending',
+                                status: 'preparing',
                                 timestamp: now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
                                 date: now.toLocaleDateString(),
                                 createdAt: now.getTime(),
