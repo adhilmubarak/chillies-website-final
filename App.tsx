@@ -58,30 +58,27 @@ export const printThermalBill = (order: Order) => {
       <head>
         <title>Order #${order.id}</title>
         <style>
-          body { font-family: 'Courier New', Courier, monospace; width: 80mm; padding: 10px; margin: 0; color: #000; background: #fff; }
-          .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+          body { font-family: 'Courier New', Courier, monospace; width: 80mm; padding: 10px; margin: 0; color: #000; background: #fff; font-weight: bold; }
+          .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 15px; }
           .order-highlight { 
-            font-size: 24px; 
-            font-weight: bold; 
-            border: 2px solid #000; 
+            font-size: 28px; 
+            font-weight: 900; 
+            border: 3px solid #000; 
             display: inline-block; 
-            padding: 5px 15px; 
-            margin: 10px 0;
+            padding: 8px 20px; 
+            margin: 15px 0;
           }
           .customer-info { 
             text-align: left; 
-            font-size: 14px; 
-            margin-bottom: 10px; 
-            padding-bottom: 5px;
-            border-bottom: 1px dotted #000;
+            font-size: 16px; 
+            margin-bottom: 15px; 
+            padding-bottom: 10px;
+            border-bottom: 2px dotted #000;
           }
-          .footer { text-align: center; border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; font-size: 12px; }
-          .total { font-weight: bold; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
-          .qr-section { text-align: center; margin-top: 15px; padding: 10px; border: 1px solid #eee; border-radius: 8px; }
-          .qr-label { font-size: 10px; margin-bottom: 5px; color: #666; font-family: sans-serif; text-transform: uppercase; letter-spacing: 1px; }
-          h2 { margin: 5px 0; }
-          p { margin: 2px 0; font-size: 12px; }
-          img { max-width: 120px; }
+          .footer { text-align: center; border-top: 2px dashed #000; padding-top: 15px; margin-top: 15px; font-size: 14px; font-weight: 900; }
+          .total { font-weight: 900; border-top: 2px solid #000; padding-top: 10px; margin-top: 10px; }
+          h2 { margin: 5px 0; font-size: 26px; font-weight: 900; }
+          p { margin: 4px 0; font-size: 14px; font-weight: bold; }
         </style>
       </head>
       <body>
@@ -89,34 +86,27 @@ export const printThermalBill = (order: Order) => {
           <h2>CHILLIES</h2>
           <p>Valiyakulam, Alappuzha</p>
           <div class="order-highlight">#${order.id}</div>
-          <p>${order.date} ${order.timestamp}</p>
+          <p>${order.date} | ${order.timestamp}</p>
         </div>
         <div class="customer-info">
           <div><strong>Name:</strong> ${order.customerName}</div>
           <div><strong>Phone:</strong> ${order.contactNumber}</div>
           ${order.address ? `<div><strong>Addr:</strong> ${order.address}</div>` : ''}
-          <div><strong>Type:</strong> ${order.type.toUpperCase()}</div>
+          <div style="margin-top: 5px; font-size: 18px; text-decoration: underline;"><strong>Type:</strong> ${order.type.toUpperCase()}</div>
         </div>
-        <div style="font-size: 14px;">${itemsHtml}</div>
-        <div class="total" style="font-size: 14px;">
+        <div style="font-size: 16px;">${itemsHtml}</div>
+        <div class="total" style="font-size: 16px;">
           <div style="display: flex; justify-content: space-between;">
             <span>Subtotal:</span>
             <span>₹${(order.subtotal || 0).toFixed(2)}</span>
           </div>
           ${order.deliveryCharge ? `<div style="display: flex; justify-content: space-between;"><span>Delivery:</span><span>₹${order.deliveryCharge.toFixed(2)}</span></div>` : ''}
           ${order.discount ? `<div style="display: flex; justify-content: space-between;"><span>Discount:</span><span>-₹${order.discount.toFixed(2)}</span></div>` : ''}
-          <div style="display: flex; justify-content: space-between; font-size: 1.1em; margin-top: 5px;">
+          <div style="display: flex; justify-content: space-between; font-size: 1.4em; font-weight: 900; margin-top: 10px;">
             <span>TOTAL:</span>
             <span>₹${order.total.toFixed(2)}</span>
           </div>
         </div>
-        
-        ${order.trackingLink ? `
-        <div class="qr-section">
-          <div class="qr-label">Scan to track order</div>
-          <img src="${trackingQrUrl}" alt="Tracking QR Code" />
-        </div>
-        ` : ''}
 
         <div class="footer">
           <p>Thank you for dining with us!</p>
