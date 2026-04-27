@@ -455,72 +455,82 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   return (
     <div className="fixed inset-0 z-[200] bg-stone-950 flex overflow-hidden font-sans text-stone-200">
       {currentPendingOrder && currentPendingOrder.status === 'pending' && (
-         <div className="fixed inset-0 z-[1000] bg-stone-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 animate-fade-in">
-             <div className="absolute top-10 flex flex-col items-center animate-pulse">
-                  <BellRing className="text-red-500 mb-4" size={48} />
-                  <h2 className="text-3xl font-serif text-white uppercase tracking-widest font-black">INCOMING ORDER</h2>
-                  <p className="text-stone-400 mt-2 tracking-widest text-sm uppercase">Please accept to start preparation</p>
-             </div>
+         <div className="fixed inset-0 z-[1000] bg-stone-950/90 backdrop-blur-2xl flex flex-col items-center justify-center p-4 sm:p-6 animate-fade-in overflow-hidden">
              
-             <div className="w-full max-w-2xl bg-stone-900 border border-gold-500/50 rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(212,175,55,0.15)] relative mt-16 max-h-[60vh] overflow-y-auto scrollbar-hide flex flex-col">
-                  <div className="p-8 border-b border-white/5 flex justify-between items-start bg-stone-950/30">
-                      <div className="space-y-2">
-                          <div className="flex items-center gap-3">
-                              <span className="text-gold-400 font-mono font-bold text-2xl tracking-tighter">#{currentPendingOrder.id}</span>
-                              <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${currentPendingOrder.type === 'delivery' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>{currentPendingOrder.type}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-stone-500 font-bold uppercase tracking-widest text-[10px]">
-                              <Calendar size={12} /> {currentPendingOrder.date} <span className="opacity-30 mx-1">|</span> {currentPendingOrder.timestamp}
-                          </div>
-                      </div>
-                      <div className="text-right">
-                          <span className="text-[9px] text-stone-600 uppercase font-black tracking-[0.2em] block mb-1">Total</span>
-                          <span className="text-3xl font-serif text-white font-bold leading-none">₹{currentPendingOrder.total}</span>
-                      </div>
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] sm:w-[80vw] sm:h-[80vw] bg-red-500/20 rounded-full animate-pulse -z-10 blur-[100px] pointer-events-none"></div>
+
+             <div className="w-full max-w-lg bg-stone-900 border border-red-500/30 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_0_80px_rgba(239,68,68,0.2)] relative flex flex-col max-h-[85vh]">
+                  
+                  <div className="bg-gradient-to-br from-red-500 to-orange-600 p-6 sm:p-8 text-center relative overflow-hidden shrink-0">
+                      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+                      <BellRing className="text-white mx-auto mb-3 animate-bounce" size={40} />
+                      <h2 className="text-2xl sm:text-3xl font-serif text-white uppercase tracking-widest font-black leading-tight">Incoming<br/>Order</h2>
+                      <p className="text-white/80 mt-2 tracking-widest text-[10px] sm:text-xs uppercase font-bold">Action Required</p>
                   </div>
                   
-                  <div className="p-8 space-y-6 flex-1">
-                      <div className="grid grid-cols-2 gap-6">
-                           <div className="space-y-2">
-                               <span className="text-[10px] text-stone-600 uppercase tracking-widest font-black block">Customer</span>
-                               <p className="text-sm font-bold text-white">{currentPendingOrder.customerName}</p>
+                  <div className="p-6 sm:p-8 overflow-y-auto scrollbar-hide flex-1 space-y-6 bg-stone-950">
+                      
+                      <div className="flex justify-between items-center bg-stone-900 p-4 sm:p-5 rounded-2xl border border-white/5 shadow-inner">
+                          <div>
+                              <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black block mb-1">Order No.</span>
+                              <span className="text-gold-400 font-mono font-bold text-lg sm:text-2xl tracking-tighter shrink-0">#{currentPendingOrder.id}</span>
+                          </div>
+                          <div className="text-right">
+                              <span className={`inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-sm ${currentPendingOrder.type === 'delivery' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                                  {currentPendingOrder.type === 'delivery' ? '🛵 Delivery' : '🛍️ Pickup'}
+                              </span>
+                          </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                           <div className="space-y-1 sm:space-y-2 bg-stone-900 p-4 sm:p-5 rounded-2xl border border-white/5">
+                               <span className="text-[9px] sm:text-[10px] text-stone-500 uppercase tracking-widest font-black block">Customer</span>
+                               <p className="text-xs sm:text-sm font-bold text-white truncate">{currentPendingOrder.customerName}</p>
+                               <p className="text-[10px] sm:text-xs font-mono text-stone-400 truncate">{currentPendingOrder.contactNumber}</p>
                            </div>
-                           <div className="space-y-2">
-                               <span className="text-[10px] text-stone-600 uppercase tracking-widest font-black block">Contact</span>
-                               <p className="text-sm font-mono text-stone-300">{currentPendingOrder.contactNumber}</p>
+                           <div className="space-y-1 sm:space-y-2 bg-stone-900 p-4 sm:p-5 rounded-2xl border border-white/5 text-right flex flex-col justify-center">
+                               <span className="text-[9px] sm:text-[10px] text-stone-500 uppercase tracking-widest font-black block">Grand Total</span>
+                               <p className="text-xl sm:text-2xl font-serif text-white font-bold leading-none shrink-0">₹{currentPendingOrder.total}</p>
                            </div>
                       </div>
                       
                       {currentPendingOrder.address && (
-                          <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 space-y-2">
-                              <span className="text-[9px] text-stone-600 uppercase tracking-[0.2em] font-black block">Delivery Location</span>
-                              <p className="text-stone-400 text-xs flex items-start gap-3 leading-relaxed">
-                                  <MapPin size={16} className="text-gold-500 shrink-0 mt-0.5" /> {currentPendingOrder.address}
-                              </p>
+                          <div className="p-4 sm:p-5 bg-stone-900 rounded-2xl border border-white/5 flex items-start gap-3">
+                              <div className="p-2 bg-stone-950 rounded-xl shrink-0"><MapPin size={16} className="text-gold-500" /></div>
+                              <div className="min-w-0">
+                                <span className="text-[9px] text-stone-500 uppercase tracking-widest font-black block mb-1">Delivery Address</span>
+                                <p className="text-stone-300 text-[10px] sm:text-xs leading-relaxed truncate whitespace-normal line-clamp-3">
+                                    {currentPendingOrder.address}
+                                </p>
+                              </div>
                           </div>
                       )}
                       
-                      <div className="bg-stone-950 rounded-[1.5rem] border border-white/5 p-6 shadow-inner space-y-4">
+                      <div className="bg-stone-900 rounded-[1.5rem] border border-white/5 p-5 sm:p-6 shadow-inner space-y-3">
+                           <span className="text-[9px] text-stone-500 uppercase tracking-widest font-black block mb-3 border-b border-white/5 pb-2">Order Items</span>
                            {currentPendingOrder.items.map((it: any, idx: number) => (
-                               <div key={idx} className="flex justify-between items-center text-sm border-b border-white/5 pb-3 last:border-0 last:pb-0">
-                                   <div className="flex items-center gap-4 overflow-hidden">
-                                       <span className="text-gold-500 font-black">{it.quantity}x</span>
-                                       <span className="text-stone-200 font-medium">{it.name}</span>
+                               <div key={idx} className="flex justify-between items-center text-[11px] sm:text-sm border-b border-white/5 pb-3 mb-3 last:border-0 last:pb-0 last:mb-0">
+                                   <div className="flex items-center gap-3 overflow-hidden">
+                                       <span className="text-gold-500 font-black bg-gold-500/10 px-2 py-0.5 rounded-md shrink-0">{it.quantity}x</span>
+                                       <span className="text-stone-200 font-medium truncate">{it.name}</span>
                                    </div>
                                </div>
                            ))}
                       </div>
                   </div>
+                  
+                  <div className="p-4 sm:p-6 bg-stone-950 border-t border-white/5 shrink-0 relative z-10">
+                    <button 
+                         onClick={() => {
+                             handleStatusChange(currentPendingOrder, 'preparing');
+                         }}
+                         className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-stone-950 text-sm sm:text-lg font-black uppercase tracking-widest py-4 sm:py-5 rounded-xl sm:rounded-2xl shadow-[0_0_40px_rgba(16,185,129,0.3)] transition-all active:scale-95 flex justify-center items-center gap-3 overflow-hidden relative group"
+                     >
+                         <div className="absolute inset-0 w-1/4 h-full bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-[400%] transition-transform duration-1000 ease-in-out"></div>
+                         <Check size={24} className="animate-pulse" /> Accept & Prepare
+                     </button>
+                  </div>
              </div>
-             
-             <button 
-                 onClick={() => {
-                     handleStatusChange(currentPendingOrder, 'preparing');
-                 }}
-                 className="mt-10 w-full max-w-sm bg-green-500 hover:bg-green-400 text-stone-950 text-lg font-black uppercase tracking-widest py-5 rounded-2xl shadow-[0_0_50px_rgba(34,197,94,0.3)] transition-all active:scale-95 flex justify-center items-center gap-3"
-             >
-                 <Check size={24} /> Accept & Start
-             </button>
          </div>
       )}
 
