@@ -706,12 +706,16 @@ function App() {
             }}
             onUpdateOrderStatus={async (id, s, pm) => { 
               try {
-                const updates: any = { status: s };
-                if (pm) updates.paymentMethod = pm;
-                if (s === 'ready' || s === 'out_for_delivery') {
-                  updates.assignedAt = Date.now();
+                const q = query(collection(db, 'orders'), where("id", "==", id)); 
+                const snap = await getDocs(q); 
+                for (const d of snap.docs) {
+                  const updates: any = { status: s };
+                  if (pm) updates.paymentMethod = pm;
+                  if (s === 'ready' || s === 'out_for_delivery') {
+                    updates.assignedAt = Date.now();
+                  }
+                  await updateDoc(d.ref, updates);
                 }
-                await updateDoc(doc(db, 'orders', id), updates);
               } catch(e) {
                 console.error("Status update error", e);
               }
@@ -738,14 +742,23 @@ function App() {
             orders={orders}
             onUpdateOrderStatus={async (id, s, pm) => { 
                 try {
-                  const updates: any = { status: s };
-                  if (pm) updates.paymentMethod = pm;
-                  if (s === 'ready' || s === 'out_for_delivery') {
-                      updates.assignedAt = Date.now();
+                  const q = query(collection(db, 'orders'), where("id", "==", id)); 
+                  const snap = await getDocs(q); 
+                  if (snap.empty) {
+                      alert("Critical Sync Error: Order ID not found on server.");
+                      return;
                   }
-                  await updateDoc(doc(db, 'orders', id), updates);
-                } catch(e) {
+                  for (const d of snap.docs) {
+                    const updates: any = { status: s };
+                    if (pm) updates.paymentMethod = pm;
+                    if (s === 'ready' || s === 'out_for_delivery') {
+                        updates.assignedAt = Date.now();
+                    }
+                    await updateDoc(d.ref, updates);
+                  }
+                } catch(e: any) {
                   console.error("Status update error", e);
+                  alert("Error updating status: " + e.message);
                 }
             }}
             onUpdateRiderLocation={async (lat, lng) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }}
@@ -758,9 +771,13 @@ function App() {
           orders={orders}
           onUpdateOrderStatus={async (id, s, pm) => { 
               try {
-                const updates: any = { status: s };
-                if (s === 'ready') updates.assignedAt = Date.now();
-                await updateDoc(doc(db, 'orders', id), updates);
+                const q = query(collection(db, 'orders'), where("id", "==", id)); 
+                const snap = await getDocs(q); 
+                for (const d of snap.docs) {
+                  const updates: any = { status: s };
+                  if (s === 'ready') updates.assignedAt = Date.now();
+                  await updateDoc(d.ref, updates);
+                }
               } catch(e) {
                 console.error("Status update error", e);
               }
