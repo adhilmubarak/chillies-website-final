@@ -63,12 +63,15 @@ const NotificationTicker: React.FC<NotificationTickerProps> = ({
                     Happy Hour is ON! Grab exclusive deals now.
                   </span>
                 )}
-                {isAnnouncementActive && announcement && (
-                  <span className="flex items-center gap-2 text-brand-400">
-                    <MessageSquare size={12} fill="currentColor" /> 
-                    {announcement}
-                  </span>
-                )}
+                {isAnnouncementActive && announcement && announcement.split('\n').map((line, idx) => line.trim() ? (
+                  <React.Fragment key={idx}>
+                     <span className="flex items-center gap-2 text-brand-400">
+                       <MessageSquare size={12} fill="currentColor" /> 
+                       {line}
+                     </span>
+                     {idx < announcement.split('\n').filter(l => l.trim()).length - 1 && <span className="text-brand-500/50">|</span>}
+                  </React.Fragment>
+                ) : null)}
               </>
             )}
             <span className="text-stone-300">///</span>

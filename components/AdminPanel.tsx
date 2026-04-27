@@ -1424,7 +1424,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                      <textarea 
                                          value={storeSettings.announcement || ''}
                                          onChange={e => onUpdateStoreSettings({ ...storeSettings, announcement: e.target.value })}
-                                         placeholder="e.g. Special Holiday Hours: We open at 4 PM tomorrow!"
+                                         placeholder="e.g. Holiday Hours!\n(Press ENTER to add multiple announcements)"
                                          className={`w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-brand-500 outline-none h-24 resize-none transition-all ${!storeSettings.isAnnouncementActive ? 'opacity-50' : ''}`}
                                          disabled={!storeSettings.isAnnouncementActive}
                                      />
