@@ -50,7 +50,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
     if (isPagerActive) {
       if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 500, 200, 500, 100, 200, 100, 500]);
       
-      const audio = new Audio('https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg');
+      const audio = new Audio('/chime.mp3');
       audio.loop = true;
       pagerAudio.current = audio;
       
