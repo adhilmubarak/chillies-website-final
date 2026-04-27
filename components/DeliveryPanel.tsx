@@ -330,7 +330,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                     onClick={() => onUpdateOrderStatus(order.id, 'delivered', method)} 
                                     className="w-full h-16 bg-green-500 hover:bg-green-400 text-stone-950 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] flex justify-center items-center gap-3 transition-all shadow-[0_10px_30px_rgba(34,197,94,0.3)] active:scale-95 hover:shadow-[0_10px_40px_rgba(34,197,94,0.5)] mt-4"
                                 > 
-                                    <Check strokeWidth={3} size={20} /> Handed Over
+                                    <Check strokeWidth={3} size={20} /> Mark as Delivered
                                 </button>
                             </div>
                         )}

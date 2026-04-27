@@ -705,16 +705,16 @@ function App() {
               await Promise.all(newArray.map((cat, i) => updateDoc(doc(db, 'categories', cat.id), { order: i })));
             }}
             onUpdateOrderStatus={async (id, s, pm) => { 
-              const q = query(collection(db, 'orders'), where("id", "==", id)); 
-              const snap = await getDocs(q); 
-              snap.forEach(d => {
+              try {
                 const updates: any = { status: s };
                 if (pm) updates.paymentMethod = pm;
                 if (s === 'ready' || s === 'out_for_delivery') {
                   updates.assignedAt = Date.now();
                 }
-                updateDoc(d.ref, updates);
-              }); 
+                await updateDoc(doc(db, 'orders', id), updates);
+              } catch(e) {
+                console.error("Status update error", e);
+              }
             }}
             onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
             onAddCustomOffer={o => addDoc(collection(db, 'customOffers'), o)}
@@ -737,16 +737,16 @@ function App() {
           <DeliveryPanel 
             orders={orders}
             onUpdateOrderStatus={async (id, s, pm) => { 
-                const q = query(collection(db, 'orders'), where("id", "==", id)); 
-                const snap = await getDocs(q); 
-                snap.forEach(d => {
+                try {
                   const updates: any = { status: s };
                   if (pm) updates.paymentMethod = pm;
                   if (s === 'ready' || s === 'out_for_delivery') {
                       updates.assignedAt = Date.now();
                   }
-                  updateDoc(d.ref, updates);
-                }); 
+                  await updateDoc(doc(db, 'orders', id), updates);
+                } catch(e) {
+                  console.error("Status update error", e);
+                }
             }}
             onUpdateRiderLocation={async (lat, lng) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }}
             deliveryUpiId={storeSettings.deliveryUpiId}
@@ -757,13 +757,13 @@ function App() {
         <KitchenPanel 
           orders={orders}
           onUpdateOrderStatus={async (id, s, pm) => { 
-              const q = query(collection(db, 'orders'), where("id", "==", id)); 
-              const snap = await getDocs(q); 
-              snap.forEach(d => {
+              try {
                 const updates: any = { status: s };
                 if (s === 'ready') updates.assignedAt = Date.now();
-                updateDoc(d.ref, updates);
-              }); 
+                await updateDoc(doc(db, 'orders', id), updates);
+              } catch(e) {
+                console.error("Status update error", e);
+              }
           }}
         />
       } />
