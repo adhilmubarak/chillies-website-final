@@ -55,6 +55,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
   const [whatsappMsg, setWhatsappMsg] = useState('');
   const [redeemPoints, setRedeemPoints] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
 
   const userLoyalty = contactNumber.length === 10 ? loyaltyAccounts.find(l => l.phone === contactNumber) : null;
 
@@ -315,7 +316,27 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                         })()}
                         {orderType === 'delivery' && (
                             <div className="space-y-3 pt-4">
-                                <h3 className="text-stone-600 text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2">Delivery Address</h3>
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-stone-600 text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2">Delivery Address</h3>
+                                    <button 
+                                        onClick={() => {
+                                            if ('geolocation' in navigator) {
+                                                setIsLocating(true);
+                                                navigator.geolocation.getCurrentPosition((position) => {
+                                                    const link = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+                                                    setAddress(prev => prev ? prev + '\nLocation: ' + link : 'Location: ' + link);
+                                                    setIsLocating(false);
+                                                }, () => {
+                                                    alert("Could not fetch location. Please ensure location permissions are granted.");
+                                                    setIsLocating(false);
+                                                }, { timeout: 10000 });
+                                            }
+                                        }}
+                                        className="text-gold-500 hover:text-gold-400 text-[9px] font-bold uppercase flex items-center gap-1 transition-colors bg-gold-500/10 px-2 py-1 rounded-md border border-gold-500/30"
+                                    >
+                                        <MapPin size={10} /> {isLocating ? 'Locating...' : 'Use Current Location'}
+                                    </button>
+                                </div>
                                 <textarea placeholder="Flat No., Landmark, Area..." value={address} onChange={(e) => { setAddress(e.target.value); setErrors(p => ({...p, address: false})); }} className={`w-full bg-stone-900 border rounded-xl py-4 px-4 text-sm text-white focus:outline-none h-24 resize-none transition-all ${errors.address ? 'border-red-500' : 'border-white/5 focus:border-gold-500'}`} />
                             </div>
                         )}

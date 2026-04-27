@@ -1609,7 +1609,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                     setManualOrderItems(prev => prev.filter(p => p.item.id !== item.id));
                                                 }
                                             }} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white"><Minus size={14} /></button>
-                                            <span className="w-4 text-center text-white text-xs font-bold">{qty}</span>
+                                            <input 
+                                                type="number"
+                                                min="0"
+                                                value={qty || ''}
+                                                placeholder="0"
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value) || 0;
+                                                    if (val === 0) {
+                                                        setManualOrderItems(prev => prev.filter(p => p.item.id !== item.id));
+                                                    } else if (qty === 0) {
+                                                        setManualOrderItems(prev => [...prev, {item, quantity: val}]);
+                                                    } else {
+                                                        setManualOrderItems(prev => prev.map(p => p.item.id === item.id ? {...p, quantity: val} : p));
+                                                    }
+                                                }}
+                                                className="w-10 text-center bg-transparent border-none outline-none text-white text-xs font-bold focus:ring-1 focus:ring-gold-500 rounded p-1 appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            />
                                             <button onClick={() => {
                                                 if (qty === 0) {
                                                     setManualOrderItems(prev => [...prev, {item, quantity: 1}]);
