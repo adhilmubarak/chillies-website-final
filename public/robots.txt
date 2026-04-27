@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /kitchen
+Disallow: /delivery
+
+Sitemap: https://www.chilliesrestaurant.in/sitemap.xml
