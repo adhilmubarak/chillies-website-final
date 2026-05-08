@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "868591964292",
+    "project_id": "chillies-debd6",
+    "storage_bucket": "chillies-debd6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868591964292:android:51a0fa177fa2f21277b2d1",
+        "android_client_info": {
+          "package_name": "com.chillies.admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "868591964292-k8a4rb6ptfcbo977p423sq3ht9v6hchd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPsrJjqDxZVjdwTJFZM1xyBjAJXL6KCGY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868591964292-k8a4rb6ptfcbo977p423sq3ht9v6hchd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868591964292:android:fd08c738115b733377b2d1",
+        "android_client_info": {
+          "package_name": "com.chillies.restaurant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "868591964292-k8a4rb6ptfcbo977p423sq3ht9v6hchd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPsrJjqDxZVjdwTJFZM1xyBjAJXL6KCGY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868591964292-k8a4rb6ptfcbo977p423sq3ht9v6hchd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
