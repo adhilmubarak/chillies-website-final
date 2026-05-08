@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import Navbar from './components/Navbar';
+
 import Hero from './components/Hero';
 import ChefsChoice from './components/ChefsChoice';
 import MenuItemCard from './components/MenuItemCard';
@@ -184,6 +186,107 @@ export const printKOT = (order: Order) => {
   }, 500);
 };
 
+const arrayBufferToBase64 = (buffer: Uint8Array) => {
+  let binary = '';
+  for (let i = 0; i < buffer.byteLength; i++) {
+    binary += String.fromCharCode(buffer[i]);
+  }
+  return window.btoa(binary);
+};
+
+export const printNetworkKOT = async (order: Order, printers: {name: string, ip: string}[]) => {
+  try {
+    const { Capacitor, registerPlugin } = await import('@capacitor/core');
+    if (!Capacitor.isNativePlatform()) {
+        printKOT(order);
+        return;
+    }
+
+    const NetworkPrinter = registerPlugin<any>('NetworkPrinter');
+
+    // ESC/POS Commands
+    const ESC = 0x1B;
+    const GS = 0x1D;
+    
+    let bytes: number[] = [];
+    
+    // Initialize printer
+    bytes.push(ESC, 0x40);
+    
+    // Center align
+    bytes.push(ESC, 0x61, 1);
+    
+    // Title: KOT (Double Width & Height)
+    bytes.push(GS, 0x21, 0x11);
+    const title = "KOT\n";
+    for(let i=0; i<title.length; i++) bytes.push(title.charCodeAt(i));
+    
+    // Normal text
+    bytes.push(GS, 0x21, 0x00);
+    
+    // Order ID
+    const orderId = `Order #${order.id}\n`;
+    for(let i=0; i<orderId.length; i++) bytes.push(orderId.charCodeAt(i));
+    
+    // Date/Time
+    const dt = `${order.date} | ${order.timestamp}\n`;
+    for(let i=0; i<dt.length; i++) bytes.push(dt.charCodeAt(i));
+    
+    // Left align
+    bytes.push(ESC, 0x61, 0);
+    bytes.push(0x0A); // New line
+    
+    // Type & Customer
+    const typeStr = `TYPE: ${order.type.toUpperCase()}\n`;
+    for(let i=0; i<typeStr.length; i++) bytes.push(typeStr.charCodeAt(i));
+    
+    if (order.customerName) {
+      const custStr = `For: ${order.customerName}\n`;
+      for(let i=0; i<custStr.length; i++) bytes.push(custStr.charCodeAt(i));
+    }
+    
+    bytes.push(0x0A); // New line
+    
+    // Items
+    const itemsHeader = "ITEMS TO PREPARE:\n";
+    for(let i=0; i<itemsHeader.length; i++) bytes.push(itemsHeader.charCodeAt(i));
+    
+    // Double width/height for items
+    bytes.push(GS, 0x21, 0x11);
+    order.items.forEach(item => {
+      const line = `${item.quantity}x ${item.name}\n`;
+      for(let i=0; i<line.length; i++) bytes.push(line.charCodeAt(i));
+    });
+    
+    // Normal text
+    bytes.push(GS, 0x21, 0x00);
+    bytes.push(0x0A);
+    bytes.push(0x0A);
+    
+    const endTicket = "End of Ticket\n";
+    for(let i=0; i<endTicket.length; i++) bytes.push(endTicket.charCodeAt(i));
+    
+    // Feed lines
+    bytes.push(0x0A, 0x0A, 0x0A, 0x0A);
+    // Cut paper
+    bytes.push(GS, 0x56, 0x00);
+    
+    const base64Data = arrayBufferToBase64(new Uint8Array(bytes));
+    
+    // Send to all printers
+    for (const p of printers) {
+      if (p.ip) {
+        await NetworkPrinter.print({ ip: p.ip, port: 9100, data: base64Data });
+      }
+    }
+    
+  } catch (e) {
+    console.error("Network Print Error", e);
+    // Fallback to browser print if plugin fails
+    printKOT(order);
+  }
+};
+
 function App() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -225,7 +328,8 @@ function App() {
       loyaltyPointsRatio: 10,
       minimumPointsToRedeem: 50,
       latestBroadcast: null as { title: string; body: string; timestamp: number } | null,
-      adminTokens: [] as string[]
+      adminTokens: [] as string[],
+      kotPrinters: [] as {name: string, ip: string}[]
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -236,9 +340,20 @@ function App() {
   const [suggestion, setSuggestion] = useState<MenuItem | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const [isAdminOpen, setIsAdminOpen] = useState(location.pathname === '/admin');
+  const [isAdminOpen, setIsAdminOpen] = useState(location.pathname === '/admin' || Capacitor.isNativePlatform());
   const [isLoading, setIsLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      setIsAdminOpen(true);
+      if (location.pathname !== '/admin') {
+        navigate('/admin', { replace: true });
+      }
+    } else if (location.pathname === '/admin') {
+      setIsAdminOpen(true);
+    }
+  }, [navigate, location.pathname]);
 
   useEffect(() => {
     const splashTimer = setTimeout(() => {
@@ -552,7 +667,8 @@ function App() {
                 loyaltyPointsRatio: data.loyaltyPointsRatio || 10,
                 minimumPointsToRedeem: data.minimumPointsToRedeem || 50,
                 latestBroadcast: data.latestBroadcast || null,
-                adminTokens: data.adminTokens || []
+                adminTokens: data.adminTokens || [],
+                kotPrinters: data.kotPrinters || []
             });
         }
     });
@@ -665,6 +781,7 @@ function App() {
 
   return (
     <>
+
     <Routes>
       <Route path="/admin" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">

@@ -7,7 +7,7 @@ import {
   Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount, Complaint } from '../types';
-import { printThermalBill, printKOT } from '../App';
+import { printThermalBill, printKOT, printNetworkKOT } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
 import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from 'react-leaflet';
@@ -59,7 +59,7 @@ interface AdminPanelProps {
     happyHourStartTime: string;
     happyHourEndTime: string;
   };
-  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[] };
+  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[]; kotPrinters?: {name: string, ip: string}[] };
   onAddItem: (item: MenuItem) => void;
   onUpdateItem: (item: MenuItem) => void;
   onDeleteItem: (id: string) => void;
@@ -70,7 +70,7 @@ interface AdminPanelProps {
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
-  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[] }) => void;
+  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[]; kotPrinters?: {name: string, ip: string}[] }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
   onTestNotification?: () => void;
@@ -236,6 +236,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const [pushTitle, setPushTitle] = useState('Chillies Update');
   const [pushBody, setPushBody] = useState('We have some exciting news for you. Open the app to see!');
+  
+  const [newPrinterName, setNewPrinterName] = useState('');
+  const [newPrinterIp, setNewPrinterIp] = useState('');
 
   const [isRinging, setIsRinging] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
@@ -247,15 +250,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   useEffect(() => {
     const currentOpenCount = (complaints || []).filter(c => c.status === 'open').length;
     if (currentOpenCount > prevOpenComplaintsCountRef.current) {
-        // Trigger alert for new complaint
+        // Trigger alert for new complaint. The other useEffect handles actual audio play based on `isRinging`
         setIsRinging(true);
-        // Play sound if possible
-        if (ringAudioRef.current && !audioBlocked) {
-            ringAudioRef.current.play().catch(e => {
-                console.log("Audio blocked:", e);
-                setAudioBlocked(true);
-            });
-        }
     }
     prevOpenComplaintsCountRef.current = currentOpenCount;
   }, [complaints, audioBlocked]);
@@ -264,14 +260,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       const pendingOrders = orders.filter(o => o.status === 'pending');
       const currentPendingCount = pendingOrders.length;
       
-      if (currentPendingCount > 0) {
+      if (currentPendingCount > prevPendingCountRef.current) {
           setIsRinging(true);
           const oldestPending = pendingOrders[pendingOrders.length - 1];
           setLatestNewOrderId(oldestPending.id);
-      } else {
+      } else if (currentPendingCount === 0) {
           setIsRinging(false);
           setLatestNewOrderId(null);
       }
+      
       prevPendingCountRef.current = currentPendingCount;
   }, [orders]);
 
@@ -788,7 +785,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <button onClick={() => printThermalBill(order)} title="Print" className="p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-900/5 transition-all">
                                             <Printer size={18} />
                                         </button>
-                                        <button onClick={() => printKOT(order)} title="Print KOT" className="p-3 bg-stone-950 text-stone-600 hover:text-orange-500 rounded-2xl border border-stone-900/5 transition-all">
+                                        <button onClick={() => {
+                                            if (storeSettings.kotPrinters && storeSettings.kotPrinters.length > 0) {
+                                                printNetworkKOT(order, storeSettings.kotPrinters);
+                                            } else {
+                                                printKOT(order);
+                                            }
+                                        }} title="Print KOT" className="p-3 bg-stone-950 text-stone-600 hover:text-orange-500 rounded-2xl border border-stone-900/5 transition-all">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-receipt-text"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>
                                         </button>
                                         <button onClick={() => {
@@ -1488,6 +1491,65 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/feedback`)} className="px-6 bg-gold-500 text-stone-950 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:bg-gold-400 whitespace-nowrap border border-gold-500">Copy URL</button>
                                     </div>
                                     <p className="text-[10px] text-stone-500 max-w-xs leading-relaxed">Share this link directly with customers to collect their dining experience ratings.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                            <h5 className="text-white text-base font-bold flex items-center gap-3"><Printer size={20} className="text-gold-500" /> Network KOT Printers</h5>
+                            <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Printer Name (e.g. Kitchen Main)" 
+                                        value={newPrinterName} 
+                                        onChange={e => setNewPrinterName(e.target.value)} 
+                                        className="col-span-1 bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm outline-none focus:border-gold-500"
+                                    />
+                                    <input 
+                                        type="text" 
+                                        placeholder="IP Address (e.g. 192.168.1.100)" 
+                                        value={newPrinterIp} 
+                                        onChange={e => setNewPrinterIp(e.target.value)} 
+                                        className="col-span-1 bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-sm outline-none focus:border-gold-500 font-mono tracking-wider"
+                                    />
+                                    <button 
+                                        onClick={() => {
+                                            if(newPrinterName && newPrinterIp) {
+                                                const updatedPrinters = [...(storeSettings.kotPrinters || []), {name: newPrinterName, ip: newPrinterIp}];
+                                                onUpdateStoreSettings({...storeSettings, kotPrinters: updatedPrinters});
+                                                setNewPrinterName('');
+                                                setNewPrinterIp('');
+                                            }
+                                        }}
+                                        className="col-span-1 bg-gold-500 text-stone-950 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-gold-400"
+                                    >
+                                        Add Printer
+                                    </button>
+                                </div>
+                                <div className="space-y-3 mt-6">
+                                    {(storeSettings.kotPrinters || []).map((printer, index) => (
+                                        <div key={index} className="flex items-center justify-between p-4 bg-stone-900 border border-white/5 rounded-2xl">
+                                            <div>
+                                                <p className="text-white font-bold text-sm">{printer.name}</p>
+                                                <p className="text-stone-500 font-mono text-[10px] uppercase tracking-widest mt-1">IP: {printer.ip} | Port: 9100</p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button 
+                                                    onClick={() => {
+                                                        const updated = (storeSettings.kotPrinters || []).filter((_, i) => i !== index);
+                                                        onUpdateStoreSettings({...storeSettings, kotPrinters: updated});
+                                                    }}
+                                                    className="p-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {(!storeSettings.kotPrinters || storeSettings.kotPrinters.length === 0) && (
+                                        <p className="text-stone-600 text-xs text-center py-4 italic">No network printers configured. System will fallback to browser print dialog.</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
