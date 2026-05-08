@@ -763,7 +763,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                         ) : filteredOrders.map(order => (
                             <div key={order.id} className="bg-stone-900/80 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-gold-500/40 transition-all duration-500 flex flex-col shadow-xl">
-                                <div className="p-8 border-b border-white/5 flex justify-between items-start bg-stone-950/30">
+                                <div className="p-6 sm:p-8 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-0 bg-stone-950/30">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-3">
                                             <span className="text-gold-400 font-mono font-bold text-2xl tracking-tighter">#{order.id}</span>
@@ -778,11 +778,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             </div>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-white/5 transition-all">
+                                    <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                                        <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="flex-1 sm:flex-none p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-white/5 transition-all flex justify-center items-center">
                                             {copiedId === order.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
                                         </button>
-                                        <button onClick={() => printThermalBill(order)} title="Print" className="p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-900/5 transition-all">
+                                        <button onClick={() => printThermalBill(order)} title="Print" className="flex-1 sm:flex-none p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
                                             <Printer size={18} />
                                         </button>
                                         <button onClick={() => {
@@ -791,7 +791,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             } else {
                                                 printKOT(order);
                                             }
-                                        }} title="Print KOT" className="p-3 bg-stone-950 text-stone-600 hover:text-orange-500 rounded-2xl border border-stone-900/5 transition-all">
+                                        }} title="Print KOT" className="flex-1 sm:flex-none p-3 bg-stone-950 text-stone-600 hover:text-orange-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-receipt-text"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>
                                         </button>
                                         <button onClick={() => {
@@ -799,7 +799,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             const formattedPhone = phone.length === 10 ? `91${phone}` : phone;
                                             const text = `Hi ${order.customerName},\n\nYour order #${order.id} is confirmed!\nYou can track your order status live here:\n${window.location.origin}/?tid=${order.id}\n\nThank you for choosing Chillies!`;
                                             window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`, '_blank');
-                                        }} title="WhatsApp Tracking Link" className="p-3 bg-stone-950 text-stone-600 hover:text-green-500 rounded-2xl border border-stone-900/5 transition-all">
+                                        }} title="WhatsApp Tracking Link" className="flex-1 sm:flex-none p-3 bg-stone-950 text-stone-600 hover:text-green-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
                                             <MessageCircle size={18} />
                                         </button>
                                     </div>
@@ -1697,48 +1697,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 />
                             </div>
                         </div>
-                        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide flex-1">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide flex-1 auto-rows-max">
                             {items.filter(i => i.name.toLowerCase().includes(manualOrderSearch.toLowerCase())).map(item => {
                                 const cartItem = manualOrderItems.find(i => i.item.id === item.id);
                                 const qty = cartItem ? cartItem.quantity : 0;
                                 return (
-                                    <div key={item.id} className="flex items-center justify-between p-4 bg-stone-950 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
-                                        <div className="flex-1 min-w-0 pr-4">
-                                            <p className="text-white text-sm font-bold truncate">{item.name}</p>
-                                            <p className="text-gold-500 text-[10px] font-mono font-bold">₹{item.price}</p>
+                                    <div 
+                                        key={item.id} 
+                                        onClick={() => {
+                                            setManualOrderItems(prev => {
+                                                const existing = prev.find(p => p.item.id === item.id);
+                                                if (existing) {
+                                                    return prev.map(p => p.item.id === item.id ? {...p, quantity: p.quantity + 1} : p);
+                                                }
+                                                return [...prev, {item, quantity: 1}];
+                                            });
+                                        }}
+                                        className="relative bg-stone-950 rounded-2xl border border-white/5 hover:border-gold-500 overflow-hidden cursor-pointer group flex flex-col h-40 transition-all active:scale-95 shadow-lg"
+                                    >
+                                        <div className="absolute top-2 right-2 bg-stone-900/80 backdrop-blur-sm px-2 py-1 rounded-lg text-gold-500 font-mono font-bold text-[10px] z-10 shadow-sm">₹{item.price}</div>
+                                        {qty > 0 && <div className="absolute top-2 left-2 bg-gold-500 text-stone-950 px-2 py-1 rounded-lg font-black text-[10px] z-10 shadow-sm">{qty}x</div>}
+                                        <div className="h-24 w-full shrink-0 relative bg-stone-900">
+                                            {item.image ? (
+                                                <SafeImage src={item.image} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center opacity-30"><ImageIcon size={24} className="text-stone-500" /></div>
+                                            )}
                                         </div>
-                                        <div className="flex items-center gap-3 bg-stone-900 rounded-xl border border-white/10 p-1">
-                                            <button onClick={() => {
-                                                if (qty > 1) {
-                                                    setManualOrderItems(prev => prev.map(p => p.item.id === item.id ? {...p, quantity: p.quantity - 1} : p));
-                                                } else if (qty === 1) {
-                                                    setManualOrderItems(prev => prev.filter(p => p.item.id !== item.id));
-                                                }
-                                            }} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white"><Minus size={14} /></button>
-                                            <input 
-                                                type="number"
-                                                min="0"
-                                                value={qty || ''}
-                                                placeholder="0"
-                                                onChange={(e) => {
-                                                    const val = parseInt(e.target.value) || 0;
-                                                    if (val === 0) {
-                                                        setManualOrderItems(prev => prev.filter(p => p.item.id !== item.id));
-                                                    } else if (qty === 0) {
-                                                        setManualOrderItems(prev => [...prev, {item, quantity: val}]);
-                                                    } else {
-                                                        setManualOrderItems(prev => prev.map(p => p.item.id === item.id ? {...p, quantity: val} : p));
-                                                    }
-                                                }}
-                                                className="w-10 text-center bg-transparent border-none outline-none text-white text-xs font-bold focus:ring-1 focus:ring-gold-500 rounded p-1 appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                            />
-                                            <button onClick={() => {
-                                                if (qty === 0) {
-                                                    setManualOrderItems(prev => [...prev, {item, quantity: 1}]);
-                                                } else {
-                                                    setManualOrderItems(prev => prev.map(p => p.item.id === item.id ? {...p, quantity: p.quantity + 1} : p));
-                                                }
-                                            }} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white"><Plus size={14} /></button>
+                                        <div className="p-3 flex-1 flex items-center justify-center text-center bg-stone-950">
+                                            <p className="text-white text-xs font-bold line-clamp-2 leading-tight group-hover:text-gold-500 transition-colors">{item.name}</p>
                                         </div>
                                     </div>
                                 )
@@ -1767,12 +1754,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     <p className="text-stone-600 text-xs italic text-center py-4">Cart is empty</p>
                                 ) : (
                                     manualOrderItems.map(item => (
-                                        <div key={item.item.id} className="flex justify-between items-center text-sm">
-                                            <div className="flex items-center gap-2 min-w-0 pr-2">
-                                                <span className="text-gold-500 font-bold shrink-0">{item.quantity}x</span>
-                                                <span className="text-stone-300 truncate">{item.item.name}</span>
+                                        <div key={item.item.id} className="flex flex-col gap-3 p-4 bg-stone-900/50 rounded-xl border border-white/5">
+                                            <div className="flex justify-between items-start text-sm gap-2">
+                                                <span className="text-stone-200 font-bold leading-tight">{item.item.name}</span>
+                                                <span className="text-gold-500 font-mono shrink-0 font-bold">₹{(item.item.price * item.quantity).toFixed(2)}</span>
                                             </div>
-                                            <span className="text-white font-mono shrink-0">₹{(item.item.price * item.quantity).toFixed(2)}</span>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 bg-stone-950 rounded-lg border border-white/10 p-1">
+                                                    <button onClick={() => {
+                                                        if (item.quantity > 1) {
+                                                            setManualOrderItems(prev => prev.map(p => p.item.id === item.item.id ? {...p, quantity: p.quantity - 1} : p));
+                                                        } else {
+                                                            setManualOrderItems(prev => prev.filter(p => p.item.id !== item.item.id));
+                                                        }
+                                                    }} className="w-6 h-6 flex items-center justify-center text-stone-500 hover:text-red-500 transition-colors"><Minus size={12} /></button>
+                                                    <span className="text-xs font-bold text-white w-4 text-center">{item.quantity}</span>
+                                                    <button onClick={() => {
+                                                        setManualOrderItems(prev => prev.map(p => p.item.id === item.item.id ? {...p, quantity: p.quantity + 1} : p));
+                                                    }} className="w-6 h-6 flex items-center justify-center text-stone-500 hover:text-green-500 transition-colors"><Plus size={12} /></button>
+                                                </div>
+                                                <button onClick={() => {
+                                                    setManualOrderItems(prev => prev.filter(p => p.item.id !== item.item.id));
+                                                }} className="text-[10px] text-red-500/70 hover:text-red-500 uppercase tracking-widest font-black transition-colors bg-red-500/10 px-3 py-1.5 rounded-lg">Remove</button>
+                                            </div>
                                         </div>
                                     ))
                                 )}
