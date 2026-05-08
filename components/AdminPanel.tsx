@@ -7,7 +7,7 @@ import {
   Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount, Complaint } from '../types';
-import { printThermalBill, printKOT, printNetworkKOT } from '../App';
+import { printThermalBill, printKOT, printNetworkKOT, discoverNetworkPrinters } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
 import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from 'react-leaflet';
@@ -239,6 +239,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   
   const [newPrinterName, setNewPrinterName] = useState('');
   const [newPrinterIp, setNewPrinterIp] = useState('');
+  const [isScanningPrinters, setIsScanningPrinters] = useState(false);
 
   const [isRinging, setIsRinging] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
@@ -763,11 +764,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                         ) : filteredOrders.map(order => (
                             <div key={order.id} className="bg-stone-900/80 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-gold-500/40 transition-all duration-500 flex flex-col shadow-xl">
-                                <div className="p-6 sm:p-8 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-0 bg-stone-950/30">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-gold-400 font-mono font-bold text-2xl tracking-tighter">#{order.id}</span>
-                                            <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${order.type === 'delivery' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>{order.type}</span>
+                                <div className="p-4 sm:p-8 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-950/30">
+                                    <div className="space-y-2 w-full sm:w-auto">
+                                        <div className="flex items-center justify-between sm:justify-start gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-gold-400 font-mono font-bold text-2xl tracking-tighter">#{order.id}</span>
+                                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${order.type === 'delivery' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>{order.type}</span>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-2 text-stone-500 font-bold uppercase tracking-widest text-[10px]">
                                             <Calendar size={12} /> {order.date} <span className="opacity-30 mx-1">|</span> {order.timestamp}
@@ -778,11 +781,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             </div>
                                         )}
                                     </div>
-                                    <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                                        <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="flex-1 sm:flex-none p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-white/5 transition-all flex justify-center items-center">
+                                    <div className="grid grid-cols-4 gap-2 w-full sm:flex sm:w-auto">
+                                        <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-white/5 transition-all flex justify-center items-center">
                                             {copiedId === order.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
                                         </button>
-                                        <button onClick={() => printThermalBill(order)} title="Print" className="flex-1 sm:flex-none p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
+                                        <button onClick={() => printThermalBill(order)} title="Print" className="p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
                                             <Printer size={18} />
                                         </button>
                                         <button onClick={() => {
@@ -791,7 +794,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             } else {
                                                 printKOT(order);
                                             }
-                                        }} title="Print KOT" className="flex-1 sm:flex-none p-3 bg-stone-950 text-stone-600 hover:text-orange-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
+                                        }} title="Print KOT" className="p-3 bg-stone-950 text-stone-600 hover:text-orange-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-receipt-text"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>
                                         </button>
                                         <button onClick={() => {
@@ -799,7 +802,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             const formattedPhone = phone.length === 10 ? `91${phone}` : phone;
                                             const text = `Hi ${order.customerName},\n\nYour order #${order.id} is confirmed!\nYou can track your order status live here:\n${window.location.origin}/?tid=${order.id}\n\nThank you for choosing Chillies!`;
                                             window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`, '_blank');
-                                        }} title="WhatsApp Tracking Link" className="flex-1 sm:flex-none p-3 bg-stone-950 text-stone-600 hover:text-green-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
+                                        }} title="WhatsApp Tracking Link" className="p-3 bg-stone-950 text-stone-600 hover:text-green-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
                                             <MessageCircle size={18} />
                                         </button>
                                     </div>
@@ -1527,6 +1530,30 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         Add Printer
                                     </button>
                                 </div>
+                                <button
+                                    onClick={async () => {
+                                        setIsScanningPrinters(true);
+                                        try {
+                                            const ips = await discoverNetworkPrinters();
+                                            if (ips && ips.length > 0) {
+                                                setNewPrinterIp(ips[0]);
+                                                if (!newPrinterName) setNewPrinterName("Auto Discovered Printer");
+                                                alert(`Found ${ips.length} printer(s)! IP ${ips[0]} has been filled in.`);
+                                            } else {
+                                                alert("No ESC/POS network printers found on port 9100 on your current WiFi.");
+                                            }
+                                        } catch (e) {
+                                            alert("Scanner failed. Ensure you are running the native Android app and connected to WiFi.");
+                                        } finally {
+                                            setIsScanningPrinters(false);
+                                        }
+                                    }}
+                                    disabled={isScanningPrinters}
+                                    className={`w-full ${isScanningPrinters ? 'bg-brand-500/50 cursor-wait' : 'bg-brand-500 hover:bg-brand-400'} text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all p-3 flex items-center justify-center gap-2`}
+                                >
+                                    <Search size={16} className={isScanningPrinters ? "animate-spin" : ""} />
+                                    {isScanningPrinters ? 'Scanning WiFi Subnet...' : 'Auto-Detect Printers on WiFi'}
+                                </button>
                                 <div className="space-y-3 mt-6">
                                     {(storeSettings.kotPrinters || []).map((printer, index) => (
                                         <div key={index} className="flex items-center justify-between p-4 bg-stone-900 border border-white/5 rounded-2xl">
