@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
+import { App as CapApp } from '@capacitor/app';
 import Navbar from './components/Navbar';
 
 import Hero from './components/Hero';
@@ -423,10 +425,54 @@ function App() {
 
   // Request notifications gracefully when the user interacts
   const requestNotifications = () => {
-    if ('Notification' in window && Notification.permission === 'default') {
+    if (Capacitor.isNativePlatform()) {
+      PushNotifications.requestPermissions().then(result => {
+        if (result.receive === 'granted') {
+          PushNotifications.register();
+        }
+      });
+    } else if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
   };
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      // Handle App state (foreground/background)
+      CapApp.addListener('appStateChange', ({ isActive }) => {
+        console.log('App state changed. Is active?', isActive);
+      });
+
+      // Initial check and register
+      PushNotifications.checkPermissions().then((res) => {
+        if (res.receive !== 'granted') {
+          PushNotifications.requestPermissions().then((res) => {
+            if (res.receive === 'granted') {
+              PushNotifications.register();
+            }
+          });
+        } else {
+          PushNotifications.register();
+        }
+      });
+
+      PushNotifications.addListener('registration', (token) => {
+        console.log('Push registration success, token: ' + token.value);
+        // Note: You can save this token to Firestore if you want to target specific devices
+      });
+
+      PushNotifications.addListener('pushNotificationReceived', (notification) => {
+        console.log('Push received: ', notification);
+      });
+
+      PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+        console.log('Push action performed: ', action);
+        if (action.notification.title?.toLowerCase().includes('order')) {
+          navigate('/admin');
+        }
+      });
+    }
+  }, []);
 
   const fireNotification = async (title: string, options: any) => {
     if ('Notification' in window && Notification.permission === 'granted') {
