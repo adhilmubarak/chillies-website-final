@@ -1,5 +1,6 @@
 package com.chillies.admin;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -50,35 +51,54 @@ public class MessagingService extends FirebaseMessagingService {
             defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         }
 
+        // Create a big text style for item preview
+        NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
+        bigStyle.setBigContentTitle(title);
+        bigStyle.bigText(body);
+
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setSmallIcon(android.R.drawable.ic_dialog_info)
                         .setContentTitle(title)
                         .setContentText(body)
+                        .setStyle(bigStyle)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
-                        .setVibrate(new long[]{0, 1000, 500, 1000})
+                        .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
                         .setPriority(NotificationCompat.PRIORITY_MAX)
                         .setCategory(NotificationCompat.CATEGORY_ALARM)
                         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                         .setFullScreenIntent(pendingIntent, true) 
-                        .setContentIntent(pendingIntent);
+                        .setContentIntent(pendingIntent)
+                        .addAction(android.R.drawable.ic_menu_view, "View Order", pendingIntent);
+
+        Notification notification = notificationBuilder.build();
+        // FLAG_INSISTENT makes the sound repeat until the user dismisses it
+        notification.flags |= Notification.FLAG_INSISTENT;
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "Orders Alerts",
+                    "Critical Order Alerts",
                     NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("Critical alerts for new restaurant orders");
+            channel.setDescription("Rings continuously until order is viewed");
             channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
-            channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
+            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            
+            // Set sound for channel (required for Android 8+)
+            android.media.AudioAttributes audioAttributes = new android.media.AudioAttributes.Builder()
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                    .build();
+            channel.setSound(defaultSoundUri, audioAttributes);
+            
             notificationManager.createNotificationChannel(channel);
         }
 
-        notificationManager.notify(0, notificationBuilder.build());
+        notificationManager.notify(0, notification);
     }
 
     private void forceOpenApp() {
