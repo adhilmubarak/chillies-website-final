@@ -196,18 +196,21 @@ const arrayBufferToBase64 = (buffer: Uint8Array) => {
   return window.btoa(binary);
 };
 
-export const discoverNetworkPrinters = async (): Promise<string[]> => {
+export const discoverNetworkPrinters = async (): Promise<{printers: string[], scannedSubnets: string[]}> => {
   try {
     const { Capacitor, registerPlugin } = await import('@capacitor/core');
     if (!Capacitor.isNativePlatform()) {
-      return [];
+      return { printers: [], scannedSubnets: [] };
     }
     const NetworkPrinter = registerPlugin<any>('NetworkPrinter');
     const result = await NetworkPrinter.discoverPrinters();
-    return result.printers || [];
+    return {
+      printers: result.printers || [],
+      scannedSubnets: result.scannedSubnets || []
+    };
   } catch (e) {
     console.error("Failed to discover printers:", e);
-    return [];
+    return { printers: [], scannedSubnets: [] };
   }
 };
 

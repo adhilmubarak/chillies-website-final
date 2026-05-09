@@ -1534,13 +1534,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     onClick={async () => {
                                         setIsScanningPrinters(true);
                                         try {
-                                            const ips = await discoverNetworkPrinters();
-                                            if (ips && ips.length > 0) {
-                                                setNewPrinterIp(ips[0]);
+                                            const { printers, scannedSubnets } = await discoverNetworkPrinters();
+                                            if (printers && printers.length > 0) {
+                                                setNewPrinterIp(printers[0]);
                                                 if (!newPrinterName) setNewPrinterName("Auto Discovered Printer");
-                                                alert(`Found ${ips.length} printer(s)! IP ${ips[0]} has been filled in.`);
+                                                alert(`Found ${printers.length} printer(s)! IP ${printers[0]} has been filled in.`);
                                             } else {
-                                                alert("No ESC/POS network printers found on port 9100 on your current WiFi.");
+                                                const subnetMsg = scannedSubnets.length > 0 ? `\n\nScanned Subnets: ${scannedSubnets.join(', ')}\nEnsure your printer is on one of these subnets.` : "";
+                                                alert("No ESC/POS network printers found on port 9100." + subnetMsg);
                                             }
                                         } catch (e) {
                                             alert("Scanner failed. Ensure you are running the native Android app and connected to WiFi.");
