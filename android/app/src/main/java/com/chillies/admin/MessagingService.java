@@ -45,7 +45,11 @@ public class MessagingService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        if (defaultSoundUri == null) {
+            defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        }
+
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setSmallIcon(android.R.drawable.ic_dialog_info)
@@ -53,9 +57,11 @@ public class MessagingService extends FirebaseMessagingService {
                         .setContentText(body)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
+                        .setVibrate(new long[]{0, 1000, 500, 1000})
                         .setPriority(NotificationCompat.PRIORITY_MAX)
                         .setCategory(NotificationCompat.CATEGORY_ALARM)
-                        .setFullScreenIntent(pendingIntent, true) // This wakes up the screen
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                        .setFullScreenIntent(pendingIntent, true) 
                         .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager =
@@ -65,6 +71,10 @@ public class MessagingService extends FirebaseMessagingService {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
                     "Orders Alerts",
                     NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("Critical alerts for new restaurant orders");
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
+            channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
             notificationManager.createNotificationChannel(channel);
         }
 
