@@ -6,6 +6,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import android.util.Base64;
+import android.util.Log;
 import java.io.OutputStream;
 import java.net.Socket;
 import com.getcapacitor.JSObject;
@@ -33,13 +34,21 @@ public class NetworkPrinterPlugin extends Plugin {
         }
 
         new Thread(() -> {
-            try (Socket socket = new Socket(ip, port)) {
+            try {
+                Log.d("NetworkPrinter", "Attempting to print to " + ip + ":" + port);
+                Socket socket = new Socket();
+                socket.connect(new InetSocketAddress(ip, port), 5000); // 5s timeout
+                
                 OutputStream os = socket.getOutputStream();
                 byte[] bytes = Base64.decode(dataBase64, Base64.DEFAULT);
                 os.write(bytes);
                 os.flush();
+                socket.close();
+                
+                Log.d("NetworkPrinter", "Print successful to " + ip);
                 call.resolve();
             } catch (Exception e) {
+                Log.e("NetworkPrinter", "Error printing to " + ip + ": " + e.getMessage());
                 call.reject("Error printing to " + ip + ": " + e.getMessage());
             }
         }).start();
