@@ -6,6 +6,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -17,7 +19,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 public class MessagingService extends FirebaseMessagingService {
     private static final String TAG = "MessagingService";
-    private static final String CHANNEL_ID = "orders_channel";
+    private static final String CHANNEL_ID = "strict_orders_channel";
 
     @Override
     public void onCreate() {
@@ -28,25 +30,35 @@ public class MessagingService extends FirebaseMessagingService {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            
+            // Check if channel already exists
+            if (notificationManager.getNotificationChannel(CHANNEL_ID) != null) {
+                return;
+            }
+
+            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            if (alarmSound == null) {
+                alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            }
+
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "Critical Order Alerts",
+                    "Strict Order Alerts",
                     NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("Rings continuously until order is viewed");
+            
+            channel.setDescription("Critical alarms for new orders (Loops until opened)");
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
             channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            
-            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-            if (defaultSoundUri == null) {
-            // Long vibration pattern: 1s on, 0.5s off
             channel.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000, 500, 1000});
-            channel.setSound(defaultSoundUri, audioAttributes);
+            channel.setSound(alarmSound, audioAttributes);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            
-            // Allow this notification to bypass "Do Not Disturb" mode
             channel.setBypassDnd(true);
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
     }
@@ -57,7 +69,7 @@ public class MessagingService extends FirebaseMessagingService {
         
         Log.d(TAG, "Strict Message Received from: " + remoteMessage.getFrom());
         
-        // Ensure CPU is awake
+        // Ensure CPU is awake to process the alert
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Chillies:StrictAlert");
         wakeLock.acquire(30000); // 30 seconds
@@ -72,8 +84,12 @@ public class MessagingService extends FirebaseMessagingService {
             if (remoteMessage.getData().containsKey("type")) type = remoteMessage.getData().get("type");
         }
 
-        // Always use high strictness for orders and complaints
-        if (title.toLowerCase().contains("order") || title.toLowerCase().contains("complaint") || "test".equals(type)) {
+        // Always trigger strict alert for orders, complaints, or tests
+        if (title.toLowerCase().contains("order") || 
+            title.toLowerCase().contains("complaint") || 
+            "test".equals(type) || 
+            "order".equals(type)) {
+            
             sendNotification(title, body, type);
         }
     }
@@ -89,12 +105,15 @@ public class MessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        if (alarmSound == null) {
+            alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        }
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(body)
-                .setAutoCancel(false) // Don't auto cancel, force user to interact
+                .setAutoCancel(false) 
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -106,15 +125,12 @@ public class MessagingService extends FirebaseMessagingService {
                 .addAction(android.R.drawable.ic_menu_view, "OPEN DASHBOARD", pendingIntent);
 
         Notification notification = notificationBuilder.build();
-        // FLAG_INSISTENT: sound repeats until user dismisses
-        // FLAG_NO_CLEAR: prevent swipe away (optional, but makes it "stricter")
         notification.flags |= Notification.FLAG_INSISTENT;
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         int notificationId = (int) (System.currentTimeMillis() % 100000);
         notificationManager.notify(notificationId, notification);
 
-        // Force wake the app
         forceOpenApp();
     }
 
