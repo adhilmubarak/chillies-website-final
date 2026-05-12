@@ -1585,57 +1585,89 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
                             <h5 className="text-white text-base font-bold flex items-center gap-3"><BellRing size={20} className="text-brand-500" /> Background Notifications</h5>
                             <div className="bg-stone-950 p-6 rounded-2xl border border-brand-500/20 space-y-4">
-                                <p className="text-[10px] text-stone-500 max-w-sm leading-relaxed mb-4">Register this device to receive secure Push Notifications for new orders, even if the app is completely closed.</p>
+                                <div className="flex flex-col gap-4">
+                                    <p className="text-[10px] text-stone-500 max-w-sm leading-relaxed">Register this device to receive secure Push Notifications for new orders, even if the app is completely closed.</p>
+                                    
+                                    <div className="bg-stone-900/50 p-4 rounded-xl border border-white/5 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">FCM Registry</span>
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-2 h-2 rounded-full ${storeSettings.adminTokens && storeSettings.adminTokens.length > 0 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+                                                <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">
+                                                    {storeSettings.adminTokens && storeSettings.adminTokens.length > 0 
+                                                        ? `${storeSettings.adminTokens.length} Admin Device(s)` 
+                                                        : 'Unregistered'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Permission Checklist for Android */}
+                                        <div className="pt-3 border-t border-white/5 space-y-2">
+                                            <p className="text-[8px] text-stone-600 uppercase font-black tracking-[0.2em]">Required Android Settings</p>
+                                            <div className="flex items-center gap-2">
+                                                <Check size={10} className="text-green-500" />
+                                                <span className="text-[10px] text-stone-500">Notifications: Allowed</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <AlertTriangle size={10} className="text-gold-500" />
+                                                <span className="text-[10px] text-stone-500">Display Over Apps: Check Settings</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Zap size={10} className="text-gold-500" />
+                                                <span className="text-[10px] text-stone-500">Battery: Unrestricted (Recommended)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <button 
                                     onClick={async () => {
-                                        const { Capacitor } = await import('@capacitor/core');
-                                        
-                                        if (Capacitor.isNativePlatform()) {
-                                            try {
+                                        try {
+                                            const { Capacitor } = await import('@capacitor/core');
+                                            const isNative = Capacitor.isNativePlatform();
+                                            
+                                            if (isNative) {
+                                                console.log("Registering for Native Push...");
                                                 const { PushNotifications } = await import('@capacitor/push-notifications');
                                                 const res = await PushNotifications.requestPermissions();
                                                 if (res.receive === 'granted') {
                                                     await PushNotifications.register();
-                                                    alert("Native Push Notifications registered! Your device ID will be synced automatically.");
+                                                    alert("Native Android Push Registered! Your device will now receive order alerts even in background.");
                                                 } else {
-                                                    alert("Notification permission denied. Please enable it in Android Settings.");
+                                                    alert("Notification permission denied in Android Settings.");
                                                 }
-                                            } catch (e) {
-                                                alert("Native registration failed. Ensure you are running the built Android APK.");
+                                            } else {
+                                                // WEB PUSH PATH
+                                                console.log("Registering for Web Push...");
+                                                if (!messaging) {
+                                                    alert('Push notifications are not supported in this browser environment.');
+                                                    return;
+                                                }
+                                                const permission = await Notification.requestPermission();
+                                                if (permission === 'granted') {
+                                                    const { getToken } = await import('firebase/messaging');
+                                                    // IMPORTANT: Replace the key below with your actual VAPID key from Firebase Console -> Project Settings -> Cloud Messaging -> Web Push Certificates
+                                                    const VAPID_KEY = 'BHcAqM5__bhlDGUtAjxBAlLfTxQCq9UxfSi0bCalkbMorZVrRZJ-Xq7fuD9RKjMQkBnAWzJemeja6sZDd8GQRCo';
+                                                    
+                                                    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                                                    const updatedTokens = Array.from(new Set([...(storeSettings.adminTokens || []), token]));
+                                                    onUpdateStoreSettings({...storeSettings, adminTokens: updatedTokens});
+                                                    alert('Web Browser Push Registered Successfully!');
+                                                }
                                             }
-                                            return;
-                                        }
-
-                                        if (!messaging) {
-                                            alert('Push notifications are not natively supported in this browser Environment.');
-                                            return;
-                                        }
-                                        try {
-                                            const permission = await Notification.requestPermission();
-                                            if (permission === 'granted') {
-                                                const { getToken } = await import('firebase/messaging');
-                                                const token = await getToken(messaging, { vapidKey: 'BHpj_oVMoUijqh0RYq84o9RHm9HQVYQ2DMmrfATuLP_1VnJP32D6YUzW_F5ywGJockkUMeGfTuEC_HbRdwtFrWw' });
-                                                const updatedTokens = Array.from(new Set([...(storeSettings.adminTokens || []), token]));
-                                                onUpdateStoreSettings({...storeSettings, adminTokens: updatedTokens});
-                                                alert('Web Push Registered Successfully!');
+                                        } catch (e: any) {
+                                            console.error('Registration Error:', e);
+                                            if (e.message?.includes('vapidKey')) {
+                                                alert('VAPID Key Error: Please ensure you have generated and pasted your Web Push Certificate key from the Firebase Console into AdminPanel.tsx');
+                                            } else {
+                                                alert('Failed to register: ' + e.message);
                                             }
-                                        } catch (e) {
-                                            console.error(e);
-                                            alert('Failed to register Web Push. Check browser permissions.');
                                         }
                                     }}
                                     className="w-full bg-stone-900 border border-brand-500/30 text-brand-500 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:bg-brand-500 hover:text-white p-4 flex items-center justify-center gap-2"
                                 >
-                                    Register This Device For Notifications
+                                    Register This Device
                                 </button>
-                                <div className="mt-4 flex items-center gap-2">
-                                    <div className={`w-2 h-2 rounded-full ${storeSettings.adminTokens && storeSettings.adminTokens.length > 0 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
-                                    <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">
-                                        {storeSettings.adminTokens && storeSettings.adminTokens.length > 0 
-                                            ? `${storeSettings.adminTokens.length} Admin Device(s) Linked` 
-                                            : 'No Devices Registered'}
-                                    </span>
-                                </div>
                             </div>
                         </div>
 

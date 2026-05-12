@@ -72,15 +72,26 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
         });
         
         console.log(response.successCount + " messages were sent successfully!");
+        
+        // Clean up invalid tokens
         if (response.failureCount > 0) {
             const failedTokens = [];
             response.responses.forEach((resp, idx) => {
                 if (!resp.success) {
-                    failedTokens.push(adminTokens[idx]);
+                    const errorCode = resp.error?.code;
+                    if (errorCode === 'messaging/invalid-registration-token' ||
+                        errorCode === 'messaging/registration-token-not-registered') {
+                        failedTokens.push(adminTokens[idx]);
+                    }
                 }
             });
-            console.log("List of tokens that caused failures: " + failedTokens);
-            // Optionally remove stale tokens from Firestore here
+
+            if (failedTokens.length > 0) {
+                await admin.firestore().collection("settings").doc("general").update({
+                    adminTokens: admin.firestore.FieldValue.arrayRemove(...failedTokens)
+                });
+                console.log(`Cleaned up ${failedTokens.length} invalid admin tokens.`);
+            }
         }
     } catch (error) {
         console.error("Error sending push notification", error);
@@ -103,31 +114,40 @@ exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}"
     const bodyText = `From ${newComplaint.customerName}: ${newComplaint.description.substring(0, 100)}...`;
 
     try {
-        await admin.messaging().sendEachForMulticast({
+        const response = await admin.messaging().sendEachForMulticast({
             tokens: adminTokens,
             data: {
                 title: title,
                 body: bodyText,
                 complaintId: event.params.complaintId,
-                click_action: "FLUTTER_NOTIFICATION_CLICK",
+                type: 'complaint',
                 url: "/admin"
             },
             android: {
                 priority: "high",
-            },
-            webpush: {
-                fcmOptions: {
-                    link: "/admin"
-                },
-                notification: {
-                    title: title,
-                    body: bodyText,
-                    icon: "/pwa-192x192.png",
-                    badge: "/pwa-192x192.png",
-                    requireInteraction: true
-                }
             }
         });
+
+        // Clean up invalid tokens
+        if (response.failureCount > 0) {
+            const failedTokens = [];
+            response.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    const errorCode = resp.error?.code;
+                    if (errorCode === 'messaging/invalid-registration-token' ||
+                        errorCode === 'messaging/registration-token-not-registered') {
+                        failedTokens.push(adminTokens[idx]);
+                    }
+                }
+            });
+
+            if (failedTokens.length > 0) {
+                await admin.firestore().collection("settings").doc("general").update({
+                    adminTokens: admin.firestore.FieldValue.arrayRemove(...failedTokens)
+                });
+                console.log(`Cleaned up ${failedTokens.length} invalid admin tokens.`);
+            }
+        }
     } catch (error) {
         console.error("Error sending complaint notification", error);
     }
@@ -147,7 +167,7 @@ exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}",
     const bodyText = testData.body || "This is a test of the background notification system.";
 
     try {
-        await admin.messaging().sendEachForMulticast({
+        const response = await admin.messaging().sendEachForMulticast({
             tokens: adminTokens,
             data: {
                 title: title,
@@ -168,6 +188,27 @@ exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}",
                 }
             }
         });
+
+        // Clean up invalid tokens
+        if (response.failureCount > 0) {
+            const failedTokens = [];
+            response.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    const errorCode = resp.error?.code;
+                    if (errorCode === 'messaging/invalid-registration-token' ||
+                        errorCode === 'messaging/registration-token-not-registered') {
+                        failedTokens.push(adminTokens[idx]);
+                    }
+                }
+            });
+
+            if (failedTokens.length > 0) {
+                await admin.firestore().collection("settings").doc("general").update({
+                    adminTokens: admin.firestore.FieldValue.arrayRemove(...failedTokens)
+                });
+                console.log(`Cleaned up ${failedTokens.length} invalid admin tokens.`);
+            }
+        }
     } catch (error) {
         console.error("Error sending test notification", error);
     }

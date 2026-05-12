@@ -462,25 +462,25 @@ function App() {
 
       PushNotifications.addListener('registration', async (token) => {
         console.log('Push registration success, token: ' + token.value);
-        // Save token to Firestore settings/general for background notifications
-        try {
-          const settingsRef = doc(db, 'settings', 'general');
-          const settingsSnap = await getDoc(settingsRef);
-          if (settingsSnap.exists()) {
-            const currentTokens = settingsSnap.data().adminTokens || [];
-            if (!currentTokens.includes(token.value)) {
-              await updateDoc(settingsRef, {
-                adminTokens: [...currentTokens, token.value]
-              });
-            }
-          } else {
-            await setDoc(settingsRef, {
-              adminTokens: [token.value]
-            });
-          }
-          console.log("Admin token synced with Firestore");
-        } catch (e) {
-          console.error("Failed to save admin token:", e);
+        if (token.value) {
+           try {
+             const settingsRef = doc(db, 'settings', 'general');
+             const settingsSnap = await getDoc(settingsRef);
+             if (settingsSnap.exists()) {
+               const adminTokens = settingsSnap.data().adminTokens || [];
+               if (!adminTokens.includes(token.value)) {
+                 await updateDoc(settingsRef, {
+                   adminTokens: arrayUnion(token.value)
+                 });
+                 console.log('Admin token synced with Firestore');
+               }
+             } else {
+               await setDoc(settingsRef, { adminTokens: [token.value] });
+               console.log('Admin token created in Firestore');
+             }
+           } catch (e) {
+             console.error('Failed to save admin token:', e);
+           }
         }
       });
 
