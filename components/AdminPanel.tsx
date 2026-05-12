@@ -1585,11 +1585,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
                             <h5 className="text-white text-base font-bold flex items-center gap-3"><BellRing size={20} className="text-brand-500" /> Background Notifications</h5>
                             <div className="bg-stone-950 p-6 rounded-2xl border border-brand-500/20 space-y-4">
-                                <p className="text-[10px] text-stone-500 max-w-sm leading-relaxed mb-4">Register this device to receive secure Web Push Notifications for new orders, even if the browser/app is completely closed.</p>
+                                <p className="text-[10px] text-stone-500 max-w-sm leading-relaxed mb-4">Register this device to receive secure Push Notifications for new orders, even if the app is completely closed.</p>
                                 <button 
                                     onClick={async () => {
+                                        const { Capacitor } = await import('@capacitor/core');
+                                        
+                                        if (Capacitor.isNativePlatform()) {
+                                            try {
+                                                const { PushNotifications } = await import('@capacitor/push-notifications');
+                                                const res = await PushNotifications.requestPermissions();
+                                                if (res.receive === 'granted') {
+                                                    await PushNotifications.register();
+                                                    alert("Native Push Notifications registered! Your device ID will be synced automatically.");
+                                                } else {
+                                                    alert("Notification permission denied. Please enable it in Android Settings.");
+                                                }
+                                            } catch (e) {
+                                                alert("Native registration failed. Ensure you are running the built Android APK.");
+                                            }
+                                            return;
+                                        }
+
                                         if (!messaging) {
-                                            alert('Push notifications are not natively supported in this browser Environment (such as iOS unsupported versions or incognito mode).');
+                                            alert('Push notifications are not natively supported in this browser Environment.');
                                             return;
                                         }
                                         try {
@@ -1598,20 +1616,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 const { getToken } = await import('firebase/messaging');
                                                 const token = await getToken(messaging, { vapidKey: 'BHpj_oVMoUijqh0RYq84o9RHm9HQVYQ2DMmrfATuLP_1VnJP32D6YUzW_F5ywGJockkUMeGfTuEC_HbRdwtFrWw' });
                                                 const updatedTokens = Array.from(new Set([...(storeSettings.adminTokens || []), token]));
-                                                onUpdateStoreSettings({ ...storeSettings, adminTokens: updatedTokens });
-                                                alert('Device registered successfully! This device will now wake up for incoming orders.');
-                                            } else {
-                                                alert('Notification permission denied by the system.');
+                                                onUpdateStoreSettings({...storeSettings, adminTokens: updatedTokens});
+                                                alert('Web Push Registered Successfully!');
                                             }
-                                        } catch (e: any) {
-                                            console.error("VAPID error logging: ", e);
-                                            alert('Failed to subscribe: You need to implement your actual VAPID key in the code.');
+                                        } catch (e) {
+                                            console.error(e);
+                                            alert('Failed to register Web Push. Check browser permissions.');
                                         }
-                                    }} 
-                                    className="px-6 py-4 bg-brand-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-brand-400 transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center gap-2 w-fit"
+                                    }}
+                                    className="w-full bg-stone-900 border border-brand-500/30 text-brand-500 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:bg-brand-500 hover:text-white p-4 flex items-center justify-center gap-2"
                                 >
-                                    <BellRing size={16} /> Subscribe Device
+                                    Register This Device For Notifications
                                 </button>
+                                <div className="mt-4 flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${storeSettings.adminTokens && storeSettings.adminTokens.length > 0 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+                                    <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">
+                                        {storeSettings.adminTokens && storeSettings.adminTokens.length > 0 
+                                            ? `${storeSettings.adminTokens.length} Admin Device(s) Linked` 
+                                            : 'No Devices Registered'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 

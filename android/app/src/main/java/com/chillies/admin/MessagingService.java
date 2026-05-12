@@ -55,6 +55,8 @@ public class MessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         
+        Log.d(TAG, "Message Received from: " + remoteMessage.getFrom());
+        
         // Universal WakeLock: Forces the CPU to wake up and process the order on ALL Android devices
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK |
@@ -62,20 +64,26 @@ public class MessagingService extends FirebaseMessagingService {
                 PowerManager.ON_AFTER_RELEASE, "Chillies:OrderAlert");
         wakeLock.acquire(30000); // Keep awake for 30 seconds
         
-        Log.d(TAG, "Message Received from: " + remoteMessage.getFrom());
-
-        String title = "New Order Recieved!";
+        String title = "Notification Received";
         String body = "Check the admin panel for details.";
+        String type = "generic";
 
-        if (remoteMessage.getNotification() != null) {
-            title = remoteMessage.getNotification().getTitle();
-            body = remoteMessage.getNotification().getBody();
-        } else if (remoteMessage.getData().size() > 0) {
+        if (remoteMessage.getData().size() > 0) {
+            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             if (remoteMessage.getData().containsKey("title")) title = remoteMessage.getData().get("title");
             if (remoteMessage.getData().containsKey("body")) body = remoteMessage.getData().get("body");
+            if (remoteMessage.getData().containsKey("type")) type = remoteMessage.getData().get("type");
+        } else if (remoteMessage.getNotification() != null) {
+            title = remoteMessage.getNotification().getTitle();
+            body = remoteMessage.getNotification().getBody();
         }
 
-        if (title != null && title.toLowerCase().contains("order")) {
+        // Trigger the alarm and force open for orders, complaints, or tests
+        if (title != null && (title.toLowerCase().contains("order") || 
+            title.toLowerCase().contains("complaint") || 
+            "test".equals(type))) {
+            
+            Log.d(TAG, "Critical message detected. Triggering alarm and force open.");
             sendNotification(title, body);
             forceOpenApp();
         }

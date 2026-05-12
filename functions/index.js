@@ -132,3 +132,43 @@ exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}"
         console.error("Error sending complaint notification", error);
     }
 });
+
+exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}", async (event) => {
+    const testData = event.data.data();
+    
+    const settingsDoc = await admin.firestore().collection("settings").doc("general").get();
+    if (!settingsDoc.exists) return;
+    
+    const settingsData = settingsDoc.data();
+    const adminTokens = settingsData.adminTokens || [];
+    if (adminTokens.length === 0) return;
+
+    const title = testData.title || "Test Notification";
+    const bodyText = testData.body || "This is a test of the background notification system.";
+
+    try {
+        await admin.messaging().sendEachForMulticast({
+            tokens: adminTokens,
+            data: {
+                title: title,
+                body: bodyText,
+                orderId: "TEST-123",
+                type: "test",
+                url: "/admin"
+            },
+            android: {
+                priority: "high",
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        alert: { title, body: bodyText },
+                        sound: "default"
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Error sending test notification", error);
+    }
+});
