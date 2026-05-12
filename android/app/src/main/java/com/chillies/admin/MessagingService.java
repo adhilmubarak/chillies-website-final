@@ -57,11 +57,9 @@ public class MessagingService extends FirebaseMessagingService {
         
         Log.d(TAG, "Message Received from: " + remoteMessage.getFrom());
         
-        // Universal WakeLock: Forces the CPU to wake up and process the order on ALL Android devices
+        // Universal WakeLock: Keep CPU awake to process the alert
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK |
-                PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                PowerManager.ON_AFTER_RELEASE, "Chillies:OrderAlert");
+        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Chillies:OrderAlert");
         wakeLock.acquire(30000); // Keep awake for 30 seconds
         
         String title = "Notification Received";
@@ -118,9 +116,10 @@ public class MessagingService extends FirebaseMessagingService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         
-        // Use a unique ID based on time
-        int notificationId = (int) System.currentTimeMillis();
+        // Use a unique ID based on time, safe for int casting
+        int notificationId = (int) (System.currentTimeMillis() % 100000);
         notificationManager.notify(notificationId, notification);
+
 
         // Also try to force open the UI
         forceOpenApp();

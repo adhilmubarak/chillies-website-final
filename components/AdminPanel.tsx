@@ -1466,6 +1466,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <p className="text-[10px] text-stone-500 leading-relaxed uppercase tracking-wide">Sleek emerald and midnight slate. Minimalist, premium, and calm for a modern feel.</p>
                                         {storeSettings.selectedTheme === 'professional' && <div className="absolute top-0 right-0 p-2"><Check size={12} className="text-brand-500" /></div>}
                                     </button>
+
+                                    <button 
+                                        onClick={async () => {
+                                            if (confirm('This will log out notifications on ALL admin devices. You will need to click "Register Android App" again on this phone. Continue?')) {
+                                                onUpdateStoreSettings({ ...storeSettings, adminTokens: [] });
+                                                alert('Registry cleared. Please click "Register Android App" below to re-link this phone.');
+                                            }
+                                        }}
+                                        className="p-6 rounded-[2rem] border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-all text-left group md:col-span-2 mt-4"
+                                    >
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">Troubleshooting: Reset Registry</span>
+                                            <Trash2 size={16} className="text-red-500" />
+                                        </div>
+                                        <p className="text-[10px] text-stone-500 leading-relaxed uppercase tracking-wide">Fixes "sometimes not receiving" issues by clearing old/dead device tokens. Use this if notifications are inconsistent.</p>
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -1654,16 +1670,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             const isNative = Capacitor.isNativePlatform();
                                             
                                             if (isNative) {
-                                                console.log("Registering for Native Push...");
+                                                console.log("Triggering Native Push Sync...");
                                                 const { PushNotifications } = await import('@capacitor/push-notifications');
                                                 const res = await PushNotifications.requestPermissions();
                                                 if (res.receive === 'granted') {
                                                     await PushNotifications.register();
-                                                    alert("Native Android Push Registered! Your device will now receive order alerts even in background.");
+                                                    alert("Native Sync Triggered! If your device wasn't already registered, it is now syncing with the database. Check the 'Admin Device(s)' count above in a few seconds.");
                                                 } else {
-                                                    alert("Notification permission denied in Android Settings.");
+                                                    alert("Notification permission denied in Android Settings. Please enable them to receive alerts.");
                                                 }
                                             } else {
+
                                                 // WEB PUSH PATH
                                                 console.log("Registering for Web Push...");
                                                 if (!messaging) {

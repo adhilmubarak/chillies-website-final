@@ -449,24 +449,7 @@ function App() {
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      // Handle App state (foreground/background)
-      CapApp.addListener('appStateChange', ({ isActive }) => {
-        console.log('App state changed. Is active?', isActive);
-      });
-
-      // Initial check and register
-      PushNotifications.checkPermissions().then((res) => {
-        if (res.receive !== 'granted') {
-          PushNotifications.requestPermissions().then((res) => {
-            if (res.receive === 'granted') {
-              PushNotifications.register();
-            }
-          });
-        } else {
-          PushNotifications.register();
-        }
-      });
-
+      // 1. SET UP LISTENERS FIRST (to avoid race conditions)
       PushNotifications.addListener('registration', async (token) => {
         console.log('Push registration success, token: ' + token.value);
         if (token.value) {
@@ -480,6 +463,8 @@ function App() {
                    adminTokens: arrayUnion(token.value)
                  });
                  console.log('Admin token synced with Firestore');
+               } else {
+                 console.log('Admin token already exists in Firestore');
                }
              } else {
                await setDoc(settingsRef, { adminTokens: [token.value] });
@@ -489,6 +474,10 @@ function App() {
              console.error('Failed to save admin token:', e);
            }
         }
+      });
+
+      PushNotifications.addListener('registrationError', (error) => {
+        console.error('Push registration error: ', error);
       });
 
       PushNotifications.addListener('pushNotificationReceived', (notification) => {
@@ -501,7 +490,29 @@ function App() {
           navigate('/admin');
         }
       });
+
+      // 2. NOW REQUEST PERMISSIONS AND REGISTER
+      CapApp.addListener('appStateChange', ({ isActive }) => {
+        console.log('App state changed. Is active?', isActive);
+        if (isActive) {
+          // Re-register on resume to ensure token is fresh
+          PushNotifications.register();
+        }
+      });
+
+      PushNotifications.checkPermissions().then((res) => {
+        if (res.receive !== 'granted') {
+          PushNotifications.requestPermissions().then((res) => {
+            if (res.receive === 'granted') {
+              PushNotifications.register();
+            }
+          });
+        } else {
+          PushNotifications.register();
+        }
+      });
     }
+
   }, []);
 
   const fireNotification = async (title: string, options: any) => {

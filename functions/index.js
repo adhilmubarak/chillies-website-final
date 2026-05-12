@@ -2,155 +2,143 @@ const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
+/**
+ * Helper to send multicast messages in chunks of 500 (FCM limit)
+ * and clean up invalid tokens.
+ */
+const sendMulticastBatched = async (tokens, payload) => {
+    const validTokens = [...new Set(tokens.filter(t => typeof t === 'string' && t.length > 0))];
+    if (validTokens.length === 0) {
+        console.log("No valid tokens to send to.");
+        return { successCount: 0, failureCount: 0 };
+    }
+
+    const chunks = [];
+    for (let i = 0; i < validTokens.length; i += 500) {
+        chunks.push(validTokens.slice(i, i + 500));
+    }
+
+    let totalSuccess = 0;
+    let totalFailure = 0;
+    const allFailedTokens = [];
+
+    for (const chunk of chunks) {
+        try {
+            const response = await admin.messaging().sendEachForMulticast({
+                ...payload,
+                tokens: chunk,
+            });
+
+            totalSuccess += response.successCount;
+            totalFailure += response.failureCount;
+
+            if (response.failureCount > 0) {
+                response.responses.forEach((resp, idx) => {
+                    if (!resp.success) {
+                        const errorCode = resp.error?.code;
+                        if (errorCode === 'messaging/invalid-registration-token' ||
+                            errorCode === 'messaging/registration-token-not-registered') {
+                            allFailedTokens.push(chunk[idx]);
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("Batch send failed:", err);
+        }
+    }
+
+    if (allFailedTokens.length > 0) {
+        try {
+            await admin.firestore().collection("settings").doc("general").update({
+                adminTokens: admin.firestore.FieldValue.arrayRemove(...allFailedTokens)
+            });
+            console.log(`Cleaned up ${allFailedTokens.length} invalid tokens.`);
+        } catch (err) {
+            console.error("Failed to clean up tokens:", err);
+        }
+    }
+
+    return { successCount: totalSuccess, failureCount: totalFailure };
+};
+
 exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (event) => {
     const newOrder = event.data.data();
-    
-    // Check if it's already accepted to prevent weird edge cases
     if (newOrder.status !== 'pending') return;
 
-    // Fetch Admin Tokens from Settings
     const settingsDoc = await admin.firestore().collection("settings").doc("general").get();
-    if (!settingsDoc.exists) {
-        console.log("No settings document found.");
-        return;
-    }
+    if (!settingsDoc.exists) return;
     
-    const settingsData = settingsDoc.data();
-    const adminTokens = settingsData.adminTokens || [];
-
-    if (adminTokens.length === 0) {
-        console.log("No admin registered for background notifications.");
-        return;
-    }
+    const adminTokens = settingsDoc.data().adminTokens || [];
+    if (adminTokens.length === 0) return;
 
     const title = "NEW ORDER: ₹" + newOrder.total;
     const bodyText = `Order #${newOrder.id} received from ${newOrder.customerName}.`;
 
-    try {
-        const response = await admin.messaging().sendEachForMulticast({
-            tokens: adminTokens,
-            data: {
+    const payload = {
+        data: {
+            title: title,
+            body: bodyText,
+            orderId: newOrder.id,
+            type: "order",
+            url: "/admin"
+        },
+        android: {
+            priority: "high",
+            ttl: 86400, // 24 hours for reliability
+        },
+        apns: {
+            payload: {
+                aps: {
+                    alert: { title, body: bodyText },
+                    sound: { critical: 1, name: "default", volume: 1.0 }
+                }
+            }
+        },
+        webpush: {
+            fcmOptions: { link: "/admin" },
+            notification: {
                 title: title,
                 body: bodyText,
-                orderId: newOrder.id,
-                click_action: "FLUTTER_NOTIFICATION_CLICK",
-                url: "/admin"
-            },
-            android: {
-                priority: "high",
-                ttl: 0, // Deliver immediately or not at all
-            },
-            apns: {
-                payload: {
-                    aps: {
-                        alert: {
-                            title: title,
-                            body: bodyText
-                        },
-                        sound: {
-                            critical: 1,
-                            name: "default",
-                            volume: 1.0
-                        }
-                    }
-                }
-            },
-            webpush: {
-                fcmOptions: {
-                    link: "/admin"
-                },
-                notification: {
-                    title: title,
-                    body: bodyText,
-                    icon: "/pwa-192x192.png",
-                    badge: "/pwa-192x192.png",
-                    requireInteraction: true,
-                    vibrate: [500, 1000, 500, 1000, 500, 1000, 500, 1000]
-                }
-            }
-        });
-        
-        console.log(response.successCount + " messages were sent successfully!");
-        
-        // Clean up invalid tokens
-        if (response.failureCount > 0) {
-            const failedTokens = [];
-            response.responses.forEach((resp, idx) => {
-                if (!resp.success) {
-                    const errorCode = resp.error?.code;
-                    if (errorCode === 'messaging/invalid-registration-token' ||
-                        errorCode === 'messaging/registration-token-not-registered') {
-                        failedTokens.push(adminTokens[idx]);
-                    }
-                }
-            });
-
-            if (failedTokens.length > 0) {
-                await admin.firestore().collection("settings").doc("general").update({
-                    adminTokens: admin.firestore.FieldValue.arrayRemove(...failedTokens)
-                });
-                console.log(`Cleaned up ${failedTokens.length} invalid admin tokens.`);
+                icon: "/pwa-192x192.png",
+                requireInteraction: true,
+                vibrate: [500, 1000, 500, 1000]
             }
         }
-    } catch (error) {
-        console.error("Error sending push notification", error);
-    }
-  });
+    };
+
+    const result = await sendMulticastBatched(adminTokens, payload);
+    console.log(`Order notification: ${result.successCount} sent, ${result.failureCount} failed.`);
+});
   
 exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}", async (event) => {
     const newComplaint = event.data.data();
     
-    // Fetch Admin Tokens from Settings
     const settingsDoc = await admin.firestore().collection("settings").doc("general").get();
     if (!settingsDoc.exists) return;
     
-    const settingsData = settingsDoc.data();
-    const adminTokens = settingsData.adminTokens || [];
-
+    const adminTokens = settingsDoc.data().adminTokens || [];
     if (adminTokens.length === 0) return;
 
     const title = "NEW COMPLAINT: " + newComplaint.subject;
     const bodyText = `From ${newComplaint.customerName}: ${newComplaint.description.substring(0, 100)}...`;
 
-    try {
-        const response = await admin.messaging().sendEachForMulticast({
-            tokens: adminTokens,
-            data: {
-                title: title,
-                body: bodyText,
-                complaintId: event.params.complaintId,
-                type: 'complaint',
-                url: "/admin"
-            },
-            android: {
-                priority: "high",
-                ttl: 0,
-            }
-        });
-
-        // Clean up invalid tokens
-        if (response.failureCount > 0) {
-            const failedTokens = [];
-            response.responses.forEach((resp, idx) => {
-                if (!resp.success) {
-                    const errorCode = resp.error?.code;
-                    if (errorCode === 'messaging/invalid-registration-token' ||
-                        errorCode === 'messaging/registration-token-not-registered') {
-                        failedTokens.push(adminTokens[idx]);
-                    }
-                }
-            });
-
-            if (failedTokens.length > 0) {
-                await admin.firestore().collection("settings").doc("general").update({
-                    adminTokens: admin.firestore.FieldValue.arrayRemove(...failedTokens)
-                });
-                console.log(`Cleaned up ${failedTokens.length} invalid admin tokens.`);
-            }
+    const payload = {
+        data: {
+            title: title,
+            body: bodyText,
+            complaintId: event.params.complaintId,
+            type: 'complaint',
+            url: "/admin"
+        },
+        android: {
+            priority: "high",
+            ttl: 86400,
         }
-    } catch (error) {
-        console.error("Error sending complaint notification", error);
-    }
+    };
+
+    const result = await sendMulticastBatched(adminTokens, payload);
+    console.log(`Complaint notification: ${result.successCount} sent, ${result.failureCount} failed.`);
 });
 
 exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}", async (event) => {
@@ -159,58 +147,34 @@ exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}",
     const settingsDoc = await admin.firestore().collection("settings").doc("general").get();
     if (!settingsDoc.exists) return;
     
-    const settingsData = settingsDoc.data();
-    const adminTokens = settingsData.adminTokens || [];
+    const adminTokens = settingsDoc.data().adminTokens || [];
     if (adminTokens.length === 0) return;
 
     const title = testData.title || "Test Notification";
     const bodyText = testData.body || "This is a test of the background notification system.";
 
-    try {
-        const response = await admin.messaging().sendEachForMulticast({
-            tokens: adminTokens,
-            data: {
-                title: title,
-                body: bodyText,
-                orderId: "TEST-123",
-                type: "test",
-                url: "/admin"
-            },
-            android: {
-                priority: "high",
-                ttl: 0,
-            },
-            apns: {
-                payload: {
-                    aps: {
-                        alert: { title, body: bodyText },
-                        sound: "default"
-                    }
+    const payload = {
+        data: {
+            title: title,
+            body: bodyText,
+            type: "test",
+            url: "/admin"
+        },
+        android: {
+            priority: "high",
+            ttl: 86400,
+        },
+        apns: {
+            payload: {
+                aps: {
+                    alert: { title, body: bodyText },
+                    sound: "default"
                 }
-            }
-        });
-
-        // Clean up invalid tokens
-        if (response.failureCount > 0) {
-            const failedTokens = [];
-            response.responses.forEach((resp, idx) => {
-                if (!resp.success) {
-                    const errorCode = resp.error?.code;
-                    if (errorCode === 'messaging/invalid-registration-token' ||
-                        errorCode === 'messaging/registration-token-not-registered') {
-                        failedTokens.push(adminTokens[idx]);
-                    }
-                }
-            });
-
-            if (failedTokens.length > 0) {
-                await admin.firestore().collection("settings").doc("general").update({
-                    adminTokens: admin.firestore.FieldValue.arrayRemove(...failedTokens)
-                });
-                console.log(`Cleaned up ${failedTokens.length} invalid admin tokens.`);
             }
         }
-    } catch (error) {
-        console.error("Error sending test notification", error);
-    }
+    };
+
+    const result = await sendMulticastBatched(adminTokens, payload);
+    console.log(`Test notification: ${result.successCount} sent, ${result.failureCount} failed.`);
 });
+
