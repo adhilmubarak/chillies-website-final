@@ -38,15 +38,15 @@ public class MessagingService extends FirebaseMessagingService {
             
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
             if (defaultSoundUri == null) {
-                defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            }
-            
-            android.media.AudioAttributes audioAttributes = new android.media.AudioAttributes.Builder()
-                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(android.media.AudioAttributes.USAGE_ALARM)
-                    .build();
+            // Long vibration pattern: 1s on, 0.5s off
+            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000, 500, 1000});
             channel.setSound(defaultSoundUri, audioAttributes);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             
+            // Allow this notification to bypass "Do Not Disturb" mode
+            channel.setBypassDnd(true);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
     }
@@ -55,42 +55,32 @@ public class MessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         
-        Log.d(TAG, "Message Received from: " + remoteMessage.getFrom());
+        Log.d(TAG, "Strict Message Received from: " + remoteMessage.getFrom());
         
-        // Universal WakeLock: Keep CPU awake to process the alert
+        // Ensure CPU is awake
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Chillies:OrderAlert");
-        wakeLock.acquire(30000); // Keep awake for 30 seconds
+        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Chillies:StrictAlert");
+        wakeLock.acquire(30000); // 30 seconds
         
-        String title = "Notification Received";
-        String body = "Check the admin panel for details.";
-        String type = "generic";
+        String title = "NEW ORDER ALERT";
+        String body = "Check the admin panel immediately!";
+        String type = "order";
 
         if (remoteMessage.getData().size() > 0) {
-            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             if (remoteMessage.getData().containsKey("title")) title = remoteMessage.getData().get("title");
             if (remoteMessage.getData().containsKey("body")) body = remoteMessage.getData().get("body");
             if (remoteMessage.getData().containsKey("type")) type = remoteMessage.getData().get("type");
-        } else if (remoteMessage.getNotification() != null) {
-            title = remoteMessage.getNotification().getTitle();
-            body = remoteMessage.getNotification().getBody();
         }
 
-        // Trigger the alarm and force open for orders, complaints, or tests
-        if (title != null && (title.toLowerCase().contains("order") || 
-            title.toLowerCase().contains("complaint") || 
-            "test".equals(type))) {
-            
-            Log.d(TAG, "Critical message detected. Triggering alarm and force open.");
+        // Always use high strictness for orders and complaints
+        if (title.toLowerCase().contains("order") || title.toLowerCase().contains("complaint") || "test".equals(type)) {
             sendNotification(title, body, type);
         }
     }
 
     private void sendNotification(String title, String body, String type) {
-        // Create the notification channel if it doesn't exist
         createNotificationChannel();
 
-        // Intent to open the app
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra("type", type);
@@ -98,44 +88,43 @@ public class MessagingService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(body)
-                .setAutoCancel(true)
+                .setAutoCancel(false) // Don't auto cancel, force user to interact
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setFullScreenIntent(pendingIntent, true) // Essential for waking the device
+                .setFullScreenIntent(pendingIntent, true)
                 .setContentIntent(pendingIntent)
-                .addAction(android.R.drawable.ic_menu_view, "View", pendingIntent);
+                .setSound(alarmSound)
+                .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000, 500, 1000})
+                .setLights(Color.RED, 3000, 3000)
+                .addAction(android.R.drawable.ic_menu_view, "OPEN DASHBOARD", pendingIntent);
 
         Notification notification = notificationBuilder.build();
-        // FLAG_INSISTENT makes the sound repeat until the user dismisses it
+        // FLAG_INSISTENT: sound repeats until user dismisses
+        // FLAG_NO_CLEAR: prevent swipe away (optional, but makes it "stricter")
         notification.flags |= Notification.FLAG_INSISTENT;
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        
-        // Use a unique ID based on time, safe for int casting
         int notificationId = (int) (System.currentTimeMillis() % 100000);
         notificationManager.notify(notificationId, notification);
 
-
-        // Also try to force open the UI
+        // Force wake the app
         forceOpenApp();
     }
 
     private void forceOpenApp() {
         try {
             Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
-                           Intent.FLAG_ACTIVITY_SINGLE_TOP | 
-                           Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            
-            getApplicationContext().startActivity(intent);
-            Log.d(TAG, "startActivity called successfully");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to force open activity: " + e.getMessage());
+            Log.e(TAG, "Failed to force open app: " + e.getMessage());
         }
     }
 
