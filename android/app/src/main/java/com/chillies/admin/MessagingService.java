@@ -20,6 +20,7 @@ import com.google.firebase.messaging.RemoteMessage;
 public class MessagingService extends FirebaseMessagingService {
     private static final String TAG = "MessagingService";
     private static final String CHANNEL_ID = "strict_orders_channel";
+    private RemoteMessage remoteMessage;
 
     @Override
     public void onCreate() {
@@ -65,6 +66,7 @@ public class MessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
+        this.remoteMessage = remoteMessage;
         super.onMessageReceived(remoteMessage);
         
         Log.d(TAG, "Strict Message Received from: " + remoteMessage.getFrom());
