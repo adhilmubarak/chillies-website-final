@@ -34,34 +34,26 @@
           extend: {
             colors: {
               brand: {
-                50: '#fdfbf4',
-                100: '#fbf5e5',
-                200: '#f5eccd',
-                300: '#eddcad',
-                400: '#e4ca8d',
-                500: '#d4af37',
-                600: '#b8972e',
-                700: '#9e8023',
-                800: '#856a1b',
-                900: '#695311',
+                50: 'var(--brand-50)',
+                100: 'var(--brand-100)',
+                200: 'var(--brand-200)',
+                300: 'var(--brand-300)',
+                400: 'var(--brand-400)',
+                500: 'var(--brand-500)',
+                600: 'var(--brand-600)',
+                700: 'var(--brand-700)',
+                800: 'var(--brand-800)',
+                900: 'var(--brand-900)',
               },
               gold: {
-                50: '#fdfbf4',
-                100: '#fbf5e5',
-                200: '#f5eccd',
-                300: '#eddcad',
-                400: '#e4ca8d',
-                500: '#d4af37',
-                600: '#b8972e',
-                700: '#9e8023',
-                800: '#856a1b',
-                900: '#695311',
+                500: 'var(--brand-500)',
+                400: 'var(--brand-400)',
               },
               stone: {
-                800: '#292524',
-                850: '#1f1f1e',
-                900: '#1c1917',
-                950: '#0c0c0c',
+                800: 'var(--stone-800)',
+                850: 'var(--stone-850)',
+                900: 'var(--stone-900)',
+                950: 'var(--stone-950)',
               }
             },
             fontFamily: {
@@ -106,8 +98,20 @@
       }
     </script>
     <style>
+      :root {
+        /* Default Classic Gold Theme */
+        --brand-50: #fdfbf4; --brand-100: #fbf5e5; --brand-200: #f5eccd; --brand-300: #eddcad; --brand-400: #e4ca8d; --brand-500: #d4af37; --brand-600: #b8972e; --brand-700: #9e8023; --brand-800: #856a1b; --brand-900: #695311;
+        --stone-800: #292524; --stone-850: #1f1f1e; --stone-900: #1c1917; --stone-950: #0c0c0c;
+      }
+
+      .theme-professional {
+        /* Emerald & Slate Professional Theme */
+        --brand-50: #f0fdf4; --brand-100: #dcfce7; --brand-200: #bbf7d0; --brand-300: #86efac; --brand-400: #4ade80; --brand-500: #10b981; --brand-600: #059669; --brand-700: #047857; --brand-800: #065f46; --brand-900: #064e3b;
+        --stone-800: #1e293b; --stone-850: #0f172a; --stone-900: #0f172a; --stone-950: #020617;
+      }
+
       body {
-        background-color: #0c0c0c;
+        background-color: var(--stone-950);
         color: #f3f4f6;
         scroll-behavior: smooth;
         overflow-x: hidden;

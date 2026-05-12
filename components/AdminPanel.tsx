@@ -59,7 +59,7 @@ interface AdminPanelProps {
     happyHourStartTime: string;
     happyHourEndTime: string;
   };
-  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[]; kotPrinters?: {name: string, ip: string}[] };
+  storeSettings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[]; kotPrinters?: {name: string, ip: string}[]; selectedTheme?: 'classic' | 'professional' };
   onAddItem: (item: MenuItem) => void;
   onUpdateItem: (item: MenuItem) => void;
   onDeleteItem: (id: string) => void;
@@ -70,7 +70,7 @@ interface AdminPanelProps {
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
-  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[]; kotPrinters?: {name: string, ip: string}[] }) => void;
+  onUpdateStoreSettings: (settings: { acceptingOrders: boolean; startTime: string; endTime: string; deliveryUpiId?: string; announcement?: string; isAnnouncementActive?: boolean; loyaltyPointsRatio?: number; minimumPointsToRedeem?: number; latestBroadcast?: { title: string; body: string; timestamp: number } | null; adminTokens?: string[]; kotPrinters?: {name: string, ip: string}[]; selectedTheme?: 'classic' | 'professional' }) => void;
   onUpdatePromos: (promos: any) => void;
   onAddOrder?: (order: Order) => Promise<void>;
   onTestNotification?: () => void;
@@ -1433,12 +1433,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </button>
                         </div>
 
-                        {!storeSettings.acceptingOrders && (
-                            <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-2xl flex items-center gap-4 text-red-500 animate-pulse">
-                                <AlertTriangle size={24} />
-                                <div className="flex-1">
-                                    <h5 className="font-bold text-sm uppercase tracking-widest">Kitchen Forced Closed</h5>
-                                    <p className="text-xs opacity-80">The restaurant is manually marked as offline.</p>
+                        {storeSettings.acceptingOrders && (
+                            <div className="pt-8 border-t border-white/10 space-y-6">
+                                <h5 className="text-white text-base font-bold flex items-center gap-3"><Layers size={20} className="text-gold-500" /> Customer Side Theme</h5>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <button 
+                                        onClick={() => onUpdateStoreSettings({ ...storeSettings, selectedTheme: 'classic' })}
+                                        className={`p-6 rounded-[2rem] border transition-all text-left group relative overflow-hidden ${storeSettings.selectedTheme === 'classic' || !storeSettings.selectedTheme ? 'bg-gold-500/10 border-gold-500' : 'bg-stone-950 border-white/5 hover:border-white/10'}`}
+                                    >
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Classic Gold</span>
+                                            <div className="flex gap-1.5">
+                                                <div className="w-4 h-4 rounded-full bg-[#d4af37] border border-white/10"></div>
+                                                <div className="w-4 h-4 rounded-full bg-[#0c0c0c] border border-white/10"></div>
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-stone-500 leading-relaxed uppercase tracking-wide">The iconic vibrant gold and deep stone aesthetic. Warm, authentic, and high-energy.</p>
+                                        {(!storeSettings.selectedTheme || storeSettings.selectedTheme === 'classic') && <div className="absolute top-0 right-0 p-2"><Check size={12} className="text-gold-500" /></div>}
+                                    </button>
+
+                                    <button 
+                                        onClick={() => onUpdateStoreSettings({ ...storeSettings, selectedTheme: 'professional' })}
+                                        className={`p-6 rounded-[2rem] border transition-all text-left group relative overflow-hidden ${storeSettings.selectedTheme === 'professional' ? 'bg-brand-500/10 border-brand-500' : 'bg-stone-950 border-white/5 hover:border-white/10'}`}
+                                    >
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Modern Professional</span>
+                                            <div className="flex gap-1.5">
+                                                <div className="w-4 h-4 rounded-full bg-[#10b981] border border-white/10"></div>
+                                                <div className="w-4 h-4 rounded-full bg-[#020617] border border-white/10"></div>
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-stone-500 leading-relaxed uppercase tracking-wide">Sleek emerald and midnight slate. Minimalist, premium, and calm for a modern feel.</p>
+                                        {storeSettings.selectedTheme === 'professional' && <div className="absolute top-0 right-0 p-2"><Check size={12} className="text-brand-500" /></div>}
+                                    </button>
                                 </div>
                             </div>
                         )}

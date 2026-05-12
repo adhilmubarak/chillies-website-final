@@ -351,7 +351,8 @@ function App() {
       minimumPointsToRedeem: 50,
       latestBroadcast: null as { title: string; body: string; timestamp: number } | null,
       adminTokens: [] as string[],
-      kotPrinters: [] as {name: string, ip: string}[]
+      kotPrinters: [] as {name: string, ip: string}[],
+      selectedTheme: 'classic' as 'classic' | 'professional'
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -440,6 +441,11 @@ function App() {
       Notification.requestPermission();
     }
   };
+
+  useEffect(() => {
+    const themeClass = storeSettings.selectedTheme === 'professional' ? 'theme-professional' : '';
+    document.body.className = themeClass;
+  }, [storeSettings.selectedTheme]);
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
