@@ -14,7 +14,7 @@ interface CartSidebarProps {
   onClearCart: () => void;
   onShowNotification: (message: string) => void;
   onAddOrder: (order: Order) => void;
-  onTrackOrder: () => void;
+  onTrackOrder: (id?: string) => void;
   coupons?: Coupon[];
   loyaltyAccounts?: LoyaltyAccount[];
   storeSettings?: { minimumPointsToRedeem?: number; loyaltyPointsRatio?: number; [key:string]: any };
@@ -183,6 +183,11 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     setWhatsappMsg(message);
     setStep('confirmation');
     
+    // Redirect to tracking directly
+    setTimeout(() => {
+        onTrackOrder(newOrderId);
+    }, 1500); // Small delay to allow the "Order Created" state to initialize
+    
     const url = getWhatsAppUrl(message);
     const win = window.open(url, '_blank');
     if (!win || win.closed || typeof win.closed === 'undefined') {
@@ -257,7 +262,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                           <div className="bg-stone-900/50 p-4 rounded-2xl border border-white/5"><FileText className="text-gold-500 mx-auto mb-2" size={18} /><span className="text-stone-500 uppercase block tracking-widest mb-1">Reference</span><span className="text-white font-black">#{confirmedOrder.id}</span></div>
                       </div>
 
-                      <div onClick={onTrackOrder} className="w-full bg-stone-900/50 p-4 rounded-2xl border border-white/5 mb-6 cursor-pointer group hover:border-gold-500/30 transition-all">
+                      <div onClick={() => onTrackOrder(confirmedOrder.id)} className="w-full bg-stone-900/50 p-4 rounded-2xl border border-white/5 mb-6 cursor-pointer group hover:border-gold-500/30 transition-all">
                           <div className="flex items-center justify-between mb-2"><span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Live Status Link</span><ExternalLink size={12} className="text-gold-500" /></div>
                           <div className="bg-black/40 rounded p-2.5 text-gold-400 font-mono text-[9px] truncate border border-white/5">{confirmedOrder.trackingLink}</div>
                       </div>

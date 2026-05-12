@@ -1173,10 +1173,12 @@ function App() {
         onRemove={id => setCartItems(prev => prev.filter(i => i.id !== id))}
         onClearCart={() => setCartItems([])} onShowNotification={() => {}} 
         onAddOrder={handleAddOrder}
-        onTrackOrder={() => {
+        onTrackOrder={(id) => {
             setIsCartOpen(false);
+            if (id && typeof id === 'string') setInitialTrackId(id);
             setIsTrackerOpen(true);
-        }} coupons={coupons}
+        }}
+        coupons={coupons}
         allMenuItems={menuItems}
         onAddToCart={addToCart}
         loyaltyAccounts={loyaltyAccounts}
