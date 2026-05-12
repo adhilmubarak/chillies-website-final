@@ -19,6 +19,38 @@ public class MessagingService extends FirebaseMessagingService {
     private static final String CHANNEL_ID = "orders_channel";
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        createNotificationChannel();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                    "Critical Order Alerts",
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("Rings continuously until order is viewed");
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            if (defaultSoundUri == null) {
+                defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            }
+            
+            android.media.AudioAttributes audioAttributes = new android.media.AudioAttributes.Builder()
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                    .build();
+            channel.setSound(defaultSoundUri, audioAttributes);
+            
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         Log.d(TAG, "Message Received from: " + remoteMessage.getFrom());
@@ -78,25 +110,6 @@ public class MessagingService extends FirebaseMessagingService {
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "Critical Order Alerts",
-                    NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("Rings continuously until order is viewed");
-            channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            
-            // Set sound for channel (required for Android 8+)
-            android.media.AudioAttributes audioAttributes = new android.media.AudioAttributes.Builder()
-                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(android.media.AudioAttributes.USAGE_ALARM)
-                    .build();
-            channel.setSound(defaultSoundUri, audioAttributes);
-            
-            notificationManager.createNotificationChannel(channel);
-        }
 
         notificationManager.notify(0, notification);
     }
