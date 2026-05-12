@@ -41,7 +41,8 @@ import {
   where, 
   getDocs,
   getDoc,
-  setDoc
+  setDoc,
+  arrayUnion
 } from 'firebase/firestore';
 
 export const printThermalBill = (order: Order) => {
