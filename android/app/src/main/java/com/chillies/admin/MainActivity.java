@@ -7,8 +7,8 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        registerPlugin(NetworkPrinterPlugin.class);
         super.onCreate(savedInstanceState);
+        registerPlugin(NetworkPrinterPlugin.class);
         
         // Allow the app to wake up and show over the lockscreen for new orders
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {

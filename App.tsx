@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { App as CapApp } from '@capacitor/app';
 import Navbar from './components/Navbar';
@@ -198,13 +198,13 @@ const arrayBufferToBase64 = (buffer: Uint8Array) => {
   return window.btoa(binary);
 };
 
+const NetworkPrinter = Capacitor.isNativePlatform() ? registerPlugin<any>('NetworkPrinter') : null;
+
 export const discoverNetworkPrinters = async (): Promise<{printers: string[], scannedSubnets: string[]}> => {
   try {
-    const { Capacitor, registerPlugin } = await import('@capacitor/core');
-    if (!Capacitor.isNativePlatform()) {
+    if (!NetworkPrinter) {
       return { printers: [], scannedSubnets: [] };
     }
-    const NetworkPrinter = registerPlugin<any>('NetworkPrinter');
     const result = await NetworkPrinter.discoverPrinters();
     return {
       printers: result.printers || [],
@@ -218,13 +218,10 @@ export const discoverNetworkPrinters = async (): Promise<{printers: string[], sc
 
 export const printNetworkKOT = async (order: Order, printers: {name: string, ip: string}[]) => {
   try {
-    const { Capacitor, registerPlugin } = await import('@capacitor/core');
-    if (!Capacitor.isNativePlatform()) {
+    if (!NetworkPrinter) {
         printKOT(order);
         return;
     }
-
-    const NetworkPrinter = registerPlugin<any>('NetworkPrinter');
 
     // ESC/POS Commands
     const ESC = 0x1B;
