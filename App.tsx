@@ -759,7 +759,8 @@ function App() {
                 minimumPointsToRedeem: data.minimumPointsToRedeem || 50,
                 latestBroadcast: data.latestBroadcast || null,
                 adminTokens: data.adminTokens || [],
-                kotPrinters: data.kotPrinters || []
+                kotPrinters: data.kotPrinters || [],
+                selectedTheme: data.selectedTheme || 'classic'
             });
         }
     });
