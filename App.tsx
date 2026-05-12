@@ -40,6 +40,7 @@ import {
   query, 
   where, 
   getDocs,
+  getDoc,
   setDoc
 } from 'firebase/firestore';
 
@@ -459,9 +460,28 @@ function App() {
         }
       });
 
-      PushNotifications.addListener('registration', (token) => {
+      PushNotifications.addListener('registration', async (token) => {
         console.log('Push registration success, token: ' + token.value);
-        // Note: You can save this token to Firestore if you want to target specific devices
+        // Save token to Firestore settings/general for background notifications
+        try {
+          const settingsRef = doc(db, 'settings', 'general');
+          const settingsSnap = await getDoc(settingsRef);
+          if (settingsSnap.exists()) {
+            const currentTokens = settingsSnap.data().adminTokens || [];
+            if (!currentTokens.includes(token.value)) {
+              await updateDoc(settingsRef, {
+                adminTokens: [...currentTokens, token.value]
+              });
+            }
+          } else {
+            await setDoc(settingsRef, {
+              adminTokens: [token.value]
+            });
+          }
+          console.log("Admin token synced with Firestore");
+        } catch (e) {
+          console.error("Failed to save admin token:", e);
+        }
       });
 
       PushNotifications.addListener('pushNotificationReceived', (notification) => {

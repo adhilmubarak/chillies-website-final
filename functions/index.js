@@ -29,10 +29,6 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
     try {
         const response = await admin.messaging().sendEachForMulticast({
             tokens: adminTokens,
-            notification: {
-                title: title,
-                body: bodyText
-            },
             data: {
                 title: title,
                 body: bodyText,
@@ -42,16 +38,16 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
             },
             android: {
                 priority: "high",
-                notification: {
-                    channelId: "high_importance_channel",
-                    vibrateTimingsMillis: [500, 1000, 500, 1000, 500, 1000, 500, 1000],
-                    priority: "max",
-                    defaultSound: true
-                }
+                // We DON'T put a notification block here for Android 
+                // to ensure onMessageReceived is triggered in the background
             },
             apns: {
                 payload: {
                     aps: {
+                        alert: {
+                            title: title,
+                            body: bodyText
+                        },
                         sound: {
                             critical: 1,
                             name: "default",
@@ -65,6 +61,8 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
                     link: "/admin"
                 },
                 notification: {
+                    title: title,
+                    body: bodyText,
                     icon: "/pwa-192x192.png",
                     badge: "/pwa-192x192.png",
                     requireInteraction: true,
@@ -107,10 +105,6 @@ exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}"
     try {
         await admin.messaging().sendEachForMulticast({
             tokens: adminTokens,
-            notification: {
-                title: title,
-                body: bodyText
-            },
             data: {
                 title: title,
                 body: bodyText,
@@ -120,18 +114,14 @@ exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}"
             },
             android: {
                 priority: "high",
-                notification: {
-                    channelId: "high_importance_channel",
-                    vibrateTimingsMillis: [500, 1000, 500, 1000, 500, 1000, 500, 1000],
-                    priority: "max",
-                    defaultSound: true
-                }
             },
             webpush: {
                 fcmOptions: {
                     link: "/admin"
                 },
                 notification: {
+                    title: title,
+                    body: bodyText,
                     icon: "/pwa-192x192.png",
                     badge: "/pwa-192x192.png",
                     requireInteraction: true
