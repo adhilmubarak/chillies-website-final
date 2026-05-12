@@ -59,7 +59,7 @@ public class MessagingService extends FirebaseMessagingService {
         
         // Universal WakeLock: Forces the CPU to wake up and process the order on ALL Android devices
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK |
+        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK |
                 PowerManager.ACQUIRE_CAUSES_WAKEUP |
                 PowerManager.ON_AFTER_RELEASE, "Chillies:OrderAlert");
         wakeLock.acquire(30000); // Keep awake for 30 seconds
@@ -84,51 +84,46 @@ public class MessagingService extends FirebaseMessagingService {
             "test".equals(type))) {
             
             Log.d(TAG, "Critical message detected. Triggering alarm and force open.");
-            sendNotification(title, body);
-            forceOpenApp();
+            sendNotification(title, body, type);
         }
     }
 
-    private void sendNotification(String title, String body) {
+    private void sendNotification(String title, String body, String type) {
+        // Create the notification channel if it doesn't exist
+        createNotificationChannel();
+
+        // Intent to open the app
         Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("type", type);
+        
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-        if (defaultSoundUri == null) {
-            defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        }
-
-        // Create a big text style for item preview
-        NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
-        bigStyle.setBigContentTitle(title);
-        bigStyle.bigText(body);
-
-        NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setSmallIcon(android.R.drawable.ic_dialog_info)
-                        .setContentTitle(title)
-                        .setContentText(body)
-                        .setStyle(bigStyle)
-                        .setAutoCancel(true)
-                        .setSound(defaultSoundUri)
-                        .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
-                        .setPriority(NotificationCompat.PRIORITY_MAX)
-                        .setCategory(NotificationCompat.CATEGORY_ALARM)
-                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                        .setFullScreenIntent(pendingIntent, true) 
-                        .setContentIntent(pendingIntent)
-                        .addAction(android.R.drawable.ic_menu_view, "View Order", pendingIntent);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setFullScreenIntent(pendingIntent, true) // Essential for waking the device
+                .setContentIntent(pendingIntent)
+                .addAction(android.R.drawable.ic_menu_view, "View", pendingIntent);
 
         Notification notification = notificationBuilder.build();
         // FLAG_INSISTENT makes the sound repeat until the user dismisses it
         notification.flags |= Notification.FLAG_INSISTENT;
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        
+        // Use a unique ID based on time
+        int notificationId = (int) System.currentTimeMillis();
+        notificationManager.notify(notificationId, notification);
 
-        notificationManager.notify(0, notification);
+        // Also try to force open the UI
+        forceOpenApp();
     }
 
     private void forceOpenApp() {

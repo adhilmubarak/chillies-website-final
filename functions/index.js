@@ -38,8 +38,7 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
             },
             android: {
                 priority: "high",
-                // We DON'T put a notification block here for Android 
-                // to ensure onMessageReceived is triggered in the background
+                ttl: 0, // Deliver immediately or not at all
             },
             apns: {
                 payload: {
@@ -125,6 +124,7 @@ exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}"
             },
             android: {
                 priority: "high",
+                ttl: 0,
             }
         });
 
@@ -178,6 +178,7 @@ exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}",
             },
             android: {
                 priority: "high",
+                ttl: 0,
             },
             apns: {
                 payload: {
