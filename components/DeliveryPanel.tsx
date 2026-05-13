@@ -190,17 +190,22 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                 </div>
                                 
                                 {method === 'UPI' && (
-                                    <div className="bg-white p-4 rounded-3xl flex flex-col items-center justify-center space-y-3 mx-auto w-fit shadow-xl border-4 border-purple-500/20 animate-fade-in">
-                                        <div className="w-48 h-48 bg-white overflow-hidden relative rounded-xl">
+                                    <div className="bg-white p-5 rounded-3xl flex flex-col items-center justify-center space-y-3 mx-auto w-fit shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-4 border-purple-500/20 animate-fade-in">
+                                        <div className="w-48 h-48 bg-white overflow-hidden relative rounded-xl flex items-center justify-center">
                                             <img 
-                                                src={`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(`upi://pay?pa=${deliveryUpiId || '8301032794@ybl'}&pn=Chillies&am=${order.total}&cu=INR`)}`} 
+                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`upi://pay?pa=${deliveryUpiId || '8301032794@ybl'}&pn=Chillies&am=${order.total}&cu=INR`)}`} 
                                                 alt="UPI QR Code" 
-                                                className="w-full h-full object-cover mix-blend-multiply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.15]"
+                                                className="w-full h-full object-contain"
+                                                onLoad={() => console.log("QR Code loaded successfully")}
+                                                onError={(e) => {
+                                                    console.error("QR Code failed to load");
+                                                    e.currentTarget.src = "https://placehold.co/300x300?text=QR+Error";
+                                                }}
                                             />
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-stone-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total to Collect</p>
-                                            <p className="text-stone-950 font-black text-xl font-mono">₹{order.total}</p>
+                                            <p className="text-purple-600 font-black text-xs uppercase tracking-widest">Scan to Pay ₹{order.total}</p>
+                                            <p className="text-stone-400 text-[8px] uppercase tracking-tighter mt-1">{deliveryUpiId || '8301032794@ybl'}</p>
                                         </div>
                                     </div>
                                 )}

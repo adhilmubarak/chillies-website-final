@@ -690,6 +690,7 @@ function App() {
   useEffect(() => {
     const q = query(collection(db, 'orders')); 
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log(`[Firestore Sync] Received update for ${snapshot.docs.length} orders. Source: ${snapshot.metadata.hasPendingWrites ? 'Local' : 'Server'}`);
       const fetched = snapshot.docs.map(doc => ({ ...doc.data(), firestoreId: doc.id } as any));
       setOrders(fetched.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0)));
     });
@@ -981,6 +982,7 @@ function App() {
           <DeliveryPanel 
             orders={orders}
             onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string, fid?: string) => { 
+                console.log(`[Status Update] Attempting to update Order ${id} (FID: ${fid}) to status: ${s}`);
                 try {
                   const updates: any = { status: s };
                   if (pm) updates.paymentMethod = pm;
@@ -990,6 +992,7 @@ function App() {
 
                   if (fid) {
                     await updateDoc(doc(db, 'orders', fid), updates);
+                    console.log(`[Status Update] Successfully updated FID: ${fid} via direct Doc reference.`);
                   } else {
                     const q = query(collection(db, 'orders'), where("id", "==", id)); 
                     const snap = await getDocs(q); 
@@ -1000,6 +1003,7 @@ function App() {
                     for (const d of snap.docs) {
                       await updateDoc(d.ref, updates);
                     }
+                    console.log(`[Status Update] Successfully updated ID: ${id} via query.`);
                   }
                 } catch(e: any) {
                   console.error("Status update error", e);
