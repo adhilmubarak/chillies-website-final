@@ -176,7 +176,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/90 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/90 animate-fade-in" onClick={onClose}>
       {isPagerActive && (
          <div className="fixed inset-0 z-[110] bg-green-500 flex flex-col items-center justify-center p-6 animate-pulse" onClick={e => e.stopPropagation()}>
             <ShoppingBag size={120} className="text-stone-950 mb-8 animate-bounce" />
@@ -211,7 +211,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                     <h3 className="text-stone-400 text-xs uppercase tracking-[0.2em] font-bold mb-4 flex items-center gap-2"><Clock size={14}/> Recent Orders</h3>
                     <div className="space-y-3 max-h-[60vh] overflow-y-auto scrollbar-hide">
                         {myHistory.map(histOrder => (
-                            <div key={histOrder.id} onClick={() => fetchOrderDetails(histOrder.id)} className="p-4 bg-stone-950/50 border border-white/5 rounded-xl cursor-pointer hover:border-gold-500/30 transition-all flex justify-between items-center group">
+                            <div key={histOrder.id} onClick={() => fetchOrderDetails(histOrder.id)} className="bg-stone-950 border border-white/10 w-full py-3 md:py-4 rounded-2xl shadow-inner group-hover:border-gold-500/30 transition-colors duration-500 px-4 flex justify-between items-center group">
                                 <div>
                                     <h4 className="text-white font-mono font-bold tracking-wider">{histOrder.id}</h4>
                                     <p className="text-stone-500 text-[10px] uppercase tracking-widest mt-1">
@@ -347,7 +347,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                         </a>
                     </div>
                     
-                    <div className="bg-stone-950/50 rounded-xl border border-white/5 p-4 space-y-3">
+                    <div className="bg-stone-950 border-b border-white/5 py-4 shadow-2xl rounded-xl border border-white/5 p-4 space-y-3">
                         <div className="flex items-center gap-3 border-b border-white/5 pb-3 mb-1">
                           <div className="w-8 h-8 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center text-gold-500">
                             <User size={14} />

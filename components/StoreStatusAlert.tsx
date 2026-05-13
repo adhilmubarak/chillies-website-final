@@ -53,7 +53,7 @@ const StoreStatusAlert: React.FC<StoreStatusAlertProps> = ({ isStoreOpen, startT
 
   const TimeUnit = ({ value, label }: { value: number; label: string }) => (
     <div className="flex flex-col items-center min-w-[60px] md:min-w-[80px]">
-      <div className="bg-stone-950/50 backdrop-blur-md border border-white/10 w-full py-3 md:py-4 rounded-2xl shadow-inner group-hover:border-gold-500/30 transition-colors duration-500">
+      <div className="bg-stone-950 border border-white/10 w-full py-3 md:py-4 rounded-2xl shadow-inner group-hover:border-gold-500/30 transition-colors duration-500">
         <span className="text-2xl md:text-4xl font-mono font-bold text-white tabular-nums tracking-tighter">
           {value.toString().padStart(2, '0')}
         </span>
@@ -68,7 +68,7 @@ const StoreStatusAlert: React.FC<StoreStatusAlertProps> = ({ isStoreOpen, startT
         {/* Glow Effects */}
         <div className="absolute -inset-2 bg-gradient-to-r from-red-900/20 via-gold-500/10 to-red-900/20 rounded-[3rem] blur-3xl opacity-50 group-hover:opacity-80 transition duration-1000"></div>
         
-        <div className="relative bg-stone-900/40 backdrop-blur-2xl border border-white/5 p-8 md:p-16 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center">
+        <div className="relative bg-stone-900 border border-white/5 p-8 md:p-16 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center">
           
           {/* Decorative Elements */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500/40 to-transparent"></div>

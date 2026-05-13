@@ -74,7 +74,7 @@ const Navbar: React.FC<NavbarProps> = ({
     <nav
       className={`fixed ${topClass} w-full z-50 transition-all duration-500 ${
         scrolled 
-          ? 'bg-stone-950/90 backdrop-blur-md border-b border-white/5 py-4 shadow-2xl' 
+          ? 'bg-stone-950 border-b border-white/5 py-4 shadow-2xl' 
           : 'bg-transparent py-4 md:py-8'
       }`}
     >

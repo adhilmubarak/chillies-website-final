@@ -41,7 +41,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ cartItemCount, onOpenCart, onOpen
   `;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-stone-950/90 backdrop-blur-2xl border-t border-white/5 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-stone-950 border-t border-white/5 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
       <div className="flex items-center justify-around h-16 px-1">
         <button onClick={() => handleNavClick('home')} className={navItemClass('home')}>
           <Home size={18} className={activeSection === 'home' ? 'fill-gold-400/10' : ''} />
