@@ -927,17 +927,22 @@ function App() {
               setDbCategories(newArray);
               await Promise.all(newArray.map((cat, i) => updateDoc(doc(db, 'categories', cat.id), { order: i })));
             }}
-            onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string) => { 
+            onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string, fid?: string) => { 
               try {
-                const q = query(collection(db, 'orders'), where("id", "==", id)); 
-                const snap = await getDocs(q); 
-                for (const d of snap.docs) {
-                  const updates: any = { status: s };
-                  if (pm) updates.paymentMethod = pm;
-                  if (s === 'ready' || s === 'out_for_delivery') {
-                    updates.assignedAt = Date.now();
+                const updates: any = { status: s };
+                if (pm) updates.paymentMethod = pm;
+                if (s === 'ready' || s === 'out_for_delivery') {
+                  updates.assignedAt = Date.now();
+                }
+
+                if (fid) {
+                  await updateDoc(doc(db, 'orders', fid), updates);
+                } else {
+                  const q = query(collection(db, 'orders'), where("id", "==", id)); 
+                  const snap = await getDocs(q); 
+                  for (const d of snap.docs) {
+                    await updateDoc(d.ref, updates);
                   }
-                  await updateDoc(d.ref, updates);
                 }
               } catch(e) {
                 console.error("Status update error", e);
@@ -975,21 +980,26 @@ function App() {
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
           <DeliveryPanel 
             orders={orders}
-            onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string) => { 
+            onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string, fid?: string) => { 
                 try {
-                  const q = query(collection(db, 'orders'), where("id", "==", id)); 
-                  const snap = await getDocs(q); 
-                  if (snap.empty) {
-                      alert("Critical Sync Error: Order ID not found on server.");
-                      return;
+                  const updates: any = { status: s };
+                  if (pm) updates.paymentMethod = pm;
+                  if (s === 'ready' || s === 'out_for_delivery') {
+                      updates.assignedAt = Date.now();
                   }
-                  for (const d of snap.docs) {
-                    const updates: any = { status: s };
-                    if (pm) updates.paymentMethod = pm;
-                    if (s === 'ready' || s === 'out_for_delivery') {
-                        updates.assignedAt = Date.now();
+
+                  if (fid) {
+                    await updateDoc(doc(db, 'orders', fid), updates);
+                  } else {
+                    const q = query(collection(db, 'orders'), where("id", "==", id)); 
+                    const snap = await getDocs(q); 
+                    if (snap.empty) {
+                        alert("Critical Sync Error: Order ID not found on server.");
+                        return;
                     }
-                    await updateDoc(d.ref, updates);
+                    for (const d of snap.docs) {
+                      await updateDoc(d.ref, updates);
+                    }
                   }
                 } catch(e: any) {
                   console.error("Status update error", e);
@@ -1004,14 +1014,19 @@ function App() {
       <Route path="/kitchen" element={
         <KitchenPanel 
           orders={orders}
-          onUpdateOrderStatus={async (id, s, pm) => { 
+          onUpdateOrderStatus={async (id, s, pm, fid) => { 
               try {
-                const q = query(collection(db, 'orders'), where("id", "==", id)); 
-                const snap = await getDocs(q); 
-                for (const d of snap.docs) {
-                  const updates: any = { status: s };
-                  if (s === 'ready') updates.assignedAt = Date.now();
-                  await updateDoc(d.ref, updates);
+                const updates: any = { status: s };
+                if (s === 'ready') updates.assignedAt = Date.now();
+
+                if (fid) {
+                  await updateDoc(doc(db, 'orders', fid), updates);
+                } else {
+                  const q = query(collection(db, 'orders'), where("id", "==", id)); 
+                  const snap = await getDocs(q); 
+                  for (const d of snap.docs) {
+                    await updateDoc(d.ref, updates);
+                  }
                 }
               } catch(e) {
                 console.error("Status update error", e);

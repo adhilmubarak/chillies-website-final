@@ -66,7 +66,7 @@ interface AdminPanelProps {
   onAddCategory: (category: string) => void;
   onUpdateCategory?: (category: CategoryConfig) => void;
   onDeleteCategory: (category: string) => void;
-  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string) => void;
+  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string, firestoreId?: string) => void;
   riderLocation?: {lat: number, lng: number, timestamp: number} | null;
   onAddCoupon: (coupon: Coupon) => void;
   onDeleteCoupon: (id: string) => void;
@@ -400,7 +400,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   const handleStatusChange = (order: Order, newStatus: Order['status']) => {
-    onUpdateOrderStatus(order.id, newStatus);
+    onUpdateOrderStatus(order.id, newStatus, undefined, order.firestoreId);
   };
 
   const copyOrderBrief = (order: Order) => {
@@ -763,7 +763,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 <p className="text-stone-500 uppercase tracking-[0.3em] text-xs font-bold">No matching records found</p>
                             </div>
                         ) : filteredOrders.map(order => (
-                            <div key={order.id} className="bg-stone-900 border border-stone-800 rounded-[2.5rem] overflow-hidden group hover:border-gold-500 transition-all duration-500 flex flex-col shadow-xl">
+                            <div key={order.firestoreId || order.id} className="bg-stone-900 border border-stone-800 rounded-[2.5rem] overflow-hidden group hover:border-gold-500 transition-all duration-500 flex flex-col shadow-xl">
                                 <div className="p-4 sm:p-8 border-b border-stone-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-950">
                                     <div className="space-y-2 w-full sm:w-auto">
                                         <div className="flex items-center justify-between sm:justify-start gap-3">

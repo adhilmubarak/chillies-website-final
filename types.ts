@@ -73,6 +73,7 @@ export interface Order {
   paymentMethod?: 'Cash' | 'UPI' | 'Online';
   pointsRedeemed?: number;
   pointsEarned?: number;
+  firestoreId?: string; // Internal ID for direct updates
 }
 
 export interface FoodRating {

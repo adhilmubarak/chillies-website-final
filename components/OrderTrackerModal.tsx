@@ -145,9 +145,13 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
     if (!foundOrder || foundOrder.status !== 'delivered') return;
     setIsSubmittingRating(true);
     try {
-       const q = query(collection(db, 'orders'), where("id", "==", foundOrder.id));
-       const snap = await getDocs(q);
-       snap.forEach(d => updateDoc(d.ref, { deliveryRating: rating }));
+       if (foundOrder.firestoreId) {
+         await updateDoc(doc(db, 'orders', foundOrder.firestoreId), { deliveryRating: rating });
+       } else {
+         const q = query(collection(db, 'orders'), where("id", "==", foundOrder.id));
+         const snap = await getDocs(q);
+         snap.forEach(d => updateDoc(d.ref, { deliveryRating: rating }));
+       }
        setFoundOrder(prev => prev ? {...prev, deliveryRating: rating} : null);
     } catch (e) {
        console.error("Error rating delivery:", e);

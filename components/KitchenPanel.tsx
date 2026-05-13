@@ -5,7 +5,7 @@ import { printKOT } from '../App';
 
 interface KitchenPanelProps {
   orders: Order[];
-  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string) => void;
+  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string, firestoreId?: string) => void;
 }
 
 const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus }) => {
@@ -21,18 +21,19 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
     .filter(o => o.status === 'pending' || o.status === 'preparing')
     .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
-  const toggleItem = (orderId: string, itemKey: string, currentStatus: string) => {
+  const toggleItem = (orderId: string, fid: string | undefined, itemKey: string, currentStatus: string) => {
     if (currentStatus === 'pending') {
         // Automatically move to preparing if they start cooking
-        onUpdateOrderStatus(orderId, 'preparing');
+        onUpdateOrderStatus(orderId, 'preparing', undefined, fid);
     }
 
+    const key = fid || orderId;
     setCrossedItems(prev => {
-      const orderCrossed = prev[orderId] || [];
+      const orderCrossed = prev[key] || [];
       if (orderCrossed.includes(itemKey)) {
-        return { ...prev, [orderId]: orderCrossed.filter(k => k !== itemKey) };
+        return { ...prev, [key]: orderCrossed.filter(k => k !== itemKey) };
       } else {
-        return { ...prev, [orderId]: [...orderCrossed, itemKey] };
+        return { ...prev, [key]: [...orderCrossed, itemKey] };
       }
     });
   };
@@ -70,14 +71,14 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {activeOrders.map(order => {
-          const orderCrossed = crossedItems[order.id] || [];
+          const orderCrossed = crossedItems[order.firestoreId || order.id] || [];
           const isAllCrossed = orderCrossed.length === order.items.length && order.items.length > 0;
           const isPending = order.status === 'pending';
           const timeElapsed = getElapsedTime(order.createdAt);
           const isDelayed = order.createdAt && (currentTime.getTime() - order.createdAt) > 10 * 60000; // > 10 mins
 
           return (
-            <div key={order.id} className={`flex flex-col bg-stone-900 rounded-3xl overflow-hidden border shadow-2xl transition-all ${isAllCrossed ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)]' : isDelayed ? 'border-red-500/80 shadow-[0_0_40px_rgba(239,68,68,0.3)] animate-pulse' : 'border-white/10'}`}>
+            <div key={order.firestoreId || order.id} className={`flex flex-col bg-stone-900 rounded-3xl overflow-hidden border shadow-2xl transition-all ${isAllCrossed ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)]' : isDelayed ? 'border-red-500/80 shadow-[0_0_40px_rgba(239,68,68,0.3)] animate-pulse' : 'border-white/10'}`}>
               
               <div className={`p-4 md:p-5 flex justify-between items-center ${isAllCrossed ? 'bg-green-500 text-stone-950' : isDelayed ? 'bg-red-500 text-white' : 'bg-stone-800 text-white'}`}>
                 <div>
@@ -102,7 +103,7 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
                     return (
                       <button
                         key={itemKey}
-                        onClick={() => toggleItem(order.id, itemKey, order.status)}
+                        onClick={() => toggleItem(order.id, order.firestoreId, itemKey, order.status)}
                         className={`w-full text-left p-4 rounded-2xl flex items-center justify-between transition-all border ${isCrossed ? 'bg-stone-900/50 border-white/5 opacity-50' : 'bg-stone-800 border-white/10 hover:border-gold-500/50 active:scale-[0.98]'}`}
                       >
                         <div className="flex gap-4 items-center">
@@ -132,7 +133,7 @@ const KitchenPanel: React.FC<KitchenPanelProps> = ({ orders, onUpdateOrderStatus
                     <Printer size={20} />
                   </button>
                   <button 
-                    onClick={() => onUpdateOrderStatus(order.id, 'ready')}
+                    onClick={() => onUpdateOrderStatus(order.id, 'ready', undefined, order.firestoreId)}
                     className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-2 transition-all active:scale-95 ${isAllCrossed ? 'bg-green-500 text-stone-950 shadow-[0_10px_40px_rgba(34,197,94,0.3)] animate-pulse hover:bg-green-400' : 'bg-stone-800 text-white hover:bg-stone-700 hover:text-green-400'}`}
                   >
                     <CheckCircle size={20} className={isAllCrossed ? "stroke-[3]" : ""} /> Mark as Ready

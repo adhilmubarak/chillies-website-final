@@ -7,7 +7,7 @@ import { Order } from '../types';
 
 interface DeliveryPanelProps {
   orders: Order[];
-  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string) => Promise<void>;
+  onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string, firestoreId?: string) => Promise<void>;
   onUpdateRiderLocation: (lat: number, lng: number) => Promise<void>;
   deliveryUpiId?: string;
 }
@@ -117,7 +117,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
             ) : deliveryOrders.map(order => {
                 const method = paymentMethods[order.id] || 'Cash';
                 return (
-                <div key={order.id} className="bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden shadow-xl">
+                <div key={order.firestoreId || order.id} className="bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden shadow-xl">
                     <div className="p-6 border-b border-stone-800 bg-stone-950/50 flex justify-between items-start">
                         <div>
                             <span className="text-brand-500 font-mono font-bold text-xl block mb-1">#{order.id}</span>
@@ -206,7 +206,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                 )}
 
                                 <button 
-                                    onClick={() => onUpdateOrderStatus(order.id, 'delivered', method)} 
+                                    onClick={() => onUpdateOrderStatus(order.id, 'delivered', method, order.firestoreId)} 
                                     className="w-full py-4 bg-green-500 hover:bg-green-400 text-white rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex justify-center items-center gap-2 transition-all shadow-lg active:scale-95"
                                 > 
                                     <Check size={18} /> Mark as Delivered 
