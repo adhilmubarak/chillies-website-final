@@ -77,9 +77,11 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
   const handleDirections = (address?: string) => {
     if (!address) return;
     const trimmed = address.trim();
-    // If address is already a URL, open it directly
-    if (trimmed.startsWith('http')) {
-        window.open(trimmed, '_blank');
+    
+    // Use regex to find a URL anywhere in the string
+    const urlMatch = trimmed.match(/https?:\/\/[^\s]+/);
+    if (urlMatch) {
+        window.open(urlMatch[0], '_blank');
     } else {
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`, '_blank');
     }
