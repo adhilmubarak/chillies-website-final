@@ -27,6 +27,13 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
     );
   }, [orders]);
   
+  // Authentication Persistence
+  useEffect(() => {
+    if (localStorage.getItem('chillies_rider_auth') === 'true') {
+        setIsAuthenticated(true);
+    }
+  }, []);
+
   // Real-time Rider Location Tracking
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -48,12 +55,18 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordInput === 'rider123' || passwordInput === 'admin123') {
+        localStorage.setItem('chillies_rider_auth', 'true');
         setIsAuthenticated(true);
         setAuthError(false);
         setPasswordInput('');
     } else {
         setAuthError(true);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('chillies_rider_auth');
+    setIsAuthenticated(false);
   };
 
   const handleCall = (phone: string) => {
@@ -63,7 +76,13 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
 
   const handleDirections = (address?: string) => {
     if (!address) return;
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+    const trimmed = address.trim();
+    // If address is already a URL, open it directly
+    if (trimmed.startsWith('http')) {
+        window.open(trimmed, '_blank');
+    } else {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`, '_blank');
+    }
   };
 
   if (!isAuthenticated) {
@@ -101,7 +120,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                   <p className="text-[10px] text-brand-500 font-bold uppercase tracking-widest">{deliveryOrders.length} Active</p>
               </div>
           </div>
-          <button onClick={() => setIsAuthenticated(false)} className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-red-500 hover:bg-stone-800 transition-colors">
+          <button onClick={handleLogout} className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-red-500 hover:bg-stone-800 transition-colors" title="Logout">
               <LogOut size={16} />
           </button>
       </header>
