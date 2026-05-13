@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 import com.getcapacitor.BridgeActivity;
+import com.chillies.admin.NetworkPrinterPlugin;
 
 public class MainActivity extends BridgeActivity {
     @Override
