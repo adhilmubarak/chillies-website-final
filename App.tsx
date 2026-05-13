@@ -198,7 +198,13 @@ const arrayBufferToBase64 = (buffer: Uint8Array) => {
   return window.btoa(binary);
 };
 
+console.log('Capacitor Platform:', Capacitor.getPlatform());
+console.log('Is Native Platform:', Capacitor.isNativePlatform());
+
 const NetworkPrinter = Capacitor.isNativePlatform() ? registerPlugin<any>('NetworkPrinter') : null;
+if (NetworkPrinter) {
+  console.log('NetworkPrinter plugin registered successfully');
+}
 
 export const discoverNetworkPrinters = async (): Promise<{printers: string[], scannedSubnets: string[]}> => {
   try {
