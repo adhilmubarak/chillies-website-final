@@ -74,7 +74,7 @@ const Navbar: React.FC<NavbarProps> = ({
     <nav
       className={`fixed ${topClass} w-full z-50 transition-all duration-500 ${
         scrolled 
-          ? 'bg-stone-950 border-b border-white/5 py-4 shadow-2xl' 
+          ? 'bg-stone-950 border-b border-stone-800 py-4 shadow-2xl' 
           : 'bg-transparent py-4 md:py-8'
       }`}
     >
@@ -88,10 +88,10 @@ const Navbar: React.FC<NavbarProps> = ({
             </span>
           </div>
           
-          <div className="hidden lg:flex items-center gap-4 px-4 py-1.5 bg-stone-900/40 rounded-2xl border border-white/10 backdrop-blur-xl shadow-inner group/clock overflow-hidden relative">
-            <div className="absolute inset-0 bg-gold-500/5 opacity-0 group-hover/clock:opacity-100 transition-opacity duration-700"></div>
+          <div className="hidden lg:flex items-center gap-4 px-4 py-1.5 bg-stone-900 rounded-2xl border border-stone-800 shadow-inner group/clock overflow-hidden relative">
+            <div className="absolute inset-0 bg-gold-500/10 opacity-0 group-hover/clock:opacity-100 transition-opacity duration-700"></div>
             
-            <div className="flex items-center gap-2 border-r border-white/10 pr-3">
+            <div className="flex items-center gap-2 border-r border-stone-800 pr-3">
               <div className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(212,175,55,0.8)]"></div>
               <span className="font-serif italic text-stone-300 text-[11px] whitespace-nowrap">
                 {formatDate(currentTime)}
@@ -147,9 +147,9 @@ const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Mobile Menu */}
-      <div className={`md:hidden fixed inset-0 z-40 bg-stone-950/98 backdrop-blur-2xl transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`md:hidden fixed inset-0 z-40 bg-stone-950 transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full justify-center items-center space-y-8 p-8 relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gold-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gold-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
             <button 
                 onClick={() => setMobileMenuOpen(false)}
@@ -161,13 +161,13 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="flex flex-col items-center gap-6 mb-12 relative z-10">
               <span className="font-serif text-3xl text-gold-400 font-bold uppercase text-center tracking-tighter">CHILLIES<br/>RESTAURANT.</span>
               
-              <div className="flex flex-col items-center bg-stone-950/5 rounded-3xl p-6 border border-white/10 shadow-2xl min-w-[200px]">
+              <div className="flex flex-col items-center bg-stone-900 rounded-3xl p-6 border border-stone-800 shadow-2xl min-w-[200px]">
                 <div className="flex items-center gap-2 mb-2">
                    <div className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(212,175,55,0.8)]"></div>
                    <span className="text-[10px] uppercase tracking-[0.3em] font-black text-stone-500">Live Time</span>
                 </div>
                 <span className="text-4xl font-mono font-black text-white tabular-nums tracking-wider mb-2">{formatTime(currentTime).split(' ')[0]}</span>
-                <span className="text-xs font-serif italic text-gold-400/80">{formatDate(currentTime)}</span>
+                <span className="text-xs font-serif italic text-gold-400">{formatDate(currentTime)}</span>
               </div>
             </div>
 

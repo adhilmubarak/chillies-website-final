@@ -62,24 +62,24 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     const styles = {
       mild: { 
         color: 'text-amber-400', 
-        bg: 'bg-amber-500/10', 
-        border: 'border-amber-500/30', 
+        bg: 'bg-amber-950', 
+        border: 'border-amber-800', 
         iconCount: 1, 
         label: 'Mild',
         pulse: '' 
       },
       medium: { 
         color: 'text-orange-500', 
-        bg: 'bg-orange-500/10', 
-        border: 'border-orange-500/30', 
+        bg: 'bg-orange-950', 
+        border: 'border-orange-800', 
         iconCount: 2, 
         label: 'Medium',
         pulse: '' 
       },
       hot: { 
         color: 'text-red-500', 
-        bg: 'bg-red-600/20', 
-        border: 'border-red-500/50', 
+        bg: 'bg-red-950', 
+        border: 'border-red-800', 
         iconCount: 3, 
         label: 'Hot',
         pulse: 'animate-pulse' 
@@ -90,13 +90,13 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     if (!config) return null;
 
     return (
-      <div className={`flex items-center gap-2 ${config.color} ${config.bg} backdrop-blur-md px-3 py-1.5 rounded-full border ${config.border} shadow-[0_4px_12px_rgba(0,0,0,0.5)] group/spicy transition-all duration-300 hover:scale-110 ${config.pulse}`}>
+      <div className={`flex items-center gap-2 ${config.color} ${config.bg} px-3 py-1.5 rounded-full border ${config.border} shadow-[0_4px_12px_rgba(0,0,0,0.5)] group/spicy transition-all duration-300 hover:scale-110 ${config.pulse}`}>
         <div className="flex -space-x-1">
           {[...Array(config.iconCount)].map((_, i) => (
             <Flame key={i} size={10} fill="currentColor" className="drop-shadow-[0_0_2px_rgba(0,0,0,0.5)]" />
           ))}
         </div>
-        <div className="h-3 w-px bg-white/20 mx-0.5"></div>
+        <div className="h-3 w-px bg-stone-800 mx-0.5"></div>
         <span className="text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap">
           {config.label}
         </span>
@@ -116,7 +116,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         />
         
         {item.isUnavailable && (
-            <div className="absolute inset-0 bg-stone-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-4 z-20">
+            <div className="absolute inset-0 bg-stone-950 flex flex-col items-center justify-center text-center p-4 z-20">
                 <div className="bg-red-600 text-white px-6 py-2 rounded-full font-black uppercase tracking-[0.2em] text-[10px] shadow-xl flex items-center gap-2 mb-2">
                     <Ban size={14} /> Sold Out
                 </div>
@@ -125,8 +125,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         )}
 
         {isTimeRestricted && (
-            <div className="absolute inset-0 bg-stone-950/80 backdrop-blur-[3px] flex flex-col items-center justify-center text-center p-4 z-20 animate-fade-in">
-                <div className="bg-gold-500/10 border border-gold-500/40 text-gold-500 px-5 py-2.5 rounded-2xl flex flex-col items-center gap-2 shadow-2xl">
+            <div className="absolute inset-0 bg-stone-950 flex flex-col items-center justify-center text-center p-4 z-20 animate-fade-in">
+                <div className="bg-stone-900 border border-gold-500/40 text-gold-500 px-5 py-2.5 rounded-2xl flex flex-col items-center gap-2 shadow-2xl">
                     <Clock size={20} className="animate-pulse" />
                     <div className="space-y-0.5">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] block">Available From</span>
@@ -139,20 +139,20 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         )}
 
         {!isStoreOpen && !item.isUnavailable && !isTimeRestricted && (
-            <div className="absolute inset-0 bg-stone-950/60 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-20">
+            <div className="absolute inset-0 bg-stone-950/90 flex flex-col items-center justify-center text-center p-4 z-20">
                 <Lock className="text-stone-400/50 mb-2" size={24} />
                 <span className="text-stone-400 font-bold uppercase tracking-[0.2em] text-[9px]">Kitchen Closed</span>
             </div>
         )}
 
         <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10 max-w-[90%]">
-            {item.isChefChoice && <div className="bg-gold-500 text-stone-950 p-2 rounded-full shadow-lg border border-gold-300/30"><ChefHat size={12} /></div>}
-            {item.isVegetarian && <div className="bg-stone-950/80 backdrop-blur-sm text-green-400 p-2 rounded-full border border-green-500/30"><Leaf size={12} /></div>}
+            {item.isChefChoice && <div className="bg-gold-500 text-stone-950 p-2 rounded-full shadow-lg border border-gold-300"><ChefHat size={12} /></div>}
+            {item.isVegetarian && <div className="bg-stone-950 text-green-400 p-2 rounded-full border border-green-800"><Leaf size={12} /></div>}
             {renderSpicyTag()}
         </div>
 
         <div className="absolute top-4 right-4 z-10">
-            <div className={`bg-stone-950/80 backdrop-blur-md font-bold px-3 py-1.5 rounded-xl border border-white/10 text-sm transition-colors duration-300 ${!isItemInteractable ? 'text-stone-600' : 'text-gold-400'}`}>
+            <div className={`bg-stone-950 font-bold px-3 py-1.5 rounded-xl border border-stone-800 text-sm transition-colors duration-300 ${!isItemInteractable ? 'text-stone-600' : 'text-gold-400'}`}>
                 ₹{displayPrice}
             </div>
         </div>

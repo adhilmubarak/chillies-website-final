@@ -223,26 +223,26 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
 
   return (
     <>
-      <div className={`fixed inset-0 bg-stone-950/90 z-[110] transition-opacity duration-500 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={handleClose} />
-      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-stone-950 border-l border-white/5 z-[120] transform transition-transform duration-500 shadow-2xl ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-0 bg-stone-950 z-[110] transition-opacity duration-500 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={handleClose} />
+      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-stone-950 border-l border-stone-800 z-[120] transform transition-transform duration-500 shadow-2xl ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full relative pb-20 md:pb-0">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent"></div>
 
           {step === 'confirmation' && confirmedOrder ? (
               <div className="flex flex-col h-full animate-fade-in">
                   <div className="p-6 md:p-8 pb-4 flex justify-between items-center">
-                      <button onClick={() => printThermalBill(confirmedOrder)} className="text-gold-500 hover:text-white transition-colors p-2 hover:bg-stone-950/5 rounded-full flex items-center gap-2 text-[10px] uppercase font-black tracking-widest">
+                      <button onClick={() => printThermalBill(confirmedOrder)} className="text-gold-500 hover:text-white transition-colors p-2 hover:bg-stone-900 rounded-full flex items-center gap-2 text-[10px] uppercase font-black tracking-widest">
                           <Printer size={18} /> Print Receipt
                       </button>
-                      <button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-950/5 rounded-full"><X size={24} /></button>
+                      <button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-900 rounded-full"><X size={24} /></button>
                   </div>
                   
                   <div className="flex-1 flex flex-col items-center px-6 md:px-8 text-center overflow-y-auto scrollbar-hide">
-                      <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-6 relative border border-green-500/20"><CheckCircle className="text-green-500 w-8 h-8" /></div>
+                      <div className="w-16 h-16 rounded-full bg-green-900 flex items-center justify-center mb-6 relative border border-green-800"><CheckCircle className="text-green-500 w-8 h-8" /></div>
                       <h2 className="font-serif text-2xl md:text-3xl text-white mb-2">Order Created</h2>
                       <p className="text-stone-400 text-xs md:text-sm mb-4 leading-relaxed">Check WhatsApp for confirmation.</p>
 
-                      <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 mb-8 flex gap-3 items-start text-left w-full">
+                      <div className="bg-orange-900 border border-orange-800 rounded-xl p-4 mb-8 flex gap-3 items-start text-left w-full">
                           <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={16} />
                           <div className="text-[9px] text-stone-300 leading-relaxed uppercase tracking-wide">
                               <span className="font-black text-orange-500 mb-1 block">Important Note</span>
@@ -258,17 +258,17 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                       </button>
 
                       <div className="w-full grid grid-cols-2 gap-3 mb-6 text-[9px]">
-                          <div className="bg-stone-900/50 p-4 rounded-2xl border border-white/5"><Clock className="text-gold-500 mx-auto mb-2" size={18} /><span className="text-stone-500 uppercase block tracking-widest mb-1">Estimated</span><span className="text-white font-black">{confirmedOrder.type === 'delivery' ? '45-60 min' : '15-20 min'}</span></div>
-                          <div className="bg-stone-900/50 p-4 rounded-2xl border border-white/5"><FileText className="text-gold-500 mx-auto mb-2" size={18} /><span className="text-stone-500 uppercase block tracking-widest mb-1">Reference</span><span className="text-white font-black">#{confirmedOrder.id}</span></div>
+                          <div className="bg-stone-900 p-4 rounded-2xl border border-stone-800"><Clock className="text-gold-500 mx-auto mb-2" size={18} /><span className="text-stone-500 uppercase block tracking-widest mb-1">Estimated</span><span className="text-white font-black">{confirmedOrder.type === 'delivery' ? '45-60 min' : '15-20 min'}</span></div>
+                          <div className="bg-stone-900 p-4 rounded-2xl border border-stone-800"><FileText className="text-gold-500 mx-auto mb-2" size={18} /><span className="text-stone-500 uppercase block tracking-widest mb-1">Reference</span><span className="text-white font-black">#{confirmedOrder.id}</span></div>
                       </div>
 
-                      <div onClick={() => onTrackOrder(confirmedOrder.id)} className="w-full bg-stone-900/50 p-4 rounded-2xl border border-white/5 mb-6 cursor-pointer group hover:border-gold-500/30 transition-all">
+                      <div onClick={() => onTrackOrder(confirmedOrder.id)} className="w-full bg-stone-900 p-4 rounded-2xl border border-stone-800 mb-6 cursor-pointer group hover:border-gold-500/30 transition-all">
                           <div className="flex items-center justify-between mb-2"><span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Live Status Link</span><ExternalLink size={12} className="text-gold-500" /></div>
-                          <div className="bg-black/40 rounded p-2.5 text-gold-400 font-mono text-[9px] truncate border border-white/5">{confirmedOrder.trackingLink}</div>
+                          <div className="bg-black rounded p-2.5 text-gold-400 font-mono text-[9px] truncate border border-stone-800">{confirmedOrder.trackingLink}</div>
                       </div>
 
-                      <div className="w-full bg-stone-900/80 rounded-2xl p-0 overflow-hidden border border-white/5 shadow-2xl relative mb-8">
-                          <div className="bg-stone-800/50 p-4 border-b border-white/5 flex justify-between items-center"><span className="text-[9px] text-stone-500 font-black tracking-widest uppercase">{confirmedOrder.date} | {confirmedOrder.timestamp}</span><button onClick={copyOrderDetails} className="text-gold-500 flex items-center gap-2 text-[9px] uppercase font-black tracking-widest">{copied ? <Check size={14} /> : <Copy size={14} />} Copy</button></div>
+                      <div className="w-full bg-stone-900 rounded-2xl p-0 overflow-hidden border border-stone-800 shadow-2xl relative mb-8">
+                          <div className="bg-stone-800 p-4 border-b border-stone-800 flex justify-between items-center"><span className="text-[9px] text-stone-500 font-black tracking-widest uppercase">{confirmedOrder.date} | {confirmedOrder.timestamp}</span><button onClick={copyOrderDetails} className="text-gold-500 flex items-center gap-2 text-[9px] uppercase font-black tracking-widest">{copied ? <Check size={14} /> : <Copy size={14} />} Copy</button></div>
                           <div className="p-6 space-y-4 text-left">
                               <div className="space-y-3">
                                 {confirmedOrder.items.map((item, idx) => (
@@ -281,7 +281,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                                     </div>
                                 ))}
                               </div>
-                              <div className="border-t border-dashed border-white/10 my-4"></div>
+                              <div className="border-t border-dashed border-stone-800 my-4"></div>
                               <div className="flex justify-between pt-2 text-xl font-serif text-white"><span>Total</span><span className="text-gold-400">₹{confirmedOrder.total.toFixed(2)}</span></div>
                           </div>
                       </div>
@@ -290,9 +290,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
               </div>
           ) : step === 'details' ? (
               <div className="flex flex-col h-full animate-fade-in">
-                  <div className="p-6 md:p-8 pb-4 border-b border-white/5 flex justify-between items-center bg-stone-950"><div className="flex items-center gap-4"><button onClick={() => setStep('cart')} className="text-stone-400 p-2 hover:bg-stone-950/5 rounded-full transition-colors"><ArrowLeft size={24} /></button><h2 className="font-serif text-xl md:text-2xl text-white">Details</h2></div><button onClick={handleClose} className="text-stone-500 p-2 hover:bg-stone-950/5 rounded-full transition-colors"><X size={24} /></button></div>
+                  <div className="p-6 md:p-8 pb-4 border-b border-stone-800 flex justify-between items-center bg-stone-950"><div className="flex items-center gap-4"><button onClick={() => setStep('cart')} className="text-stone-400 p-2 hover:bg-stone-900 rounded-full transition-colors"><ArrowLeft size={24} /></button><h2 className="font-serif text-xl md:text-2xl text-white">Details</h2></div><button onClick={handleClose} className="text-stone-500 p-2 hover:bg-stone-900 rounded-full transition-colors"><X size={24} /></button></div>
                   <div className="flex-1 p-6 md:p-8 space-y-8 overflow-y-auto scrollbar-hide">
-                      <div className="bg-stone-900/50 border border-white/5 rounded-2xl p-6 flex justify-between items-end relative overflow-hidden"><div className="space-y-1"><span className="text-stone-300 text-sm block font-medium">{cartItems.reduce((acc, i) => acc + i.quantity, 0)} Items Selected</span><span className="text-stone-400 text-[10px] font-black uppercase tracking-widest block flex items-center gap-1 mt-1">{orderType === 'delivery' ? <Bike size={12}/> : <Store size={12}/>} {orderType === 'delivery' ? 'Home Delivery' : 'Self Pickup'}</span></div><div className="text-right"><span className="text-gold-400 font-serif text-2xl md:text-3xl font-bold">₹{total.toFixed(0)}</span></div></div>
+                      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 flex justify-between items-end relative overflow-hidden"><div className="space-y-1"><span className="text-stone-300 text-sm block font-medium">{cartItems.reduce((acc, i) => acc + i.quantity, 0)} Items Selected</span><span className="text-stone-400 text-[10px] font-black uppercase tracking-widest block flex items-center gap-1 mt-1">{orderType === 'delivery' ? <Bike size={12}/> : <Store size={12}/>} {orderType === 'delivery' ? 'Home Delivery' : 'Self Pickup'}</span></div><div className="text-right"><span className="text-gold-400 font-serif text-2xl md:text-3xl font-bold">₹{total.toFixed(0)}</span></div></div>
                       <div className="space-y-5">
                         <h3 className="text-stone-600 text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2">Contact Details</h3>
                         <div className="space-y-3">
@@ -304,7 +304,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                             const isEligible = userLoyalty.points >= minRequired;
                             
                             return (
-                                <div className={`border rounded-xl p-4 flex items-center justify-between animate-fade-in transition-all ${isEligible ? 'bg-gold-500/10 border-gold-500/30' : 'bg-stone-900/40 border-white/5 opacity-60 grayscale'}`}>
+                                <div className={`border rounded-xl p-4 flex items-center justify-between animate-fade-in transition-all ${isEligible ? 'bg-stone-900 border-gold-500/50' : 'bg-stone-900 border-stone-800 opacity-60 grayscale'}`}>
                                     <div>
                                         <h4 className="text-gold-500 font-bold text-xs uppercase tracking-widest block mb-1">Chillies Points</h4>
                                         <p className="text-stone-400 text-[10px]">
@@ -337,25 +337,25 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                                                 }, { timeout: 10000 });
                                             }
                                         }}
-                                        className="text-gold-500 hover:text-gold-400 text-[9px] font-bold uppercase flex items-center gap-1 transition-colors bg-gold-500/10 px-2 py-1 rounded-md border border-gold-500/30"
+                                        className="text-gold-500 hover:text-gold-400 text-[9px] font-bold uppercase flex items-center gap-1 transition-colors bg-stone-900 px-2 py-1 rounded-md border border-gold-500/30"
                                     >
                                         <MapPin size={10} /> {isLocating ? 'Locating...' : 'Use Current Location'}
                                     </button>
                                 </div>
-                                <textarea placeholder="Flat No., Landmark, Area..." value={address} onChange={(e) => { setAddress(e.target.value); setErrors(p => ({...p, address: false})); }} className={`w-full bg-stone-900 border rounded-xl py-4 px-4 text-sm text-white focus:outline-none h-24 resize-none transition-all ${errors.address ? 'border-red-500' : 'border-white/5 focus:border-gold-500'}`} />
+                                <textarea placeholder="Flat No., Landmark, Area..." value={address} onChange={(e) => { setAddress(e.target.value); setErrors(p => ({...p, address: false})); }} className={`w-full bg-stone-900 border rounded-xl py-4 px-4 text-sm text-white focus:outline-none h-24 resize-none transition-all ${errors.address ? 'border-red-500' : 'border-stone-800 focus:border-gold-500'}`} />
                             </div>
                         )}
                       </div>
                   </div>
-                  <div className="p-6 md:p-8 border-t border-white/5 bg-stone-950 space-y-4">
-                      <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 flex gap-3 items-start">
+                  <div className="p-6 md:p-8 border-t border-stone-800 bg-stone-950 space-y-4">
+                      <div className="bg-orange-900 border border-orange-800 rounded-xl p-4 flex gap-3 items-start">
                           <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={16} />
                           <div className="text-[9px] text-stone-300 leading-relaxed uppercase tracking-wide">
                               <span className="font-black text-orange-500 mb-1 block">Important Note</span>
                               Because orders are processed via WhatsApp, restaurant staff might be busy during rush hours. <strong className="text-white">Please make a call to the restaurant to confirm your order</strong> after placing it.
                           </div>
                       </div>
-                      <div className="bg-gold-500/5 border border-gold-500/20 rounded-xl p-4 flex gap-3 items-start">
+                      <div className="bg-gold-500/10 border border-gold-500/20 rounded-xl p-4 flex gap-3 items-start">
                           <AlertCircle className="text-gold-500 shrink-0 mt-0.5" size={16} />
                           <p className="text-[9px] text-stone-400 leading-relaxed uppercase tracking-wide">Final step: Press <strong>Send</strong> in WhatsApp.</p>
                       </div>
@@ -366,14 +366,14 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
               </div>
           ) : (
             <>
-                <div className="p-6 md:p-8 pb-4 border-b border-white/5 flex justify-between items-center bg-stone-950"><h2 className="font-serif text-2xl md:text-3xl text-white">Your Selection</h2><button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-950/5 rounded-full"><X size={24} /></button></div>
-                <div className="px-6 md:px-8 py-6 border-b border-white/5 bg-stone-950/30"><div className="grid grid-cols-2 gap-2 p-1 bg-stone-900/50 rounded-xl border border-white/5 shadow-inner"><button onClick={() => setOrderType('delivery')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'delivery' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Bike size={16} /><span>Delivery</span></button><button onClick={() => setOrderType('pickup')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'pickup' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Store size={16} /><span>Pickup</span></button></div></div>
-                <div className="flex-1 overflow-y-auto pt-6 md:pt-8 bg-stone-950/30 space-y-6 scrollbar-hide min-h-0">
+                <div className="p-6 md:p-8 pb-4 border-b border-stone-800 flex justify-between items-center bg-stone-950"><h2 className="font-serif text-2xl md:text-3xl text-white">Your Selection</h2><button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-900 rounded-full"><X size={24} /></button></div>
+                <div className="px-6 md:px-8 py-6 border-b border-stone-800 bg-stone-950"><div className="grid grid-cols-2 gap-2 p-1 bg-stone-900 rounded-xl border border-stone-800 shadow-inner"><button onClick={() => setOrderType('delivery')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'delivery' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Bike size={16} /><span>Delivery</span></button><button onClick={() => setOrderType('pickup')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'pickup' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Store size={16} /><span>Pickup</span></button></div></div>
+                <div className="flex-1 overflow-y-auto pt-6 md:pt-8 bg-stone-950 space-y-6 scrollbar-hide min-h-0">
                     <div className="px-6 md:px-8 space-y-4">
                     {cartItems.length === 0 ? (<div className="h-full flex flex-col items-center justify-center text-stone-500 space-y-6 animate-fade-in py-10"><ShoppingBag size={32} className="opacity-20" /><p className="font-light tracking-widest uppercase text-[10px]">Cart is empty</p><button onClick={() => { onClose(); document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gold-400 hover:text-gold-300 uppercase text-[10px] tracking-widest font-black border-b border-gold-400/30 pb-1 transition-all">Explore Menu</button></div>) : (cartItems.map((item) => (
-                        <div key={item.id} className="flex gap-4 items-center bg-stone-900 border border-white/5 p-4 rounded-2xl group hover:border-gold-500/20 transition-all">
+                        <div key={item.id} className="flex gap-4 items-center bg-stone-900 border border-stone-800 p-4 rounded-2xl group hover:border-gold-500/20 transition-all">
                           <SafeImage src={item.image} containerClassName="w-14 h-14 md:w-16 md:h-16 rounded-xl shrink-0" className="w-full h-full object-cover" />
-                          <div className="flex-grow min-w-0"><h4 className="text-stone-200 font-medium text-xs md:text-sm truncate">{item.name}</h4><p className="text-gold-400 text-xs mt-1 font-bold">₹{item.price}</p></div><div className="flex items-center bg-stone-950 rounded-xl border border-white/10 p-1"><button onClick={() => onUpdateQuantity(item.id, -1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Minus size={12} /></button><span className="w-6 text-center text-[10px] font-bold text-white">{item.quantity}</span><button onClick={() => onUpdateQuantity(item.id, 1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Plus size={12} /></button></div></div>)))}
+                          <div className="flex-grow min-w-0"><h4 className="text-stone-200 font-medium text-xs md:text-sm truncate">{item.name}</h4><p className="text-gold-400 text-xs mt-1 font-bold">₹{item.price}</p></div><div className="flex items-center bg-stone-950 rounded-xl border border-stone-800 p-1"><button onClick={() => onUpdateQuantity(item.id, -1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Minus size={12} /></button><span className="w-6 text-center text-[10px] font-bold text-white">{item.quantity}</span><button onClick={() => onUpdateQuantity(item.id, 1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Plus size={12} /></button></div></div>)))}
                     </div>
 
                     {cartItems.length > 0 && suggestedItems.length > 0 && (
@@ -381,10 +381,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                             <div className="text-[10px] text-stone-500 font-black uppercase tracking-[0.2em] mb-4">Complete Your Meal</div>
                             <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide snap-x">
                                 {suggestedItems.map(item => (
-                                    <div key={item.id} className="snap-start shrink-0 w-44 bg-stone-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col hover:border-gold-500/30 transition-all group">
+                                    <div key={item.id} className="snap-start shrink-0 w-44 bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden flex flex-col hover:border-gold-500/30 transition-all group">
                                         <div className="h-28 w-full relative">
                                             <SafeImage src={item.image} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent"></div>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900 to-transparent"></div>
                                         </div>
                                         <div className="p-4 flex-1 flex flex-col justify-between -mt-12 relative z-10">
                                             <div>
@@ -393,7 +393,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                                             </div>
                                             <button 
                                                 onClick={() => onAddToCart && onAddToCart(item)}
-                                                className="mt-4 py-2.5 w-full bg-stone-950 border border-white/10 text-stone-300 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-gold-500 hover:text-gold-500 transition-all active:scale-95 flex items-center justify-center gap-1"
+                                                className="mt-4 py-2.5 w-full bg-stone-950 border border-stone-800 text-stone-300 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-gold-500 hover:text-gold-500 transition-all active:scale-95 flex items-center justify-center gap-1"
                                             >
                                                 <Plus size={10} /> Add
                                             </button>
@@ -405,9 +405,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                     )}
                 </div>
                 {cartItems.length > 0 && (
-                    <div className="p-6 md:p-8 bg-stone-950 border-t border-white/5 space-y-6">
-                    <div className="space-y-2">{!appliedCoupon ? (<div className="flex gap-2"><div className="relative flex-grow"><input type="text" value={couponInput} onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(''); }} placeholder="Coupon?" className="w-full bg-stone-900 border border-white/5 rounded-xl py-3 pl-10 pr-3 text-[10px] text-white focus:outline-none focus:border-gold-500 uppercase tracking-widest" /><Ticket size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-600" /></div><button onClick={handleApplyCoupon} className="bg-stone-800 text-stone-300 hover:bg-gold-500 hover:text-black px-5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Apply</button></div>) : (<div className="flex items-center justify-between bg-gold-500/5 border border-gold-500/20 rounded-xl p-3.5"><div className="flex items-center gap-3"><Tag size={16} className="text-gold-500" /><div><span className="text-[10px] text-gold-500 font-black block uppercase tracking-widest">{appliedCoupon.code}</span><span className="text-[9px] text-stone-500 uppercase tracking-widest">Active Discount</span></div></div><button onClick={handleRemoveCoupon} className="text-stone-600 hover:text-red-500 transition-colors"><X size={16} /></button></div>)}{couponError && <p className="text-red-500 text-[9px] pl-1 font-bold uppercase tracking-widest">{couponError}</p>}</div>
-                    <div className="space-y-3 text-stone-400 text-sm"><div className="flex justify-between text-[10px] font-black uppercase tracking-widest"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>{orderType === 'delivery' && (<div className="flex justify-between text-[10px] text-stone-500 font-black uppercase tracking-widest"><span>Delivery</span><span>+₹{DELIVERY_FEE.toFixed(2)}</span></div>)}{appliedCoupon && <div className="flex justify-between text-[10px] text-green-600 font-black uppercase tracking-widest"><span>Savings</span><span>-₹{discountAmount.toFixed(2)}</span></div>}{pointsRedeemed > 0 && <div className="flex justify-between text-[10px] text-gold-500 font-black uppercase tracking-widest"><span>Points Redeemed</span><span>-₹{pointsRedeemed.toFixed(2)}</span></div>}<div className="flex justify-between pt-4 border-t border-white/10 text-xl md:text-2xl font-serif text-white"><span>Total</span><span className="text-gold-400">₹{total.toFixed(2)}</span></div></div>
+                    <div className="p-6 md:p-8 bg-stone-950 border-t border-stone-800 space-y-6">
+                    <div className="space-y-2">{!appliedCoupon ? (<div className="flex gap-2"><div className="relative flex-grow"><input type="text" value={couponInput} onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(''); }} placeholder="Coupon?" className="w-full bg-stone-900 border border-stone-800 rounded-xl py-3 pl-10 pr-3 text-[10px] text-white focus:outline-none focus:border-gold-500 uppercase tracking-widest" /><Ticket size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-600" /></div><button onClick={handleApplyCoupon} className="bg-stone-800 text-stone-300 hover:bg-gold-500 hover:text-black px-5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Apply</button></div>) : (<div className="flex items-center justify-between bg-gold-500/10 border border-gold-500/20 rounded-xl p-3.5"><div className="flex items-center gap-3"><Tag size={16} className="text-gold-500" /><div><span className="text-[10px] text-gold-500 font-black block uppercase tracking-widest">{appliedCoupon.code}</span><span className="text-[9px] text-stone-500 uppercase tracking-widest">Active Discount</span></div></div><button onClick={handleRemoveCoupon} className="text-stone-600 hover:text-red-500 transition-colors"><X size={16} /></button></div>)}{couponError && <p className="text-red-500 text-[9px] pl-1 font-bold uppercase tracking-widest">{couponError}</p>}</div>
+                    <div className="space-y-3 text-stone-400 text-sm"><div className="flex justify-between text-[10px] font-black uppercase tracking-widest"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>{orderType === 'delivery' && (<div className="flex justify-between text-[10px] text-stone-500 font-black uppercase tracking-widest"><span>Delivery</span><span>+₹{DELIVERY_FEE.toFixed(2)}</span></div>)}{appliedCoupon && <div className="flex justify-between text-[10px] text-green-600 font-black uppercase tracking-widest"><span>Savings</span><span>-₹{discountAmount.toFixed(2)}</span></div>}{pointsRedeemed > 0 && <div className="flex justify-between text-[10px] text-gold-500 font-black uppercase tracking-widest"><span>Points Redeemed</span><span>-₹{pointsRedeemed.toFixed(2)}</span></div>}<div className="flex justify-between pt-4 border-t border-stone-800 text-xl md:text-2xl font-serif text-white"><span>Total</span><span className="text-gold-400">₹{total.toFixed(2)}</span></div></div>
                     <button onClick={() => setStep('details')} className="w-full py-5 bg-gold-500 text-stone-950 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 transition-all hover:bg-gold-400 shadow-xl active:scale-[0.98]"><span>Next Step</span><ArrowRight size={18} /></button>
                     </div>
                 )}

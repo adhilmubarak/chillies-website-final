@@ -37,8 +37,8 @@ const FeedbackModal: React.FC = () => {
     if (isSuccess) {
         return (
             <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center p-4">
-                <div className="max-w-md w-full bg-stone-900 border border-gold-500/20 rounded-[3rem] p-10 text-center shadow-2xl animate-fade-in-up">
-                    <div className="w-20 h-20 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="max-w-md w-full bg-stone-900 border border-stone-800 rounded-[3rem] p-10 text-center shadow-2xl animate-fade-in-up">
+                    <div className="w-20 h-20 bg-stone-950 rounded-full flex items-center justify-center mx-auto mb-6 border border-gold-500">
                         <CheckCircle size={40} className="text-gold-500" />
                     </div>
                     <h2 className="text-3xl font-serif text-white mb-4">Thank You!</h2>
@@ -63,7 +63,7 @@ const FeedbackModal: React.FC = () => {
             </button>
             <div className="absolute top-0 right-0 w-96 h-96 bg-gold-500/5 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
 
-            <div className="max-w-md w-full bg-stone-900 border border-white/5 rounded-[3rem] p-8 md:p-10 shadow-2xl relative z-10 animate-fade-in-up mt-10 md:mt-0">
+            <div className="max-w-md w-full bg-stone-900 border border-stone-800 rounded-[3rem] p-8 md:p-10 shadow-2xl relative z-10 animate-fade-in-up mt-10 md:mt-0">
                 <div className="text-center mb-10">
                     <span className="font-serif text-2xl text-gold-400 font-bold uppercase tracking-tighter block mb-2">CHILLIES.</span>
                     <h2 className="text-xl text-white font-serif">Customer Feedback</h2>
@@ -131,7 +131,7 @@ const FeedbackModal: React.FC = () => {
                     <button 
                         type="submit" 
                         disabled={isSubmitting || rating === 0 || !customerName}
-                        className="w-full bg-gold-500 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-widest text-xs shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                        className="w-full bg-gold-500 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-widest text-xs shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                     >
                         {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
                     </button>

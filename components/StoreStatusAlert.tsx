@@ -53,7 +53,7 @@ const StoreStatusAlert: React.FC<StoreStatusAlertProps> = ({ isStoreOpen, startT
 
   const TimeUnit = ({ value, label }: { value: number; label: string }) => (
     <div className="flex flex-col items-center min-w-[60px] md:min-w-[80px]">
-      <div className="bg-stone-950 border border-white/10 w-full py-3 md:py-4 rounded-2xl shadow-inner group-hover:border-gold-500/30 transition-colors duration-500">
+      <div className="bg-stone-950 border border-stone-800 w-full py-3 md:py-4 rounded-2xl shadow-inner group-hover:border-gold-500 transition-colors duration-500">
         <span className="text-2xl md:text-4xl font-mono font-bold text-white tabular-nums tracking-tighter">
           {value.toString().padStart(2, '0')}
         </span>
@@ -66,9 +66,9 @@ const StoreStatusAlert: React.FC<StoreStatusAlertProps> = ({ isStoreOpen, startT
     <div className="w-full px-4 md:px-8 mt-16 md:mt-24 animate-fade-in relative z-10">
       <div className="max-w-4xl mx-auto group">
         {/* Glow Effects */}
-        <div className="absolute -inset-2 bg-gradient-to-r from-red-900/20 via-gold-500/10 to-red-900/20 rounded-[3rem] blur-3xl opacity-50 group-hover:opacity-80 transition duration-1000"></div>
+        <div className="absolute -inset-2 bg-stone-900 rounded-[3rem] opacity-50 group-hover:opacity-80 transition duration-1000"></div>
         
-        <div className="relative bg-stone-900 border border-white/5 p-8 md:p-16 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center">
+        <div className="relative bg-stone-900 border border-stone-800 p-8 md:p-16 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center">
           
           {/* Decorative Elements */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500/40 to-transparent"></div>
@@ -79,7 +79,7 @@ const StoreStatusAlert: React.FC<StoreStatusAlertProps> = ({ isStoreOpen, startT
             
             {/* Status Header */}
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-3 bg-stone-950 border border-white/5 px-5 py-2 rounded-full shadow-xl">
+              <div className="inline-flex items-center gap-3 bg-stone-950 border border-stone-800 px-5 py-2 rounded-full shadow-xl">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
                 <span className="text-stone-400 uppercase tracking-[0.3em] text-[9px] md:text-[10px] font-black">Kitchen Offline</span>
               </div>
@@ -106,7 +106,7 @@ const StoreStatusAlert: React.FC<StoreStatusAlertProps> = ({ isStoreOpen, startT
             </div>
 
             {/* Info Footer */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 w-full border-t border-white/5">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 w-full border-t border-stone-800">
                 <div className="flex items-center gap-3 text-stone-300">
                     <Calendar size={16} className="text-gold-500" />
                     <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest">Resuming Service at {formatTime(startTime)}</span>
@@ -123,7 +123,7 @@ const StoreStatusAlert: React.FC<StoreStatusAlertProps> = ({ isStoreOpen, startT
                     const el = document.getElementById('menu');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="group flex items-center gap-3 text-gold-500 hover:text-gold-300 transition-all duration-300 text-[10px] md:text-xs uppercase font-black tracking-[0.2em] border-b border-gold-500/20 pb-2 hover:border-gold-400"
+                className="group flex items-center gap-3 text-gold-500 hover:text-gold-300 transition-all duration-300 text-[10px] md:text-xs uppercase font-black tracking-[0.2em] border-b border-gold-500 pb-2 hover:border-gold-400"
             >
                 Browse Menu for Later <Timer size={14} className="group-hover:rotate-12 transition-transform" />
             </button>

@@ -143,11 +143,11 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[300] bg-stone-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-lg aspect-square bg-stone-900 border border-gold-500/30 rounded-[3rem] overflow-hidden relative shadow-[0_0_50px_rgba(212,175,55,0.15)] flex items-center justify-center">
+    <div className="fixed inset-0 z-[300] bg-stone-950 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-lg aspect-square bg-stone-900 border border-gold-500 rounded-[3rem] overflow-hidden relative shadow-[0_0_50px_rgba(212,175,55,0.15)] flex items-center justify-center">
         {error ? (
           <div className="p-10 text-center animate-fade-in">
-            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+            <div className="w-16 h-16 bg-red-950 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
               <CameraOff size={32} />
             </div>
             <h3 className="text-white font-serif text-xl mb-2">Camera Access Required</h3>
@@ -156,7 +156,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
           </div>
         ) : !isReady ? (
             <div className="flex flex-col items-center gap-6 p-10 text-center">
-                <div className="w-20 h-20 bg-gold-500/10 rounded-full flex items-center justify-center text-gold-500 mb-2 border border-gold-500/20">
+                <div className="w-20 h-20 bg-stone-950 rounded-full flex items-center justify-center text-gold-500 mb-2 border border-gold-500">
                     <Camera size={32} />
                 </div>
                 <div>
@@ -173,9 +173,9 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
         ) : (
           <>
             <div id="scanner-target" className="w-full h-full"></div>
-            <div className="absolute inset-0 border-[2px] border-gold-500/20 pointer-events-none rounded-[3rem]"></div>
+            <div className="absolute inset-0 border-[2px] border-stone-800 pointer-events-none rounded-[3rem]"></div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] border-2 border-gold-500 rounded-2xl pointer-events-none flex items-center justify-center">
-                <div className="w-full h-0.5 bg-gold-500/50 absolute top-1/2 animate-pulse"></div>
+                <div className="w-full h-0.5 bg-gold-500 absolute top-1/2 animate-pulse"></div>
             </div>
           </>
         )}
@@ -183,7 +183,7 @@ const BarcodeScanner: React.FC<{ onScan: (text: string) => void, onClose: () => 
       
       <div className="mt-12 flex flex-col items-center gap-6">
           {isReady && !error && <p className="text-gold-500 font-serif text-lg tracking-widest uppercase">Align Code within Frame</p>}
-          <button onClick={onClose} className="px-12 py-4 border border-white/10 text-stone-400 hover:text-white hover:bg-stone-950/5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all">Cancel Scan</button>
+          <button onClick={onClose} className="px-12 py-4 border border-stone-800 text-stone-400 hover:text-white hover:bg-stone-900 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all">Cancel Scan</button>
       </div>
     </div>
   );
@@ -453,11 +453,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   if (!isAuthenticated) {
     return (
       <div className="fixed inset-0 z-[200] flex items-center justify-center bg-stone-950 p-4" onClick={onClose}>
-        <div className="w-full max-w-md bg-stone-900 border border-gold-500/20 rounded-3xl p-10 text-center shadow-2xl relative" onClick={e => e.stopPropagation()}>
+        <div className="w-full max-w-md bg-stone-900 border border-gold-500 rounded-3xl p-10 text-center shadow-2xl relative" onClick={e => e.stopPropagation()}>
           <button onClick={onClose} className="absolute top-6 right-6 text-stone-600 hover:text-white transition-colors">
             <X size={20} />
           </button>
-          <div className="w-16 h-16 bg-stone-950 border border-gold-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-stone-950 border border-gold-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <Lock className="text-gold-500" />
           </div>
           <h2 className="text-2xl font-serif text-white mb-6">Chillies HQ Access</h2>
@@ -482,11 +482,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   return (
     <div className="fixed inset-0 z-[200] bg-stone-950 flex overflow-hidden font-sans text-stone-200">
       {currentPendingOrder && currentPendingOrder.status === 'pending' && (
-         <div className="fixed inset-0 z-[1000] bg-stone-950/90 backdrop-blur-2xl flex flex-col items-center justify-center p-4 sm:p-6 animate-fade-in overflow-hidden">
+         <div className="fixed inset-0 z-[1000] bg-stone-950 flex flex-col items-center justify-center p-4 sm:p-6 animate-fade-in overflow-hidden">
              
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] sm:w-[80vw] sm:h-[80vw] bg-red-500/20 rounded-full animate-pulse -z-10 blur-[100px] pointer-events-none"></div>
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] sm:w-[80vw] sm:h-[80vw] bg-red-950 rounded-full animate-pulse -z-10 blur-[100px] pointer-events-none"></div>
 
-             <div className="w-full max-w-lg bg-stone-900 border border-red-500/30 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_0_80px_rgba(239,68,68,0.2)] relative flex flex-col max-h-[85vh]">
+             <div className="w-full max-w-lg bg-stone-900 border border-red-800 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_0_80px_rgba(239,68,68,0.2)] relative flex flex-col max-h-[85vh]">
                   
                   <div className="bg-gradient-to-br from-red-500 to-orange-600 p-6 sm:p-8 text-center relative overflow-hidden shrink-0">
                       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
@@ -497,32 +497,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   
                   <div className="p-6 sm:p-8 overflow-y-auto scrollbar-hide flex-1 space-y-6 bg-stone-950">
                       
-                      <div className="flex justify-between items-center bg-stone-900 p-4 sm:p-5 rounded-2xl border border-white/5 shadow-inner">
+                      <div className="flex justify-between items-center bg-stone-900 p-4 sm:p-5 rounded-2xl border border-stone-800 shadow-inner">
                           <div>
                               <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black block mb-1">Order No.</span>
                               <span className="text-gold-400 font-mono font-bold text-lg sm:text-2xl tracking-tighter shrink-0">#{currentPendingOrder.id}</span>
                           </div>
                           <div className="text-right">
-                              <span className={`inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-sm ${currentPendingOrder.type === 'delivery' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                              <span className={`inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-sm ${currentPendingOrder.type === 'delivery' ? 'bg-blue-950 text-blue-400 border border-blue-800' : 'bg-orange-950 text-orange-400 border border-orange-800'}`}>
                                   {currentPendingOrder.type === 'delivery' ? '🛵 Delivery' : '🛍️ Pickup'}
                               </span>
                           </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                           <div className="space-y-1 sm:space-y-2 bg-stone-900 p-4 sm:p-5 rounded-2xl border border-white/5">
+                           <div className="space-y-1 sm:space-y-2 bg-stone-900 p-4 sm:p-5 rounded-2xl border border-stone-800">
                                <span className="text-[9px] sm:text-[10px] text-stone-500 uppercase tracking-widest font-black block">Customer</span>
                                <p className="text-xs sm:text-sm font-bold text-white truncate">{currentPendingOrder.customerName}</p>
                                <p className="text-[10px] sm:text-xs font-mono text-stone-400 truncate">{currentPendingOrder.contactNumber}</p>
                            </div>
-                           <div className="space-y-1 sm:space-y-2 bg-stone-900 p-4 sm:p-5 rounded-2xl border border-white/5 text-right flex flex-col justify-center">
+                           <div className="space-y-1 sm:space-y-2 bg-stone-900 p-4 sm:p-5 rounded-2xl border border-stone-800 text-right flex flex-col justify-center">
                                <span className="text-[9px] sm:text-[10px] text-stone-500 uppercase tracking-widest font-black block">Grand Total</span>
                                <p className="text-xl sm:text-2xl font-serif text-white font-bold leading-none shrink-0">₹{currentPendingOrder.total}</p>
                            </div>
                       </div>
                       
                       {currentPendingOrder.address && (
-                          <div className="p-4 sm:p-5 bg-stone-900 rounded-2xl border border-white/5 flex items-start gap-3">
+                          <div className="p-4 sm:p-5 bg-stone-900 rounded-2xl border border-stone-800 flex items-start gap-3">
                               <div className="p-2 bg-stone-950 rounded-xl shrink-0"><MapPin size={16} className="text-gold-500" /></div>
                               <div className="min-w-0">
                                 <span className="text-[9px] text-stone-500 uppercase tracking-widest font-black block mb-1">Delivery Address</span>
@@ -533,12 +533,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           </div>
                       )}
                       
-                      <div className="bg-stone-900 rounded-[1.5rem] border border-white/5 p-5 sm:p-6 shadow-inner space-y-3">
-                           <span className="text-[9px] text-stone-500 uppercase tracking-widest font-black block mb-3 border-b border-white/5 pb-2">Order Items</span>
+                      <div className="bg-stone-900 rounded-[1.5rem] border border-stone-800 p-5 sm:p-6 shadow-inner space-y-3">
+                           <span className="text-[9px] text-stone-500 uppercase tracking-widest font-black block mb-3 border-b border-stone-800 pb-2">Order Items</span>
                            {currentPendingOrder.items.map((it: any, idx: number) => (
-                               <div key={idx} className="flex justify-between items-center text-[11px] sm:text-sm border-b border-white/5 pb-3 mb-3 last:border-0 last:pb-0 last:mb-0">
+                               <div key={idx} className="flex justify-between items-center text-[11px] sm:text-sm border-b border-stone-800 pb-3 mb-3 last:border-0 last:pb-0 last:mb-0">
                                    <div className="flex items-center gap-3 overflow-hidden">
-                                       <span className="text-gold-500 font-black bg-gold-500/10 px-2 py-0.5 rounded-md shrink-0">{it.quantity}x</span>
+                                       <span className="text-gold-500 font-black bg-stone-950 px-2 py-0.5 rounded-md shrink-0">{it.quantity}x</span>
                                        <span className="text-stone-200 font-medium truncate">{it.name}</span>
                                    </div>
                                </div>
@@ -546,14 +546,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       </div>
                   </div>
                   
-                  <div className="p-4 sm:p-6 bg-stone-950 border-t border-white/5 shrink-0 relative z-10">
+                  <div className="p-4 sm:p-6 bg-stone-950 border-t border-stone-800 shrink-0 relative z-10">
                     <button 
                          onClick={() => {
                              handleStatusChange(currentPendingOrder, 'preparing');
                          }}
                          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-stone-950 text-sm sm:text-lg font-black uppercase tracking-widest py-4 sm:py-5 rounded-xl sm:rounded-2xl shadow-[0_0_40px_rgba(16,185,129,0.3)] transition-all active:scale-95 flex justify-center items-center gap-3 overflow-hidden relative group"
                      >
-                         <div className="absolute inset-0 w-1/4 h-full bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-[400%] transition-transform duration-1000 ease-in-out"></div>
+                         <div className="absolute inset-0 w-1/4 h-full bg-white/10 skew-x-12 -translate-x-full group-hover:translate-x-[400%] transition-transform duration-1000 ease-in-out"></div>
                          <Check size={24} className="animate-pulse" /> Accept & Prepare
                      </button>
                   </div>
@@ -561,9 +561,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
          </div>
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-stone-900 border-r border-white/5 flex flex-col shrink-0 h-full transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-8 border-b border-white/5 flex items-center gap-3">
-            <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center font-serif text-stone-950 font-bold text-xl shadow-lg shadow-gold-500/20">C</div>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-stone-900 border-r border-stone-800 flex flex-col shrink-0 h-full transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-8 border-b border-stone-800 flex items-center gap-3">
+            <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center font-serif text-stone-950 font-bold text-xl shadow-lg shadow-gold-500/40">C</div>
             <div>
                 <h1 className="text-white font-serif font-bold text-lg leading-none uppercase tracking-tight">CHILLIES</h1>
                 <span className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">Admin Console</span>
@@ -587,7 +587,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     key={tab.id}
                     onClick={() => { setActiveTab(tab.id as any); setIsMobileMenuOpen(false); }}
                     className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 relative group ${
-                        activeTab === tab.id ? 'bg-gold-500 text-stone-950 shadow-xl' : 'text-stone-400 hover:text-white hover:bg-stone-950/5'
+                        activeTab === tab.id ? 'bg-gold-500 text-stone-950 shadow-xl' : 'text-stone-400 hover:text-white hover:bg-stone-900'
                     }`}
                 >
                     <tab.icon size={18} className={activeTab === tab.id ? 'stroke-[2.5]' : ''} />
@@ -607,21 +607,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </button>
             ))}
         </nav>
-        <div className="p-6 border-t border-white/5 space-y-2">
-            <button onClick={() => { localStorage.removeItem('chillies_admin_auth'); setIsAuthenticated(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-red-500 text-sm font-bold hover:bg-red-500/5 rounded-xl transition-colors"><LogOut size={16} /> Logout</button>
+        <div className="p-6 border-t border-stone-800 space-y-2">
+            <button onClick={() => { localStorage.removeItem('chillies_admin_auth'); setIsAuthenticated(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-red-500 text-sm font-bold hover:bg-red-950 rounded-xl transition-colors"><LogOut size={16} /> Logout</button>
             <button onClick={handleExit} className="w-full flex items-center gap-3 px-4 py-3 text-stone-500 text-sm font-bold hover:text-white transition-colors"><X size={16} /> Exit Panel</button>
         </div>
       </aside>
 
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-stone-950/80 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-stone-950 z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       <main className="flex-1 flex flex-col min-w-0 bg-stone-950 h-full overflow-hidden">
-        <header className="h-20 border-b border-white/5 px-8 flex items-center justify-between shrink-0 bg-stone-900/20 backdrop-blur-md">
+        <header className="h-20 border-b border-stone-800 px-8 flex items-center justify-between shrink-0 bg-stone-900">
             <div className="flex items-center gap-4">
                 <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-stone-500 hover:text-white transition-colors">
                     <Menu size={24} />
@@ -629,17 +629,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 <h2 className="text-2xl font-serif text-white capitalize">{activeTab}</h2>
             </div>
             <div className="flex items-center gap-4">
-                <div className={`flex items-center gap-3 px-4 py-2 rounded-full border transition-all ${isStoreOpen ? 'bg-green-500/10 border-green-500/50 text-green-500' : 'bg-red-500/10 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'}`}>
+                <div className={`flex items-center gap-3 px-4 py-2 rounded-full border transition-all ${isStoreOpen ? 'bg-green-950 border-green-800 text-green-500' : 'bg-red-950 border-red-800 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'}`}>
                     <div className={`w-2 h-2 rounded-full animate-pulse ${isStoreOpen ? 'bg-green-500' : 'bg-red-500'}`}></div>
                     <span className="text-[10px] font-black uppercase tracking-widest">{isStoreOpen ? 'Active' : 'Offline'}</span>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-stone-800 border border-white/10 flex items-center justify-center text-stone-400">
+                <div className="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 flex items-center justify-center text-stone-400">
                     <User size={20} />
                 </div>
             </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8 bg-stone-950/50 relative">
+        <div className="flex-1 overflow-y-auto p-8 bg-stone-950 relative">
             {audioBlocked && (
                 <div onClick={() => {
                    if (ringAudioRef.current) {
@@ -659,7 +659,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             {activeTab === 'dashboard' && (
                 <div className="space-y-8 animate-fade-in max-w-7xl mx-auto">
                     {!isStoreOpen && openingCountdown && (
-                        <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl flex items-center justify-between shadow-lg shadow-red-500/5">
+                        <div className="bg-red-950 border border-red-800 p-6 rounded-2xl flex items-center justify-between shadow-lg shadow-red-500/5">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-red-500 text-white rounded-xl"><Clock size={24} /></div>
                                 <div>
@@ -680,9 +680,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             { label: 'Delivered', val: stats.deliveredOrders, icon: Check, color: 'text-blue-500' },
                             { label: 'Avg. Order', val: `₹${stats.avgOrderValue}`, icon: Filter, color: 'text-purple-500' }
                         ].map((s: {label: string, val: string | number, icon: any, color: string}, i: number) => (
-                            <div key={i} className="bg-stone-900/50 border border-white/5 p-6 rounded-2xl group hover:border-white/10 transition-colors">
+                            <div key={i} className="bg-stone-900 border border-stone-800 p-6 rounded-2xl group hover:border-gold-500 transition-colors">
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className={`p-3 rounded-xl bg-stone-950 border border-white/5 ${s.color} shadow-lg shadow-black/40`}><s.icon size={20} /></div>
+                                    <div className={`p-3 rounded-xl bg-stone-950 border border-stone-800 ${s.color} shadow-lg shadow-black/40`}><s.icon size={20} /></div>
                                     <span className="text-green-500 text-[10px] font-bold">+5.2%</span>
                                 </div>
                                 <p className="text-stone-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1">{s.label}</p>
@@ -696,7 +696,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             {activeTab === 'orders' && (
                 <div className="space-y-8 animate-fade-in max-w-7xl mx-auto pb-12">
                     <div className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
-                        <div className="flex p-1.5 bg-stone-900 border border-white/5 rounded-2xl w-full lg:w-fit shadow-inner">
+                        <div className="flex p-1.5 bg-stone-900 border border-stone-800 rounded-2xl w-full lg:w-fit shadow-inner">
                             {[
                                 { id: 'new', label: 'New', count: orders.filter(o => o.status === 'pending').length },
                                 { id: 'active', label: 'Active', count: orders.filter(o => ['preparing', 'ready', 'out_for_delivery'].includes(o.status)).length },
@@ -710,12 +710,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     }`}
                                 >
                                     {s.label}
-                                    {s.count > 0 && <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono ${orderStage === s.id ? 'bg-stone-950 text-gold-500' : 'bg-stone-800 text-stone-400'}`}>{s.count}</span>}
+                                    {s.count > 0 && <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono ${orderStage === s.id ? 'bg-stone-900 text-gold-500' : 'bg-stone-800 text-stone-400'}`}>{s.count}</span>}
                                 </button>
                             ))}
                         </div>
                         {orderStage === 'history' && (
-                            <div className="flex p-1.5 bg-stone-900 border border-white/5 rounded-2xl shadow-inner">
+                            <div className="flex p-1.5 bg-stone-900 border border-stone-800 rounded-2xl shadow-inner">
                                 {['all', 'Cash', 'UPI'].map(pf => (
                                     <button
                                         key={pf}
@@ -737,14 +737,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     placeholder="Search by ID, Name or Phone..." 
                                     value={orderSearch}
                                     onChange={e => setOrderSearch(e.target.value)}
-                                    className="w-full bg-stone-900 border border-white/5 rounded-2xl py-4 pl-12 pr-12 text-xs text-white focus:border-gold-500 outline-none shadow-inner"
+                                    className="w-full bg-stone-900 border border-stone-800 rounded-2xl py-4 pl-12 pr-12 text-xs text-white focus:border-gold-500 outline-none shadow-inner"
                                 />
                                 <button onClick={() => setIsScannerOpen(true)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gold-500 hover:text-gold-400 transition-colors" title="Scan QR Code"><Scan size={18} /></button>
                             </div>
                             {orderStage === 'active' && (
                                 <button 
                                     onClick={() => riderLocation ? setIsRiderMapOpen(true) : alert("Rider Location is completely unavailable. Waiting for them to open the Delivery Portal and grant GPS tracking permissions.")} 
-                                    className={`p-4 rounded-2xl transition-all shadow-lg shrink-0 flex items-center justify-center gap-2 ${riderLocation ? 'bg-brand-500 text-white hover:bg-brand-400' : 'bg-stone-900 border border-white/5 text-stone-600 hover:text-stone-400'}`} 
+                                    className={`p-4 rounded-2xl transition-all shadow-lg shrink-0 flex items-center justify-center gap-2 ${riderLocation ? 'bg-brand-500 text-white hover:bg-brand-400' : 'bg-stone-900 border border-stone-800 text-stone-600 hover:text-stone-400'}`} 
                                     title={riderLocation ? "Open Live Track Feed" : "Signal Missing"}
                                 >
                                     <Navigation size={20} className={riderLocation ? "animate-pulse" : ""} />
@@ -758,34 +758,34 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {filteredOrders.length === 0 ? (
-                            <div className="col-span-full py-32 text-center border-2 border-dashed border-stone-800 rounded-[3rem] bg-stone-900/20">
+                            <div className="col-span-full py-32 text-center border-2 border-dashed border-stone-800 rounded-[3rem] bg-stone-900">
                                 <ShoppingBag className="mx-auto text-stone-300 mb-6 opacity-20" size={64} />
                                 <p className="text-stone-500 uppercase tracking-[0.3em] text-xs font-bold">No matching records found</p>
                             </div>
                         ) : filteredOrders.map(order => (
-                            <div key={order.id} className="bg-stone-900/80 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-gold-500/40 transition-all duration-500 flex flex-col shadow-xl">
-                                <div className="p-4 sm:p-8 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-950/30">
+                            <div key={order.id} className="bg-stone-900 border border-stone-800 rounded-[2.5rem] overflow-hidden group hover:border-gold-500 transition-all duration-500 flex flex-col shadow-xl">
+                                <div className="p-4 sm:p-8 border-b border-stone-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-950">
                                     <div className="space-y-2 w-full sm:w-auto">
                                         <div className="flex items-center justify-between sm:justify-start gap-3">
                                             <div className="flex items-center gap-3">
                                                 <span className="text-gold-400 font-mono font-bold text-2xl tracking-tighter">#{order.id}</span>
-                                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${order.type === 'delivery' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>{order.type}</span>
+                                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${order.type === 'delivery' ? 'bg-blue-950 text-blue-400' : 'bg-orange-950 text-orange-400'}`}>{order.type}</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2 text-stone-500 font-bold uppercase tracking-widest text-[10px]">
                                             <Calendar size={12} /> {order.date} <span className="opacity-30 mx-1">|</span> {order.timestamp}
                                         </div>
                                         {order.paymentMethod && order.status === 'delivered' && (
-                                            <div className={`mt-3 inline-flex border border-white/5 items-center justify-center gap-2 text-[10px] uppercase font-black tracking-widest px-3 py-1.5 rounded-xl shadow-sm ${order.paymentMethod === 'UPI' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'}`}>
+                                            <div className={`mt-3 inline-flex border border-stone-800 items-center justify-center gap-2 text-[10px] uppercase font-black tracking-widest px-3 py-1.5 rounded-xl shadow-sm ${order.paymentMethod === 'UPI' ? 'bg-purple-950 text-purple-400' : 'bg-green-950 text-green-400'}`}>
                                                 {order.paymentMethod === 'UPI' ? '📱 UPI' : '💵 Cash'}
                                             </div>
                                         )}
                                     </div>
                                     <div className="grid grid-cols-4 gap-2 w-full sm:flex sm:w-auto">
-                                        <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-white/5 transition-all flex justify-center items-center">
+                                        <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-stone-800 transition-all flex justify-center items-center">
                                             {copiedId === order.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
                                         </button>
-                                        <button onClick={() => printThermalBill(order)} title="Print" className="p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
+                                        <button onClick={() => printThermalBill(order)} title="Print" className="p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-800 transition-all flex justify-center items-center">
                                             <Printer size={18} />
                                         </button>
                                         <button onClick={() => {
@@ -794,7 +794,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             } else {
                                                 printKOT(order);
                                             }
-                                        }} title="Print KOT" className="p-3 bg-stone-950 text-stone-600 hover:text-orange-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
+                                        }} title="Print KOT" className="p-3 bg-stone-950 text-stone-600 hover:text-orange-500 rounded-2xl border border-stone-800 transition-all flex justify-center items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-receipt-text"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>
                                         </button>
                                         <button onClick={() => {
@@ -819,17 +819,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         </div>
                                     </div>
                                     {order.address && (
-                                        <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 space-y-2">
+                                        <div className="p-4 bg-stone-950 rounded-2xl border border-stone-800 space-y-2">
                                             <span className="text-[9px] text-stone-600 uppercase tracking-[0.2em] font-black block">Location</span>
                                             <p className="text-stone-400 text-xs flex items-start gap-3 leading-relaxed">
                                                 <MapPin size={16} className="text-gold-500 shrink-0 mt-0.5" /> <div>{renderAddressWithLinks(order.address)}</div>
                                             </p>
                                         </div>
                                     )}
-                                    <div className="bg-stone-950 rounded-[1.5rem] border border-white/5 p-6 shadow-inner">
+                                    <div className="bg-stone-950 rounded-[1.5rem] border border-stone-800 p-6 shadow-inner">
                                         <div className="max-h-40 overflow-y-auto scrollbar-hide space-y-4">
                                             {order.items.map((it: any, idx: number) => (
-                                                <div key={idx} className="flex justify-between items-center text-sm border-b border-white/5 pb-3 last:border-0 last:pb-0">
+                                                <div key={idx} className="flex justify-between items-center text-sm border-b border-stone-800 pb-3 last:border-0 last:pb-0">
                                                     <div className="flex items-center gap-4 overflow-hidden">
                                                         <SafeImage src={it.image} containerClassName="w-10 h-10 rounded-xl shrink-0" className="w-full h-full object-cover" />
                                                         <span className="text-stone-200 truncate font-medium"><span className="text-gold-500 font-black mr-2">{it.quantity}x</span> {it.name}</span>
@@ -838,7 +838,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="mt-6 pt-6 border-t border-white/10 flex justify-between items-end">
+                                        <div className="mt-6 pt-6 border-t border-stone-800 flex justify-between items-end">
                                             <div className="space-y-1">
                                                 <span className="text-[9px] text-stone-600 uppercase font-black tracking-[0.2em]">Grand Total</span>
                                                 <div className="text-3xl font-serif text-white font-bold leading-none">₹{order.total}</div>
@@ -846,13 +846,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             <button onClick={() => {
                                                 const newStatus = order.type === 'delivery' ? 'out_for_delivery' : 'ready';
                                                 handleStatusChange(order, newStatus);
-                                            }} className="p-4 bg-green-500/10 text-green-500 rounded-2xl border border-green-500/20 hover:bg-green-500 hover:text-white transition-all">
+                                            }} className="p-4 bg-green-950 text-green-500 rounded-2xl border border-green-800 hover:bg-green-500 hover:text-white transition-all">
                                                 <Send size={18} />
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="p-8 bg-stone-950/40 border-t border-white/5">
+                                <div className="p-8 bg-stone-950 border-t border-stone-800">
                                     <select 
                                         value={order.status} 
                                         onChange={(e) => handleStatusChange(order, e.target.value as any)}
@@ -1541,7 +1541,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                         </div>
 
-                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                        <div className="pt-10 border-t border-stone-800 space-y-6 mt-10">
                             <h5 className="text-white text-base font-bold flex items-center gap-3"><Printer size={20} className="text-gold-500" /> Network KOT Printers</h5>
                             <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1600,7 +1600,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 </button>
                                 <div className="space-y-3 mt-6">
                                     {(storeSettings.kotPrinters || []).map((printer, index) => (
-                                        <div key={index} className="flex items-center justify-between p-4 bg-stone-900 border border-white/5 rounded-2xl">
+                                        <div key={index} className="flex items-center justify-between p-4 bg-stone-900 border border-stone-800 rounded-2xl">
                                             <div>
                                                 <p className="text-white font-bold text-sm">{printer.name}</p>
                                                 <p className="text-stone-500 font-mono text-[10px] uppercase tracking-widest mt-1">IP: {printer.ip} | Port: 9100</p>
@@ -1611,7 +1611,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                         const updated = (storeSettings.kotPrinters || []).filter((_, i) => i !== index);
                                                         onUpdateStoreSettings({...storeSettings, kotPrinters: updated});
                                                     }}
-                                                    className="p-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                                                    className="p-3 text-red-500 hover:bg-red-950 rounded-xl transition-all"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -1625,17 +1625,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                         </div>
 
-                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                        <div className="pt-10 border-t border-stone-800 space-y-6 mt-10">
                             <h5 className="text-white text-base font-bold flex items-center gap-3"><BellRing size={20} className="text-brand-500" /> Background Notifications</h5>
-                            <div className="bg-stone-950 p-6 rounded-2xl border border-brand-500/20 space-y-4">
+                            <div className="bg-stone-950 p-6 rounded-2xl border border-brand-800 space-y-4">
                                 <div className="flex flex-col gap-4">
                                     <p className="text-[10px] text-stone-500 max-w-sm leading-relaxed">Register this device to receive secure Push Notifications for new orders, even if the app is completely closed.</p>
                                     
-                                    <div className="bg-stone-900/50 p-4 rounded-xl border border-white/5 space-y-3">
+                                    <div className="bg-stone-900 p-4 rounded-xl border border-stone-800 space-y-3">
                                         <div className="flex items-center justify-between">
                                             <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">FCM Registry</span>
                                             <div className="flex items-center gap-2">
-                                                <div className={`w-2 h-2 rounded-full ${storeSettings.adminTokens && storeSettings.adminTokens.length > 0 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+                                                <div className={`w-2 h-2 rounded-full ${storeSettings.adminTokens && storeSettings.adminTokens.length > 0 ? 'bg-green-500 shadow-lg' : 'bg-red-500 animate-pulse'}`}></div>
                                                 <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">
                                                     {storeSettings.adminTokens && storeSettings.adminTokens.length > 0 
                                                         ? `${storeSettings.adminTokens.length} Admin Device(s)` 
@@ -1645,7 +1645,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         </div>
                                         
                                         {/* Permission Checklist for Android */}
-                                        <div className="pt-3 border-t border-white/5 space-y-2">
+                                        <div className="pt-3 border-t border-stone-800 space-y-2">
                                             <p className="text-[8px] text-stone-600 uppercase font-black tracking-[0.2em]">Required Android Settings</p>
                                             <div className="flex items-center gap-2">
                                                 <Check size={10} className="text-green-500" />
@@ -1708,7 +1708,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             }
                                         }
                                     }}
-                                    className="w-full bg-stone-900 border border-brand-500/30 text-brand-500 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:bg-brand-500 hover:text-white p-4 flex items-center justify-center gap-2"
+                                    className="w-full bg-stone-900 border border-brand-800 text-brand-500 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:bg-brand-500 hover:text-white p-4 flex items-center justify-center gap-2"
                                 >
                                     Register This Device
                                 </button>
@@ -1716,26 +1716,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
 
 
-                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                        <div className="pt-10 border-t border-stone-800 space-y-6 mt-10">
                             <h5 className="text-white text-base font-bold flex items-center gap-3"><Smartphone size={20} className="text-brand-500" /> App Installation</h5>
                             {deferredPrompt ? (
                                 <button 
                                     onClick={handleInstallClick}
-                                    className="px-8 py-4 bg-brand-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-brand-400 transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center gap-2 w-fit"
+                                    className="px-8 py-4 bg-brand-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-brand-400 transition-all shadow-lg active:scale-95 flex items-center gap-2 w-fit"
                                 >
                                     <Download size={16} /> Install Admin App
                                 </button>
                             ) : (
-                                <div className="bg-stone-950 border border-white/5 p-4 rounded-2xl w-fit">
+                                <div className="bg-stone-950 border border-stone-800 p-4 rounded-2xl w-fit">
                                     <p className="text-stone-500 text-[10px] uppercase font-black tracking-[0.1em]">Install option unavailable</p>
                                     <p className="text-stone-600 text-xs mt-1 max-w-xs">If on iOS, tap 'Share' then 'Add to Home Screen'. Otherwise, app may already be installed.</p>
                                 </div>
                             )}
                         </div>
 
-                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                        <div className="pt-10 border-t border-stone-800 space-y-6 mt-10">
                             <h5 className="text-white text-base font-bold flex items-center gap-3"><Send size={20} className="text-brand-500" /> Dispatch Push Notification</h5>
-                            <div className="bg-stone-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                            <div className="bg-stone-950 p-6 rounded-2xl border border-stone-800 space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black">Notification Title</label>
                                     <input 
@@ -1771,11 +1771,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                         </div>
 
-                        <div className="pt-10 border-t border-white/10 space-y-6 mt-10">
+                        <div className="pt-10 border-t border-stone-800 space-y-6 mt-10">
                             <h5 className="text-white text-base font-bold flex items-center gap-3"><MessageCircle size={20} className="text-gold-500" /> System Diagnostics</h5>
                             <button 
                                 onClick={() => { if(onTestNotification) onTestNotification(); }} 
-                                className="px-8 py-4 bg-stone-950 border border-white/10 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] hover:border-gold-500 hover:text-gold-500 transition-all shadow-inner"
+                                className="px-8 py-4 bg-stone-950 border border-stone-800 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] hover:border-gold-500 hover:text-gold-500 transition-all shadow-inner"
                             >
                                 Test Push Notifications
                             </button>
@@ -1796,9 +1796,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Manual Order Modal */}
       {isManualOrderOpen && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in overflow-y-auto">
-            <div className="bg-stone-900 border border-white/10 rounded-[3rem] w-full max-w-4xl shadow-[0_0_100px_rgba(0,0,0,0.8)] my-8 overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-stone-950/40 shrink-0">
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950 animate-fade-in overflow-y-auto">
+            <div className="bg-stone-900 border border-stone-800 rounded-[3rem] w-full max-w-4xl shadow-[0_0_100px_rgba(0,0,0,0.8)] my-8 overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="p-8 border-b border-stone-800 flex justify-between items-center bg-stone-950 shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center text-stone-950 shadow-lg shadow-gold-500/20"><ShoppingBag size={24} className="stroke-[3]" /></div>
                         <div>
@@ -1813,7 +1813,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     {/* Left Side: Items Selection */}
                     <div className="space-y-6 flex flex-col h-full">
                         <div className="space-y-4">
-                            <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-4">Menu Items</h4>
+                            <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-stone-800 pb-4">Menu Items</h4>
                             <div className="relative">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" size={14} />
                                 <input 
@@ -1821,7 +1821,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     placeholder="Search items..." 
                                     value={manualOrderSearch}
                                     onChange={e => setManualOrderSearch(e.target.value)}
-                                    className="w-full bg-stone-950 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-xs text-white focus:border-gold-500 outline-none"
+                                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-3 pl-10 pr-4 text-xs text-white focus:border-gold-500 outline-none"
                                 />
                             </div>
                         </div>
@@ -1841,9 +1841,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 return [...prev, {item, quantity: 1}];
                                             });
                                         }}
-                                        className="relative bg-stone-950 rounded-2xl border border-white/5 hover:border-gold-500 overflow-hidden cursor-pointer group flex flex-col h-40 transition-all active:scale-95 shadow-lg"
+                                        className="relative bg-stone-950 rounded-2xl border border-stone-800 hover:border-gold-500 overflow-hidden cursor-pointer group flex flex-col h-40 transition-all active:scale-95 shadow-lg"
                                     >
-                                        <div className="absolute top-2 right-2 bg-stone-900/80 backdrop-blur-sm px-2 py-1 rounded-lg text-gold-500 font-mono font-bold text-[10px] z-10 shadow-sm">₹{item.price}</div>
+                                        <div className="absolute top-2 right-2 bg-stone-900 px-2 py-1 rounded-lg text-gold-500 font-mono font-bold text-[10px] z-10 shadow-sm">₹{item.price}</div>
                                         {qty > 0 && <div className="absolute top-2 left-2 bg-gold-500 text-stone-950 px-2 py-1 rounded-lg font-black text-[10px] z-10 shadow-sm">{qty}x</div>}
                                         <div className="h-24 w-full shrink-0 relative bg-stone-900">
                                             {item.image ? (
@@ -1862,33 +1862,33 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                     {/* Right Side: Order Details */}
                     <div className="space-y-6 flex flex-col h-full">
-                        <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-4">Customer Details</h4>
+                        <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-stone-800 pb-4">Customer Details</h4>
                         <div className="space-y-4">
                             <input type="text" placeholder="Customer Name" value={manualCustomerName} onChange={e => setManualCustomerName(e.target.value)} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none" />
                             <input type="tel" placeholder="Contact Number (Optional for walk-in)" value={manualContact} onChange={e => setManualContact(e.target.value.replace(/\D/g, '').slice(0,10))} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none" />
                             <div className="grid grid-cols-2 gap-4">
-                                <button onClick={() => setManualOrderType('pickup')} className={`py-4 rounded-xl border text-[10px] uppercase font-black tracking-[0.2em] transition-all ${manualOrderType === 'pickup' ? 'bg-gold-500 text-stone-950 border-gold-500 shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'bg-stone-950 text-stone-500 border-stone-800 hover:border-stone-700'}`}>Pickup/Dine-in</button>
-                                <button onClick={() => setManualOrderType('delivery')} className={`py-4 rounded-xl border text-[10px] uppercase font-black tracking-[0.2em] transition-all ${manualOrderType === 'delivery' ? 'bg-gold-500 text-stone-950 border-gold-500 shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'bg-stone-950 text-stone-500 border-stone-800 hover:border-stone-700'}`}>Delivery</button>
+                                <button onClick={() => setManualOrderType('pickup')} className={`py-4 rounded-xl border text-[10px] uppercase font-black tracking-[0.2em] transition-all ${manualOrderType === 'pickup' ? 'bg-gold-500 text-stone-950 border-gold-500 shadow-lg' : 'bg-stone-950 text-stone-500 border-stone-800 hover:border-stone-700'}`}>Pickup/Dine-in</button>
+                                <button onClick={() => setManualOrderType('delivery')} className={`py-4 rounded-xl border text-[10px] uppercase font-black tracking-[0.2em] transition-all ${manualOrderType === 'delivery' ? 'bg-gold-500 text-stone-950 border-gold-500 shadow-lg' : 'bg-stone-950 text-stone-500 border-stone-800 hover:border-stone-700'}`}>Delivery</button>
                             </div>
                             {manualOrderType === 'delivery' && (
                                 <textarea placeholder="Delivery Address" value={manualAddress} onChange={e => setManualAddress(e.target.value)} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-sm focus:border-gold-500 outline-none h-24 resize-none" />
                             )}
                         </div>
                         
-                        <div className="bg-stone-950 p-6 rounded-[2rem] border border-white/5 mt-auto shadow-inner flex flex-col flex-1 min-h-0">
-                            <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-3 mb-4 shrink-0">Added Items</h4>
+                        <div className="bg-stone-950 p-6 rounded-[2rem] border border-stone-800 mt-auto shadow-inner flex flex-col flex-1 min-h-0">
+                            <h4 className="text-stone-400 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-stone-800 pb-3 mb-4 shrink-0">Added Items</h4>
                             <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-3 mb-4">
                                 {manualOrderItems.length === 0 ? (
                                     <p className="text-stone-600 text-xs italic text-center py-4">Cart is empty</p>
                                 ) : (
                                     manualOrderItems.map(item => (
-                                        <div key={item.item.id} className="flex flex-col gap-3 p-4 bg-stone-900/50 rounded-xl border border-white/5">
+                                        <div key={item.item.id} className="flex flex-col gap-3 p-4 bg-stone-900 rounded-xl border border-stone-800">
                                             <div className="flex justify-between items-start text-sm gap-2">
                                                 <span className="text-stone-200 font-bold leading-tight">{item.item.name}</span>
                                                 <span className="text-gold-500 font-mono shrink-0 font-bold">₹{(item.item.price * item.quantity).toFixed(2)}</span>
                                             </div>
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2 bg-stone-950 rounded-lg border border-white/10 p-1">
+                                                <div className="flex items-center gap-2 bg-stone-950 rounded-lg border border-stone-800 p-1">
                                                     <button onClick={() => {
                                                         if (item.quantity > 1) {
                                                             setManualOrderItems(prev => prev.map(p => p.item.id === item.item.id ? {...p, quantity: p.quantity - 1} : p));
@@ -1903,13 +1903,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 </div>
                                                 <button onClick={() => {
                                                     setManualOrderItems(prev => prev.filter(p => p.item.id !== item.item.id));
-                                                }} className="text-[10px] text-red-500/70 hover:text-red-500 uppercase tracking-widest font-black transition-colors bg-red-500/10 px-3 py-1.5 rounded-lg">Remove</button>
+                                                }} className="text-[10px] text-red-500 hover:text-red-400 uppercase tracking-widest font-black transition-colors bg-red-950 px-3 py-1.5 rounded-lg">Remove</button>
                                             </div>
                                         </div>
                                     ))
                                 )}
                             </div>
-                            <div className="pt-4 border-t border-white/5 shrink-0">
+                            <div className="pt-4 border-t border-stone-800 shrink-0">
                                 <div className="flex justify-between items-center text-white mb-3">
                                     <span className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Subtotal</span>
                                     <span className="font-mono text-sm">₹{manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0)}</span>
@@ -1926,7 +1926,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     />
                                 </div>
                             )}
-                            <div className="flex justify-between items-center text-gold-500 text-2xl font-serif pt-4 border-t border-white/5 mt-2">
+                            <div className="flex justify-between items-center text-gold-500 text-2xl font-serif pt-4 border-t border-stone-800 mt-2">
                                 <span>Total Payable</span>
                                 <span>₹{manualOrderItems.reduce((acc, i) => acc + (i.item.price * i.quantity), 0) + (manualOrderType === 'delivery' ? manualDeliveryCharge : 0)}</span>
                             </div>
@@ -1935,7 +1935,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
                 </div>
 
-                <div className="p-8 border-t border-white/5 bg-stone-950/40 shrink-0">
+                <div className="p-8 border-t border-stone-800 bg-stone-950 shrink-0">
                     <button 
                         disabled={manualOrderItems.length === 0 || (manualOrderType === 'delivery' && !manualAddress)}
                         onClick={() => {
@@ -1981,8 +1981,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Category Editor Modal */}
       {editingCategory && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in">
-            <div className="bg-stone-900 border border-white/10 rounded-[2.5rem] w-full max-w-md shadow-2xl p-8 space-y-8">
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950 animate-fade-in">
+            <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] w-full max-w-md shadow-2xl p-8 space-y-8">
                 <div className="flex justify-between items-center">
                     <h3 className="text-xl font-serif text-white">Edit Category</h3>
                     <button onClick={() => setEditingCategory(null)} className="text-stone-500 hover:text-white transition-all"><X size={24} /></button>
@@ -2015,9 +2015,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Item Add/Edit Modal */}
       {isItemFormOpen && editingItem && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in overflow-y-auto">
-            <div className="bg-stone-900 border border-white/10 rounded-[3rem] w-full max-w-2xl shadow-[0_0_100px_rgba(0,0,0,0.8)] my-8 overflow-hidden">
-                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-stone-950/40">
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950 animate-fade-in overflow-y-auto">
+            <div className="bg-stone-900 border border-stone-800 rounded-[3rem] w-full max-w-2xl shadow-[0_0_100px_rgba(0,0,0,0.8)] my-8 overflow-hidden">
+                <div className="p-8 border-b border-stone-800 flex justify-between items-center bg-stone-950">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center text-stone-950 shadow-lg shadow-gold-500/20"><Plus size={24} className="stroke-[3]" /></div>
                         <h3 className="text-xl font-serif text-white">{editingItem.id ? 'Edit Dish' : 'Craft New Dish'}</h3>
@@ -2083,12 +2083,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         </div>
                                     )}
                                 </div>
-                                <input type="text" placeholder="Paste Image URL" value={editingItem.image || ''} onChange={e => setEditingItem({...editingItem, image: e.target.value})} className="w-full bg-stone-900/50 border border-stone-800 rounded-2xl p-4 text-white text-[10px] font-mono focus:border-gold-500 outline-none mt-2 shadow-inner" />
+                                <input type="text" placeholder="Paste Image URL" value={editingItem.image || ''} onChange={e => setEditingItem({...editingItem, image: e.target.value})} className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-[10px] font-mono focus:border-gold-500 outline-none mt-2 shadow-inner" />
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-stone-950/40 p-6 rounded-[2rem] border border-white/5 shadow-inner">
+                    <div className="bg-stone-950 p-6 rounded-[2rem] border border-stone-800 shadow-inner">
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                             {[
                                 { key: 'isChefChoice', label: 'Chef Pick', icon: ChefHat },
@@ -2096,7 +2096,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 { key: 'isHappyHour', label: 'Happy', icon: PartyPopper },
                                 { key: 'isExclusive', label: 'Exclusive', icon: EyeOff }
                             ].map((flag) => (
-                                <label key={flag.key} className={`flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all duration-300 cursor-pointer select-none ${editingItem[flag.key as keyof MenuItem] ? 'bg-gold-500/10 border-gold-500 text-gold-500 shadow-lg shadow-gold-500/5' : 'bg-stone-900/30 border-stone-800 text-stone-600 hover:border-stone-700'}`}>
+                                <label key={flag.key} className={`flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all duration-300 cursor-pointer select-none ${editingItem[flag.key as keyof MenuItem] ? 'bg-stone-950 border-gold-500 text-gold-500 shadow-lg' : 'bg-stone-900 border-stone-800 text-stone-600 hover:border-stone-700'}`}>
                                     <input type="checkbox" className="hidden" checked={!!editingItem[flag.key as keyof MenuItem]} onChange={() => setEditingItem({...editingItem, [flag.key]: !editingItem[flag.key as keyof MenuItem]})} />
                                     <flag.icon size={18} />
                                     <span className="text-[9px] font-black uppercase tracking-widest">{flag.label}</span>
@@ -2106,7 +2106,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
 
                     {(editingItem.isFlashSale || editingItem.isHappyHour) && (
-                        <div className="bg-stone-950/40 p-6 rounded-[2rem] border border-white/5 shadow-inner mt-4">
+                        <div className="bg-stone-950 p-6 rounded-[2rem] border border-stone-800 shadow-inner mt-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {editingItem.isFlashSale && (
                                     <div className="space-y-2">
@@ -2125,7 +2125,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     )}
                 </div>
 
-                <div className="p-8 border-t border-white/5 bg-stone-950/40 flex gap-4">
+                <div className="p-8 border-t border-stone-800 bg-stone-950 flex gap-4">
                     <button onClick={() => { 
                         if(!editingItem || !editingItem.name || !editingItem.price) return; 
                         if(editingItem.id) onUpdateItem(editingItem as MenuItem); 
@@ -2140,9 +2140,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Offer Editor Modal */}
       {isOfferFormOpen && editingOffer && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/95 backdrop-blur-2xl animate-fade-in overflow-y-auto">
-            <div className="bg-stone-900 border border-white/10 rounded-[3rem] w-full max-w-xl shadow-2xl my-8 overflow-hidden">
-                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-stone-950/40">
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950 animate-fade-in overflow-y-auto">
+            <div className="bg-stone-900 border border-stone-800 rounded-[3rem] w-full max-w-xl shadow-2xl my-8 overflow-hidden">
+                <div className="p-8 border-b border-stone-800 flex justify-between items-center bg-stone-950">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center text-stone-950 shadow-lg shadow-gold-500/20"><Sparkles size={24} className="stroke-[3]" /></div>
                         <h3 className="text-xl font-serif text-white">{editingOffer.id ? 'Edit Offer' : 'Create Offer'}</h3>
@@ -2162,7 +2162,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black">Background Image URL (Optional)</label>
                         <input type="text" value={editingOffer.image || ''} onChange={e => setEditingOffer({...editingOffer, image: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-white text-xs font-mono focus:border-gold-500 outline-none" />
                     </div>
-                    <label className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer select-none transition-all ${editingOffer.isActive ? 'bg-gold-500/10 border-gold-500 text-gold-500' : 'bg-stone-950 border-stone-800 text-stone-600'}`}>
+                    <label className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer select-none transition-all ${editingOffer.isActive ? 'bg-stone-950 border-gold-500 text-gold-500' : 'bg-stone-950 border-stone-800 text-stone-600'}`}>
                         <input type="checkbox" className="hidden" checked={!!editingOffer.isActive} onChange={() => setEditingOffer({...editingOffer, isActive: !editingOffer.isActive})} />
                         <div className={`w-5 h-5 rounded-md flex items-center justify-center border ${editingOffer.isActive ? 'bg-gold-500 border-gold-500 text-stone-950' : 'border-stone-600'}`}>
                             {editingOffer.isActive && <Check size={14} className="stroke-[4]" />}
@@ -2170,7 +2170,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <span className="text-xs font-bold uppercase tracking-widest">Publish to public board</span>
                     </label>
                 </div>
-                <div className="p-8 border-t border-white/5 bg-stone-950/40 flex gap-4">
+                <div className="p-8 border-t border-stone-800 bg-stone-950 flex gap-4">
                     <button onClick={() => {
                         if (!editingOffer.title || !editingOffer.description) return;
                         if (editingOffer.id && onUpdateCustomOffer) {
@@ -2186,11 +2186,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       )}
 
       {isRiderMapOpen && riderLocation && (
-        <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-stone-900 w-full max-w-2xl rounded-3xl overflow-hidden relative border border-brand-500/20 shadow-2xl">
-            <button onClick={() => setIsRiderMapOpen(false)} className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black border border-white/10 rounded-full flex items-center justify-center text-white transition-all"><X size={20} /></button>
-            <div className="p-6 bg-stone-950 border-b border-brand-500/10 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-500 relative">
+        <div className="fixed inset-0 z-[300] bg-stone-950/95 flex items-center justify-center p-4">
+          <div className="bg-stone-900 w-full max-w-2xl rounded-3xl overflow-hidden relative border border-brand-500 shadow-2xl">
+            <button onClick={() => setIsRiderMapOpen(false)} className="absolute top-4 right-4 z-10 w-10 h-10 bg-black hover:bg-black border border-stone-800 rounded-full flex items-center justify-center text-white transition-all"><X size={20} /></button>
+            <div className="p-6 bg-stone-950 border-b border-brand-800 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-stone-900 border border-brand-500 flex items-center justify-center text-brand-500 relative">
                   <Navigation size={24} />
                   <div className="absolute top-0 right-0 w-3 h-3 bg-brand-500 rounded-full animate-ping"></div>
               </div>
@@ -2218,9 +2218,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <Marker position={[riderLocation.lat, riderLocation.lng]} icon={riderIcon} />
                 </MapContainer>
             </div>
-            <div className="p-4 bg-stone-950 border-t border-brand-500/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="p-4 bg-stone-950 border-t border-brand-800 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p className="text-stone-500 text-[10px] uppercase tracking-widest font-mono">LAT {riderLocation.lat.toFixed(6)} | LNG {riderLocation.lng.toFixed(6)}</p>
-                <a href={`https://www.google.com/maps/search/?api=1&query=${riderLocation.lat},${riderLocation.lng}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-brand-500 text-white px-6 py-3 rounded-xl uppercase font-black text-[10px] tracking-widest hover:bg-brand-400 transition-colors shadow-lg shadow-brand-500/20 active:scale-95">
+                <a href={`https://www.google.com/maps/search/?api=1&query=${riderLocation.lat},${riderLocation.lng}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-brand-500 text-white px-6 py-3 rounded-xl uppercase font-black text-[10px] tracking-widest hover:bg-brand-400 transition-colors shadow-lg active:scale-95">
                     Open in Google Maps <MapPin size={14} />
                 </a>
             </div>
@@ -2231,7 +2231,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       {isRinging && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[400] flex justify-center p-2 animate-fade-in pointer-events-none">
             <div className="bg-red-500 text-white p-6 rounded-3xl shadow-[0_10px_50px_rgba(239,68,68,0.5)] flex items-center gap-6 pointer-events-auto border border-red-400">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
                     <BellRing size={24} />
                 </div>
                 <div>

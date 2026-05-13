@@ -34,7 +34,7 @@ const Hero: React.FC = () => {
           <a
             href="#menu"
             onClick={scrollToMenu}
-            className="group w-full sm:w-auto inline-flex items-center justify-center bg-gold-500 text-stone-950 px-10 py-4 rounded-full font-black tracking-[0.2em] uppercase text-[10px] sm:text-xs transition-all hover:scale-105 active:scale-95 shadow-[0_15px_30px_rgba(212,175,55,0.3)]"
+            className="group w-full sm:w-auto inline-flex items-center justify-center bg-gold-500 text-stone-950 px-10 py-4 rounded-full font-black tracking-[0.2em] uppercase text-[10px] sm:text-xs transition-all hover:scale-105 active:scale-95 shadow-lg"
           >
             Explore Menu <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
           </a>
