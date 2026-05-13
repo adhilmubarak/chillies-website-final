@@ -13,38 +13,29 @@ const sendMulticastBatched = async (tokens, payload) => {
         return { successCount: 0, failureCount: 0 };
     }
 
-    const chunks = [];
-    for (let i = 0; i < validTokens.length; i += 500) {
-        chunks.push(validTokens.slice(i, i + 500));
-    }
-
     let totalSuccess = 0;
     let totalFailure = 0;
     const allFailedTokens = [];
 
-    for (const chunk of chunks) {
+    for (let i = 0; i < validTokens.length; i += 500) {
+        const chunk = validTokens.slice(i, i + 500);
         try {
-            const response = await admin.messaging().sendEachForMulticast({
-                ...payload,
-                tokens: chunk,
-            });
-
+            const response = await admin.messaging().sendEachForMulticast({ ...payload, tokens: chunk });
             totalSuccess += response.successCount;
             totalFailure += response.failureCount;
 
             if (response.failureCount > 0) {
                 response.responses.forEach((resp, idx) => {
                     if (!resp.success) {
-                        const errorCode = resp.error?.code;
-                        if (errorCode === 'messaging/invalid-registration-token' ||
-                            errorCode === 'messaging/registration-token-not-registered') {
+                        const code = resp.error?.code;
+                        if (code === 'messaging/invalid-registration-token' || code === 'messaging/registration-token-not-registered') {
                             allFailedTokens.push(chunk[idx]);
                         }
                     }
                 });
             }
         } catch (err) {
-            console.error("Batch send failed:", err);
+            console.error("Fast-path batch failed:", err);
         }
     }
 

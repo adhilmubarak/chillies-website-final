@@ -18,6 +18,9 @@ import java.net.Inet4Address;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @CapacitorPlugin(name = "NetworkPrinter")
 public class NetworkPrinterPlugin extends Plugin {
@@ -35,21 +38,17 @@ public class NetworkPrinterPlugin extends Plugin {
 
         new Thread(() -> {
             try {
-                Log.d("NetworkPrinter", "Attempting to print to " + ip + ":" + port);
                 Socket socket = new Socket();
-                socket.connect(new InetSocketAddress(ip, port), 5000); // 5s timeout
+                socket.connect(new InetSocketAddress(ip, port), 3000); 
                 
                 OutputStream os = socket.getOutputStream();
                 byte[] bytes = Base64.decode(dataBase64, Base64.DEFAULT);
                 os.write(bytes);
                 os.flush();
                 socket.close();
-                
-                Log.d("NetworkPrinter", "Print successful to " + ip);
                 call.resolve();
             } catch (Exception e) {
-                Log.e("NetworkPrinter", "Error printing to " + ip + ": " + e.getMessage());
-                call.reject("Error printing to " + ip + ": " + e.getMessage());
+                call.reject(e.getMessage());
             }
         }).start();
     }
@@ -60,47 +59,39 @@ public class NetworkPrinterPlugin extends Plugin {
             try {
                 List<String> subnets = getLocalIpSubnets();
                 if (subnets.isEmpty()) {
-                    call.reject("Could not determine local IP subnet. Ensure WiFi is connected.");
+                    call.reject("WiFi not connected");
                     return;
                 }
                 
                 JSArray foundPrinters = new JSArray();
-                List<Thread> threads = new ArrayList<>();
+                // Use a larger thread pool for faster scanning
+                ExecutorService executor = Executors.newFixedThreadPool(50);
                 
                 for (String baseIp : subnets) {
                     for (int i = 1; i < 255; i++) {
                         final String testIp = baseIp + i;
-                        Thread t = new Thread(() -> {
+                        executor.execute(() -> {
                             try (Socket socket = new Socket()) {
-                                socket.connect(new InetSocketAddress(testIp, 9100), 1000); // Increased timeout to 1s
+                                // Fast timeout for discovery (400ms is usually enough on LAN)
+                                socket.connect(new InetSocketAddress(testIp, 9100), 400);
                                 synchronized (foundPrinters) {
-                                    // Avoid duplicates
-                                    boolean exists = false;
-                                    for(int j=0; j<foundPrinters.length(); j++) {
-                                        if (foundPrinters.getString(j).equals(testIp)) { exists = true; break; }
-                                    }
-                                    if (!exists) foundPrinters.put(testIp);
+                                    foundPrinters.put(testIp);
                                 }
                             } catch (Exception ignored) { }
                         });
-                        threads.add(t);
-                        t.start();
                     }
                 }
                 
-                for (Thread t : threads) {
-                    try {
-                        t.join(1200); // Wait slightly longer than socket timeout
-                    } catch (Exception ignored) { }
-                }
+                executor.shutdown();
+                // Wait max 5 seconds for full scan
+                executor.awaitTermination(5, TimeUnit.SECONDS);
                 
                 JSObject result = new JSObject();
                 result.put("printers", foundPrinters);
-                result.put("scannedSubnets", new JSArray(subnets));
                 call.resolve(result);
 
             } catch (Exception e) {
-                call.reject("Discovery failed: " + e.getMessage());
+                call.reject(e.getMessage());
             }
         }).start();
     }
@@ -110,9 +101,6 @@ public class NetworkPrinterPlugin extends Plugin {
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
                 NetworkInterface intf = en.nextElement();
-                // Prioritize wlan0 or eth0 interfaces
-                String name = intf.getName().toLowerCase();
-                
                 for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
                     InetAddress inetAddress = enumIpAddr.nextElement();
                     if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
@@ -120,21 +108,12 @@ public class NetworkPrinterPlugin extends Plugin {
                         int lastDot = ip.lastIndexOf('.');
                         if (lastDot > 0) {
                             String subnet = ip.substring(0, lastDot + 1);
-                            if (!subnets.contains(subnet)) {
-                                // Add WiFi subnets to the front
-                                if (name.contains("wlan") || name.contains("eth")) {
-                                    subnets.add(0, subnet);
-                                } else {
-                                    subnets.add(subnet);
-                                }
-                            }
+                            if (!subnets.contains(subnet)) subnets.add(subnet);
                         }
                     }
                 }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch (Exception ignored) { }
         return subnets;
     }
 }
