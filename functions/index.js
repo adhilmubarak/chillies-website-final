@@ -76,7 +76,8 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
         },
         android: {
             priority: "high",
-            ttl: 86400, // 24 hours for reliability
+            ttl: 86400,
+            directBootOk: true
         },
         apns: {
             payload: {
@@ -125,6 +126,7 @@ exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}"
         android: {
             priority: "high",
             ttl: 86400,
+            directBootOk: true
         }
     };
 
@@ -154,6 +156,7 @@ exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}",
         android: {
             priority: "high",
             ttl: 86400,
+            directBootOk: true
         },
         apns: {
             payload: {
