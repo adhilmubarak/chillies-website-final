@@ -1,20 +1,36 @@
 package com.chillies.admin;
 
+import android.app.KeyguardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 import com.getcapacitor.BridgeActivity;
-import com.chillies.admin.NetworkPrinterPlugin;
 
 public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         registerPlugin(NetworkPrinterPlugin.class);
-        
-        // Allow the app to wake up and show over the lockscreen for new orders
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+        configureWakeFlags();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        configureWakeFlags();
+    }
+
+    private void configureWakeFlags() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true);
             setTurnScreenOn(true);
+            KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+            if (keyguardManager != null) {
+                keyguardManager.requestDismissKeyguard(this, null);
+            }
         } else {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
