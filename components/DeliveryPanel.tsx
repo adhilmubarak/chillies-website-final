@@ -75,15 +75,23 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
   };
 
   const handleDirections = (address?: string) => {
-    if (!address) return;
+    if (!address) {
+        alert("Error: No address found for this order.");
+        return;
+    }
     const trimmed = address.trim();
     
-    // Use regex to find a URL anywhere in the string
-    const urlMatch = trimmed.match(/https?:\/\/[^\s]+/);
+    // Improved regex to find a URL and exclude trailing punctuation
+    const urlMatch = trimmed.match(/https?:\/\/[^\s,)]+/);
+    
     if (urlMatch) {
-        window.open(urlMatch[0], '_blank');
+        const url = urlMatch[0];
+        console.log("Opening direct location link:", url);
+        window.open(url, '_blank');
     } else {
-        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`, '_blank');
+        const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`;
+        console.log("Searching for address:", trimmed);
+        window.open(searchUrl, '_blank');
     }
   };
 
