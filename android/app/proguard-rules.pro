@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Preserve Capacitor Plugins
+-keep @com.getcapacitor.annotation.CapacitorPlugin public class * extends com.getcapacitor.Plugin {
+    @com.getcapacitor.PluginMethod public void *(...);
+}
+
+# Preserve your custom plugin package
+-keep class com.chillies.admin.** { *; }
