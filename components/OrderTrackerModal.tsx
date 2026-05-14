@@ -118,34 +118,53 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
 
   if (!isOpen) return null;
 
-  const fetchOrderDetails = (idToFetch: string) => {
+  const fetchOrderDetails = async (idToFetch: string) => {
     if (!idToFetch.trim()) return;
     setLoading(true);
     setError('');
     
-    setTimeout(() => {
-        const targetId = idToFetch.trim().toUpperCase();
-        const found = orders.find(o => o.id === targetId);
+    // Sanitize ID: Remove # and trim whitespace
+    const targetId = idToFetch.trim().replace(/^#/, '').toUpperCase();
+    
+    try {
+        // 1. Try local search first for speed
+        let found = orders.find(o => o.id === targetId);
+        
+        // 2. Fallback to direct Firestore query for reliability
+        if (!found) {
+            const q = query(collection(db, 'orders'), where("id", "==", targetId));
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+                found = { ...snap.docs[0].data(), firestoreId: snap.docs[0].id } as Order;
+            }
+        }
         
         if (!found) {
-            setError('Order not found. Please check your Order ID.');
+            setError(`Order #${targetId} not found. Please check the ID.`);
             setFoundOrder(null);
         } else {
             setFoundOrder(found);
+            setOrderId(targetId); // Normalize the input field
             
-            // Also save to standard history if not present
+            // Save to recent orders
             try {
-                const savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
+                let savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
                 if (!savedIds.includes(targetId)) {
                     savedIds.push(targetId);
+                    if (savedIds.length > 10) savedIds = savedIds.slice(-10);
                     localStorage.setItem('myOrders', JSON.stringify(savedIds));
+                    // Update the visual history list immediately
                     const history = orders.filter(o => savedIds.includes(o.id)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                     setMyHistory(history);
                 }
             } catch(e) {}
         }
+    } catch (err) {
+        console.error("Search error:", err);
+        setError("Search failed. Check your internet connection.");
+    } finally {
         setLoading(false);
-    }, 500);
+    }
   };
 
   useEffect(() => {
