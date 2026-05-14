@@ -1,151 +1,51 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
-import { Capacitor, registerPlugin } from '@capacitor/core';
-import { PushNotifications } from '@capacitor/push-notifications';
-import { App as CapApp } from '@capacitor/app';
-import Navbar from './components/Navbar';
 
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import ChefsChoice from './components/ChefsChoice';
 import MenuItemCard from './components/MenuItemCard';
+import CartSidebar from './components/CartSidebar';
+import OrderTrackerModal from './components/OrderTrackerModal';
+import AdminPanel from './components/AdminPanel';
+import { Category, MenuItem, CartItem, Order, CategoryConfig, Coupon, CustomOffer, LoyaltyAccount, FoodRating, Complaint } from './types';
+import { MENU_ITEMS } from './data.ts';
+import { db } from './firebase';
+import { collection, addDoc, query, onSnapshot, doc, setDoc, updateDoc, getDocs, where, deleteDoc } from 'firebase/firestore';
+import { Search, Bike, Store, Clock, Flame, ShoppingBag, CheckCircle, XCircle, User, Star, AlertCircle, MessageSquare, Send, X, Info } from 'lucide-react';
+import BottomNav from './components/BottomNav';
+import NotificationTicker from './components/NotificationTicker';
+import SmartSuggestion from './components/SmartSuggestion';
+import ChefsChoice from './components/ChefsChoice';
 import FlashSaleView from './components/FlashSaleView';
 import HappyHourView from './components/HappyHourView';
-import CartSidebar from './components/CartSidebar';
-import Footer from './components/Footer';
-import OrderTrackerModal from './components/OrderTrackerModal';
-import SmartSuggestion from './components/SmartSuggestion';
-import NotificationTicker from './components/NotificationTicker';
 import StoreStatusAlert from './components/StoreStatusAlert';
-import BottomNav from './components/BottomNav';
+import OffersPage from './components/OffersPage';
+import RewardsPage from './components/RewardsPage';
 import FeedbackModal from './components/FeedbackModal';
-import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
+import ComplaintsPage from './components/ComplaintsPage';
+import DeliveryPanel from './components/DeliveryPanel';
+import KitchenPanel from './components/KitchenPanel';
 import ShawarmaLoader from './components/ShawarmaLoader';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { PushNotifications } from '@capacitor/push-notifications';
+import { registerPlugin } from '@capacitor/core';
 
-// Lazy load heavy components for faster initial load
-const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
-const DeliveryPanel = React.lazy(() => import('./components/DeliveryPanel'));
-const KitchenPanel = React.lazy(() => import('./components/KitchenPanel'));
-const RewardsPage = React.lazy(() => import('./components/RewardsPage'));
-const OffersPage = React.lazy(() => import('./components/OffersPage'));
-const ComplaintsPage = React.lazy(() => import('./components/ComplaintsPage'));
-import { MenuItem, CategoryConfig, CartItem, Order, Coupon, CustomOffer, FoodRating, LoyaltyAccount, Category, Complaint } from './types';
-import { Search, X } from 'lucide-react';
-
-import { db } from './firebase';
-import { 
-  collection, 
-  onSnapshot, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  query, 
-  where, 
-  getDocs,
-  getDoc,
-  setDoc,
-  arrayUnion
-} from 'firebase/firestore';
-
-export const printThermalBill = (order: Order) => {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) return;
-
-  const itemsHtml = order.items
-    .map(item => `
-      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-        <span>${item.quantity}x ${item.name}</span>
-        <span>₹${(item.price * item.quantity).toFixed(2)}</span>
-      </div>
-    `)
-    .join('');
-  const trackingQrUrl = order.trackingLink ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(order.trackingLink)}&bgcolor=ffffff&color=000000&margin=0` : '';
-
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Order #${order.id}</title>
-        <style>
-          body { font-family: 'Courier New', Courier, monospace; width: 80mm; padding: 10px; margin: 0; color: #000; background: #fff; font-weight: bold; }
-          .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 15px; }
-          .order-highlight { 
-            font-size: 28px; 
-            font-weight: 900; 
-            border: 3px solid #000; 
-            display: inline-block; 
-            padding: 8px 20px; 
-            margin: 15px 0;
-          }
-          .customer-info { 
-            text-align: left; 
-            font-size: 16px; 
-            margin-bottom: 15px; 
-            padding-bottom: 10px;
-            border-bottom: 2px dotted #000;
-          }
-          .footer { text-align: center; border-top: 2px dashed #000; padding-top: 15px; margin-top: 15px; font-size: 14px; font-weight: 900; }
-          .total { font-weight: 900; border-top: 2px solid #000; padding-top: 10px; margin-top: 10px; }
-          h2 { margin: 5px 0; font-size: 26px; font-weight: 900; }
-          p { margin: 4px 0; font-size: 14px; font-weight: bold; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h2>CHILLIES</h2>
-          <p>Valiyakulam, Alappuzha</p>
-          <div class="order-highlight">#${order.id}</div>
-          <p>${order.date} | ${order.timestamp}</p>
-        </div>
-        <div class="customer-info">
-          <div><strong>Name:</strong> ${order.customerName}</div>
-          <div><strong>Phone:</strong> ${order.contactNumber}</div>
-          ${order.address ? `<div><strong>Addr:</strong> ${order.address}</div>` : ''}
-          <div style="margin-top: 5px; font-size: 18px; text-decoration: underline;"><strong>Type:</strong> ${order.type.toUpperCase()}</div>
-        </div>
-        <div style="font-size: 16px;">${itemsHtml}</div>
-        <div class="total" style="font-size: 16px;">
-          <div style="display: flex; justify-content: space-between;">
-            <span>Subtotal:</span>
-            <span>₹${(order.subtotal || 0).toFixed(2)}</span>
-          </div>
-          ${order.deliveryCharge ? `<div style="display: flex; justify-content: space-between;"><span>Delivery:</span><span>₹${order.deliveryCharge.toFixed(2)}</span></div>` : ''}
-          ${order.discount ? `<div style="display: flex; justify-content: space-between;"><span>Discount:</span><span>-₹${order.discount.toFixed(2)}</span></div>` : ''}
-          <div style="display: flex; justify-content: space-between; font-size: 1.4em; font-weight: 900; margin-top: 10px;">
-            <span>TOTAL:</span>
-            <span>₹${order.total.toFixed(2)}</span>
-          </div>
-        </div>
-
-        <div class="footer">
-          <p>Thank you for dining with us!</p>
-          <p>Spread Happiness</p>
-        </div>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 500);
-};
-
+// KOT Printing Helper
 export const printKOT = (order: Order) => {
-  const printWindow = window.open('', '_blank');
+  const printWindow = window.open('', '_blank', 'width=600,height=600');
   if (!printWindow) return;
-
-  const itemsHtml = order.items
-    .map(item => `
-      <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 20px; border-bottom: 1px dotted #ccc; padding-bottom: 5px;">
-        <span><strong>${item.quantity}x</strong> ${item.name}</span>
-      </div>
-    `)
-    .join('');
+  
+  const itemsHtml = order.items.map(item => `
+    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 22px;">
+      <span>${item.quantity}x ${item.name}</span>
+    </div>
+  `).join('');
 
   printWindow.document.write(`
     <html>
       <head>
-        <title>KOT #${order.id}</title>
+        <title>KOT - #${order.id}</title>
         <style>
           body { font-family: 'Courier New', Courier, monospace; width: 80mm; padding: 10px; margin: 0; color: #000; background: #fff; font-weight: bold; }
           .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 15px; }
@@ -192,130 +92,44 @@ export const printKOT = (order: Order) => {
   }, 500);
 };
 
+export const printThermalBill = (order: Order) => {
+  const printWindow = window.open('', '_blank', 'width=600,height=600');
+  if (!printWindow) return;
+  const itemsHtml = order.items.map(item => `<div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span>${item.quantity}x ${item.name}</span><span>₹${item.price * item.quantity}</span></div>`).join('');
+  printWindow.document.write(`<html><head><style>body { font-family: monospace; width: 80mm; padding: 10px; margin: 0; }</style></head><body><h2 style="text-align:center">Chillies Restaurant</h2><p style="text-align:center">Order #${order.id}</p><hr/>${itemsHtml}<hr/><div style="display:flex; justify-content:space-between; font-weight:bold"><span>Total</span><span>₹${order.total}</span></div><p style="text-align:center; margin-top:20px">Thank you!</p></body></html>`);
+  printWindow.document.close();
+  setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+};
+
 const arrayBufferToBase64 = (buffer: Uint8Array) => {
   let binary = '';
-  for (let i = 0; i < buffer.byteLength; i++) {
-    binary += String.fromCharCode(buffer[i]);
-  }
+  for (let i = 0; i < buffer.byteLength; i++) binary += String.fromCharCode(buffer[i]);
   return window.btoa(binary);
 };
 
-console.log('Capacitor Platform:', Capacitor.getPlatform());
-console.log('Is Native Platform:', Capacitor.isNativePlatform());
-
 const NetworkPrinter = Capacitor.isNativePlatform() ? registerPlugin<any>('NetworkPrinter') : null;
-if (NetworkPrinter) {
-  console.log('NetworkPrinter plugin registered successfully');
-}
 
 export const discoverNetworkPrinters = async (): Promise<{printers: string[], scannedSubnets: string[]}> => {
-  try {
-    if (!NetworkPrinter) {
-      return { printers: [], scannedSubnets: [] };
-    }
-    const result = await NetworkPrinter.discoverPrinters();
-    return {
-      printers: result.printers || [],
-      scannedSubnets: result.scannedSubnets || []
-    };
-  } catch (e) {
-    console.error("Failed to discover printers:", e);
-    return { printers: [], scannedSubnets: [] };
-  }
+  if (!NetworkPrinter) return { printers: [], scannedSubnets: [] };
+  const result = await NetworkPrinter.discoverPrinters();
+  return { printers: result.printers || [], scannedSubnets: result.scannedSubnets || [] };
 };
 
 export const printNetworkKOT = async (order: Order, printers: {name: string, ip: string}[]) => {
-  try {
-    if (!NetworkPrinter) {
-        printKOT(order);
-        return;
-    }
-
-    // ESC/POS Commands
-    const ESC = 0x1B;
-    const GS = 0x1D;
-    
-    let bytes: number[] = [];
-    
-    // Initialize printer
-    bytes.push(ESC, 0x40);
-    
-    // Center align
-    bytes.push(ESC, 0x61, 1);
-    
-    // Title: KOT (Double Width & Height)
-    bytes.push(GS, 0x21, 0x11);
-    const title = "KOT\n";
-    for(let i=0; i<title.length; i++) bytes.push(title.charCodeAt(i));
-    
-    // Normal text
-    bytes.push(GS, 0x21, 0x00);
-    
-    // Order ID
-    const orderId = `Order #${order.id}\n`;
-    for(let i=0; i<orderId.length; i++) bytes.push(orderId.charCodeAt(i));
-    
-    // Date/Time
-    const dt = `${order.date} | ${order.timestamp}\n`;
-    for(let i=0; i<dt.length; i++) bytes.push(dt.charCodeAt(i));
-    
-    // Left align
-    bytes.push(ESC, 0x61, 0);
-    bytes.push(0x0A); // New line
-    
-    // Type & Customer
-    const typeStr = `TYPE: ${order.type.toUpperCase()}\n`;
-    for(let i=0; i<typeStr.length; i++) bytes.push(typeStr.charCodeAt(i));
-    
-    if (order.customerName) {
-      const custStr = `For: ${order.customerName}\n`;
-      for(let i=0; i<custStr.length; i++) bytes.push(custStr.charCodeAt(i));
-    }
-    
-    bytes.push(0x0A); // New line
-    
-    // Items
-    const itemsHeader = "ITEMS TO PREPARE:\n";
-    for(let i=0; i<itemsHeader.length; i++) bytes.push(itemsHeader.charCodeAt(i));
-    
-    // Double width/height for items
-    bytes.push(GS, 0x21, 0x11);
-    order.items.forEach(item => {
-      const line = `${item.quantity}x ${item.name}\n`;
-      for(let i=0; i<line.length; i++) bytes.push(line.charCodeAt(i));
-    });
-    
-    // Normal text
-    bytes.push(GS, 0x21, 0x00);
-    bytes.push(0x0A);
-    bytes.push(0x0A);
-    
-    const endTicket = "End of Ticket\n";
-    for(let i=0; i<endTicket.length; i++) bytes.push(endTicket.charCodeAt(i));
-    
-    // Feed lines
-    bytes.push(0x0A, 0x0A, 0x0A, 0x0A);
-    // Cut paper
-    bytes.push(GS, 0x56, 0x00);
-    
-    const base64Data = arrayBufferToBase64(new Uint8Array(bytes));
-    
-    // Send to all printers
-    for (const p of printers) {
-      if (p.ip) {
-        await NetworkPrinter.print({ ip: p.ip, port: 9100, data: base64Data });
-      }
-    }
-    
-  } catch (e) {
-    console.error("Network Print Error", e);
-    // Fallback to browser print if plugin fails
-    printKOT(order);
-  }
+  if (!NetworkPrinter) { printKOT(order); return; }
+  let bytes: number[] = [0x1B, 0x40, 0x1B, 0x61, 1, 0x1D, 0x21, 0x11];
+  const title = "KOT\n"; for(let i=0; i<title.length; i++) bytes.push(title.charCodeAt(i));
+  bytes.push(0x1D, 0x21, 0x00);
+  const info = `Order #${order.id}\n${order.date} | ${order.timestamp}\n\n`; for(let i=0; i<info.length; i++) bytes.push(info.charCodeAt(i));
+  bytes.push(0x1B, 0x61, 0);
+  order.items.forEach(item => { const line = `${item.quantity}x ${item.name}\n`; for(let i=0; i<line.length; i++) bytes.push(line.charCodeAt(i)); });
+  bytes.push(0x0A, 0x0A, 0x0A, 0x0A, 0x1D, 0x56, 0x00);
+  const base64Data = arrayBufferToBase64(new Uint8Array(bytes));
+  for (const p of printers) if (p.ip) await NetworkPrinter.print({ ip: p.ip, port: 9100, data: base64Data });
 };
 
 function App() {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(MENU_ITEMS);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [dbCategories, setDbCategories] = useState<CategoryConfig[]>([
@@ -329,12 +143,10 @@ function App() {
   const [customOffers, setCustomOffers] = useState<CustomOffer[]>([]);
   const [loyaltyAccounts, setLoyaltyAccounts] = useState<LoyaltyAccount[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
-  
   const [activeSection, setActiveSection] = useState('home');
   const [foodRatings, setFoodRatings] = useState<FoodRating[]>([]);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [riderLocation, setRiderLocation] = useState<{lat: number, lng: number, timestamp: number} | null>(null);
-
   const [promoSettings, setPromoSettings] = useState({
       isFlashSaleActive: false,
       flashSaleDate: new Date().toISOString().split('T')[0],
@@ -344,7 +156,6 @@ function App() {
       happyHourStartTime: '16:00',
       happyHourEndTime: '18:00'
   });
-
   const [storeSettings, setStoreSettings] = useState({
       acceptingOrders: true,
       startTime: '07:00',
@@ -368,20 +179,14 @@ function App() {
   const [suggestion, setSuggestion] = useState<MenuItem | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const [isAdminOpen, setIsAdminOpen] = useState(location.pathname === '/admin' || Capacitor.isNativePlatform());
+  const [isAdminOpen, setIsAdminOpen] = useState(location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery') || Capacitor.isNativePlatform());
   const [isLoading, setIsLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      setIsAdminOpen(true);
-      if (location.pathname !== '/admin') {
-        navigate('/admin', { replace: true });
-      }
-    } else if (location.pathname === '/admin') {
-      setIsAdminOpen(true);
-    }
-  }, [navigate, location.pathname]);
+    const isSpecialPath = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery');
+    setIsAdminOpen(isSpecialPath || Capacitor.isNativePlatform());
+  }, [location.pathname]);
 
   useEffect(() => {
     const splashTimer = setTimeout(() => {
@@ -396,13 +201,13 @@ function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const tid = params.get('tid');
-    if (tid) {
-      setInitialTrackId(tid);
+    const tid = params.get('tid') || params.get('trackId');
+    if (tid || location.pathname === '/track') {
+      if (tid) setInitialTrackId(tid);
       setIsTrackerOpen(true);
-      window.history.replaceState({}, '', window.location.pathname);
+      if (tid) window.history.replaceState({}, '', window.location.pathname);
     }
-  }, [location.search]);
+  }, [location.search, location.pathname]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -433,248 +238,12 @@ function App() {
     setDeferredPrompt(null);
   };
 
-
-  // Request notifications gracefully when the user interacts
-  const requestNotifications = () => {
-    if (Capacitor.isNativePlatform()) {
-      PushNotifications.requestPermissions().then(result => {
-        if (result.receive === 'granted') {
-          PushNotifications.register();
-        }
-      });
-    } else if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-  };
-
-  useEffect(() => {
-    const themeClass = storeSettings.selectedTheme === 'professional' ? 'theme-professional' : '';
-    document.body.className = themeClass;
-  }, [storeSettings.selectedTheme]);
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      // 1. SET UP LISTENERS FIRST (to avoid race conditions)
-      PushNotifications.addListener('registration', async (token) => {
-        console.log('Push registration success, token: ' + token.value);
-        if (token.value) {
-           try {
-             const settingsRef = doc(db, 'settings', 'general');
-             const settingsSnap = await getDoc(settingsRef);
-             if (settingsSnap.exists()) {
-               const adminTokens = settingsSnap.data().adminTokens || [];
-               if (!adminTokens.includes(token.value)) {
-                 await updateDoc(settingsRef, {
-                   adminTokens: arrayUnion(token.value)
-                 });
-                 console.log('Admin token synced with Firestore');
-               } else {
-                 console.log('Admin token already exists in Firestore');
-               }
-             } else {
-               await setDoc(settingsRef, { adminTokens: [token.value] });
-               console.log('Admin token created in Firestore');
-             }
-           } catch (e) {
-             console.error('Failed to save admin token:', e);
-           }
-        }
-      });
-
-      PushNotifications.addListener('registrationError', (error) => {
-        console.error('Push registration error: ', error);
-      });
-
-      PushNotifications.addListener('pushNotificationReceived', (notification) => {
-        console.log('Push received: ', notification);
-      });
-
-      PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-        console.log('Push action performed: ', action);
-        if (action.notification.title?.toLowerCase().includes('order')) {
-          navigate('/admin');
-        }
-      });
-
-      // 2. NOW REQUEST PERMISSIONS AND REGISTER
-      CapApp.addListener('appStateChange', ({ isActive }) => {
-        console.log('App state changed. Is active?', isActive);
-        if (isActive) {
-          // Re-register on resume to ensure token is fresh
-          PushNotifications.register();
-        }
-      });
-
-      PushNotifications.checkPermissions().then((res) => {
-        if (res.receive !== 'granted') {
-          PushNotifications.requestPermissions().then((res) => {
-            if (res.receive === 'granted') {
-              PushNotifications.register();
-            }
-          });
-        } else {
-          PushNotifications.register();
-        }
-      });
-    }
-
-  }, []);
-
-  const fireNotification = async (title: string, options: any) => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      try {
-        if ('serviceWorker' in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          if (regs.length > 0) {
-            const registration = await navigator.serviceWorker.ready;
-            if (registration && registration.showNotification) {
-              await registration.showNotification(title, options);
-              return;
-            }
-          }
-        }
-        // Fallback for desktop web or dev mode without SW
-        new Notification(title, options);
-      } catch (e) {
-        new Notification(title, options);
-      }
-    }
-  };
-
-  // Push Notification logic for Flash Sales
-  const prevPromoRef = React.useRef<any>(null);
-  useEffect(() => {
-    if (prevPromoRef.current) {
-       if (!prevPromoRef.current.isFlashSaleActive && promoSettings.isFlashSaleActive) {
-          fireNotification('⚡ Flash Sale is LIVE!', { body: 'Special discounts are active right now. Order before they are gone!', icon: '/pwa-icon.svg', vibrate: [200, 100, 200] });
-       }
-    }
-    prevPromoRef.current = promoSettings;
-  }, [promoSettings.isFlashSaleActive]);
-
-  // Push Notification logic for Broadcasts
-  const prevBroadcastRef = React.useRef<any>(null);
-  const isInitialBroadcastLoad = React.useRef<boolean>(true);
-  useEffect(() => {
-    if (storeSettings.latestBroadcast) {
-       if (isInitialBroadcastLoad.current) {
-           isInitialBroadcastLoad.current = false;
-       } else if (!prevBroadcastRef.current || prevBroadcastRef.current.timestamp !== storeSettings.latestBroadcast.timestamp) {
-          fireNotification(storeSettings.latestBroadcast.title, { 
-              body: storeSettings.latestBroadcast.body, 
-              icon: '/pwa-icon.svg', 
-              vibrate: [200, 100, 200] 
-          });
-       }
-       prevBroadcastRef.current = storeSettings.latestBroadcast;
-    }
-  }, [storeSettings.latestBroadcast]);
-
-  // Push Notification logic for Local Orders
-  const prevOrdersRef = React.useRef<Record<string, string>>({});
-  useEffect(() => {
-    const myOrderIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
-    orders.forEach(order => {
-       const prevStatus = prevOrdersRef.current[order.id];
-       if (myOrderIds.includes(order.id) && prevStatus && prevStatus !== order.status) {
-           const messages: Record<string, string> = {
-              preparing: '👨‍🍳 Your order is now being prepared.',
-              ready: '🥡 Your order is ready!',
-              out_for_delivery: '🛵 Your order is out for delivery! Track it live.',
-              delivered: '✨ Your order is complete. Enjoy!',
-              cancelled: '❌ Your order was cancelled.'
-           };
-           if (messages[order.status]) {
-               fireNotification(`Order #${order.id} Update`, { body: messages[order.status], icon: '/pwa-icon.svg', vibrate: [200, 100, 200] });
-           }
-       }
-       prevOrdersRef.current[order.id] = order.status;
-    });
-  }, [orders]);
-
-  // Abandoned Cart Notification logic
-  useEffect(() => {
-    let timer: number;
-    if (cartItems.length > 0 && !isCartOpen) {
-      timer = window.setTimeout(() => {
-        fireNotification('Hungry? 😋', { 
-            body: 'Your delicious food is waiting in the cart! Complete your order before the kitchen closes.', 
-            icon: '/pwa-192x192.png', 
-            vibrate: [200, 100, 200] 
-        });
-      }, 15 * 60 * 1000); // 15 minutes
-    }
-    return () => {
-      if (timer) window.clearTimeout(timer);
-    };
-  }, [cartItems, isCartOpen]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const trackId = params.get('tid') || params.get('trackId');
-    if (trackId) {
-      setInitialTrackId(trackId);
-      setIsTrackerOpen(true);
-      const cleanUrl = window.location.origin + window.location.pathname;
-      window.history.replaceState({}, document.title, cleanUrl);
-    }
-  }, []);
-
-  const isFlashSaleActive = useMemo(() => {
-    if (!promoSettings.isFlashSaleActive) return false;
-    const today = currentTime.toISOString().split('T')[0];
-    if (promoSettings.flashSaleDate && today !== promoSettings.flashSaleDate) return false;
-    const [startH, startM] = promoSettings.flashSaleStartTime.split(':').map(Number);
-    const [endH, endM] = promoSettings.flashSaleEndTime.split(':').map(Number);
-    const startMin = startH * 60 + startM;
-    const endMin = endH * 60 + endM;
-    const currMin = currentTime.getHours() * 60 + currentTime.getMinutes();
-    return currMin >= startMin && currMin < endMin;
-  }, [promoSettings, currentTime]);
-
-  const isHappyHourActive = useMemo(() => {
-    if (!promoSettings.isHappyHourActive) return false;
-    const [startH, startM] = promoSettings.happyHourStartTime.split(':').map(Number);
-    const [endH, endM] = promoSettings.happyHourEndTime.split(':').map(Number);
-    const startMin = startH * 60 + startM;
-    const endMin = endH * 60 + endM;
-    const currMin = currentTime.getHours() * 60 + currentTime.getMinutes();
-    return currMin >= startMin && currMin < endMin;
-  }, [promoSettings, currentTime]);
-
-  const checkTimeRange = (startStr?: string, endStr?: string): boolean => {
-      if (!startStr || !endStr) return true;
-      const [startH, startM] = startStr.split(':').map(Number);
-      const [endH, endM] = endStr.split(':').map(Number);
-      const startMin = startH * 60 + startM;
-      const endMin = endH * 60 + endM;
-      const currMin = currentTime.getHours() * 60 + currentTime.getMinutes();
-      if (startMin <= endMin) return currMin >= startMin && currMin <= endMin;
-      return currMin >= startMin || currMin <= endMin;
-  };
-
-  const isStoreOpen = storeSettings.acceptingOrders && checkTimeRange(storeSettings.startTime, storeSettings.endTime);
-
-  const checkAvailability = (catName: string) => {
-      if (!isStoreOpen) return { isAvailable: false, reason: 'Store Closed' };
-      const config = dbCategories.find(c => c.name === catName);
-      if (!config) return { isAvailable: true };
-      if (config.isUnavailable) return { isAvailable: false, reason: 'Category Offline' };
-      const active = checkTimeRange(config.startTime, config.endTime);
-      return { isAvailable: active, availabilityTime: config.startTime };
-  };
-
   useEffect(() => {
     const q = query(collection(db, 'menuItems'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       let items = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MenuItem));
       items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-      setMenuItems(items.length > 0 ? items : INITIAL_MENU_ITEMS);
+      setMenuItems(items.length > 0 ? items : MENU_ITEMS);
       setIsLoading(false);
     }, () => setIsLoading(false));
     return () => unsubscribe();
@@ -692,61 +261,8 @@ function App() {
   useEffect(() => {
     const q = query(collection(db, 'orders')); 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log(`[Firestore Sync] Received update for ${snapshot.docs.length} orders. Source: ${snapshot.metadata.hasPendingWrites ? 'Local' : 'Server'}`);
       const fetched = snapshot.docs.map(doc => ({ ...doc.data(), firestoreId: doc.id } as any));
       setOrders(fetched.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0)));
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const q = query(collection(db, 'coupons'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setCoupons(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Coupon)));
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const q = query(collection(db, 'foodRatings'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as FoodRating));
-      setFoodRatings(fetched.sort((a, b) => b.createdAt - a.createdAt));
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const q = query(collection(db, 'customOffers'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setCustomOffers(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as CustomOffer)));
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const q = doc(db, 'tracking', 'rider1');
-    const unsubscribe = onSnapshot(q, (docSnap) => {
-      if (docSnap.exists()) {
-        setRiderLocation(docSnap.data() as any);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const q = query(collection(db, 'loyalty'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setLoyaltyAccounts(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as LoyaltyAccount)));
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const q = query(collection(db, 'complaints'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Complaint));
-      setComplaints(fetched.sort((a, b) => b.createdAt - a.createdAt));
     });
     return () => unsubscribe();
   }, []);
@@ -784,6 +300,52 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  const isFlashSaleActive = useMemo(() => {
+    if (!promoSettings.isFlashSaleActive) return false;
+    const today = currentTime.toISOString().split('T')[0];
+    if (promoSettings.flashSaleDate && today !== promoSettings.flashSaleDate) return false;
+    const [startH, startM] = promoSettings.flashSaleStartTime.split(':').map(Number);
+    const [endH, endM] = promoSettings.flashSaleEndTime.split(':').map(Number);
+    const startMin = startH * 60 + startM;
+    const endMin = endH * 60 + endM;
+    const currMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+    return currMin >= startMin && currMin < endMin;
+  }, [promoSettings, currentTime]);
+
+  const isHappyHourActive = useMemo(() => {
+    if (!promoSettings.isHappyHourActive) return false;
+    const [startH, startM] = promoSettings.happyHourStartTime.split(':').map(Number);
+    const [endH, endM] = promoSettings.happyHourEndTime.split(':').map(Number);
+    const startMin = startH * 60 + startM;
+    const endMin = endH * 60 + endM;
+    const currMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+    return currMin >= startMin && currMin < endMin;
+  }, [promoSettings, currentTime]);
+
+  const isStoreOpen = storeSettings.acceptingOrders && (() => {
+      const [startH, startM] = storeSettings.startTime.split(':').map(Number);
+      const [endH, endM] = storeSettings.endTime.split(':').map(Number);
+      const startMin = startH * 60 + startM;
+      const endMin = endH * 60 + endM;
+      const currMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+      if (startMin <= endMin) return currMin >= startMin && currMin <= endMin;
+      return currMin >= startMin || currMin <= endMin;
+  })();
+
+  const checkAvailability = (catName: string) => {
+      if (!isStoreOpen) return { isAvailable: false, reason: 'Store Closed' };
+      const config = dbCategories.find(c => c.name === catName);
+      if (!config) return { isAvailable: true };
+      if (config.isUnavailable) return { isAvailable: false, reason: 'Category Offline' };
+      const [startH, startM] = (config.startTime || '00:00').split(':').map(Number);
+      const [endH, endM] = (config.endTime || '23:59').split(':').map(Number);
+      const startMin = startH * 60 + startM;
+      const endMin = endH * 60 + endM;
+      const currMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+      const active = startMin <= endMin ? (currMin >= startMin && currMin <= endMin) : (currMin >= startMin || currMin <= endMin);
+      return { isAvailable: active, availabilityTime: config.startTime };
+  };
+
   const addToCart = (item: MenuItem) => {
     if (!isStoreOpen) return;
     let price = item.price;
@@ -798,499 +360,200 @@ function App() {
   };
 
   const handleAddOrder = async (order: Order) => {
+    setOrders(prev => [order, ...prev]);
     try {
-      requestNotifications(); // Ask for notification permission during checkout interaction
-      
-      const myOrders = JSON.parse(localStorage.getItem('myOrders') || '[]');
-      if (!myOrders.includes(order.id)) {
-          myOrders.push(order.id);
-          localStorage.setItem('myOrders', JSON.stringify(myOrders));
-      }
-
-      await addDoc(collection(db, 'orders'), order);
-      
-      if (order.contactNumber && order.contactNumber.length === 10) {
-          const account = loyaltyAccounts.find(l => l.phone === order.contactNumber);
-          const ratio = storeSettings.loyaltyPointsRatio || 10;
-          const pointsEarned = Math.floor(order.total / ratio);
-          
-          if (account && account.id) {
-              const newPoints = account.points - (order.pointsRedeemed || 0) + pointsEarned;
-              await updateDoc(doc(db, 'loyalty', account.id), { 
-                  points: newPoints, 
-                  lastUpdated: Date.now() 
-              });
-          }
-      }
-    } catch (error) {
-      console.error("Error adding order: ", error);
-    }
+        const savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
+        savedIds.push(order.id);
+        localStorage.setItem('myOrders', JSON.stringify(savedIds));
+    } catch(e) {}
   };
 
-  useEffect(() => {
-    if (activeCategory === 'Flash Sale' && !isFlashSaleActive) {
-      setActiveCategory('Breads');
-    } else if (activeCategory === 'Happy Hour' && !isHappyHourActive) {
-      setActiveCategory('Breads');
-    }
-  }, [isFlashSaleActive, isHappyHourActive, activeCategory]);
+  const orderedCats = dbCategories.map(c => c.name);
+  if (isFlashSaleActive) orderedCats.unshift('Flash Sale');
+  if (isHappyHourActive) orderedCats.unshift('Happy Hour');
 
-  const orderedCats = useMemo(() => [
-    ...dbCategories.filter(c => !c.isUnavailable && (c.name.toLowerCase() === 'breads' || c.name.toLowerCase() === 'bread')).map(c => c.name),
-    ...(isFlashSaleActive ? ['Flash Sale'] : []), 
-    ...(isHappyHourActive ? ['Happy Hour'] : []), 
-    ...dbCategories.filter(c => !c.isUnavailable && c.name.toLowerCase() !== 'breads' && c.name.toLowerCase() !== 'bread').map(c => c.name),
-    'All'
-  ], [dbCategories, isFlashSaleActive, isHappyHourActive]);
+  const filteredItems = menuItems.filter(item => 
+    item.category === activeCategory && 
+    (item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     item.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
-  const observerTarget = React.useRef<HTMLDivElement>(null);
-  
+  const observerTarget = useRef(null);
   useEffect(() => {
-    const el = observerTarget.current;
-    if (!el) return;
-    
-    let isInitialRender = true;
-    const observer = new IntersectionObserver(
-        (entries) => {
-            if (isInitialRender) {
-                isInitialRender = false;
-                return;
-            }
-            if (entries[0].isIntersecting) {
-               const currentIndex = orderedCats.indexOf(activeCategory);
-               if (currentIndex !== -1 && currentIndex < orderedCats.length - 2) {
-                   const nextCat = orderedCats[currentIndex + 1];
-                   setActiveCategory(nextCat);
-                   setTimeout(() => {
-                       document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' });
-                   }, 50);
-               }
-            }
-        }, 
-        { threshold: 0.1 }
-    );
-    
-    const t = setTimeout(() => observer.observe(el), 800);
-    return () => { clearTimeout(t); observer.disconnect(); };
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        const currentIndex = orderedCats.indexOf(activeCategory);
+        if (currentIndex !== -1 && currentIndex < orderedCats.length - 1) {
+          setActiveCategory(orderedCats[currentIndex + 1]);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    }, { threshold: 1.0 });
+    if (observerTarget.current) observer.observe(observerTarget.current);
+    return () => observer.disconnect();
   }, [activeCategory, orderedCats]);
 
-  const filteredItems = menuItems.filter(item => {
-    const parentCategory = dbCategories.find(c => c.name === item.category);
-    if (parentCategory?.isUnavailable) return false;
-
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    let matchesCategory = false;
-    if (activeCategory === 'Flash Sale') matchesCategory = !!item.isFlashSale;
-    else if (activeCategory === 'Happy Hour') matchesCategory = !!item.isHappyHour;
-    else if (activeCategory === 'All') matchesCategory = !item.isExclusive;
-    else matchesCategory = item.category === activeCategory && !item.isExclusive;
-    return matchesCategory && matchesSearch;
-  });
-
   return (
-    <>
-
     <React.Suspense fallback={<ShawarmaLoader />}>
-    <Routes>
-      <Route path="/admin" element={
-        <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
+      {!isAdminOpen && (
+        <>
+          <Navbar 
+            currentTime={currentTime}
+            cartItemCount={cartItems.reduce((acc, i) => acc + i.quantity, 0)} 
+            onOpenCart={() => setIsCartOpen(true)} 
+            onOpenTracker={() => setIsTrackerOpen(true)}
+            hasTicker={!isStoreOpen || isFlashSaleActive || isHappyHourActive || storeSettings.isAnnouncementActive}
+          />
+          <NotificationTicker 
+            isFlashSaleActive={isFlashSaleActive} 
+            isHappyHourActive={isHappyHourActive}
+            flashSaleEndTime={promoSettings.flashSaleEndTime}
+            isStoreOpen={isStoreOpen}
+            startTime={storeSettings.startTime}
+            announcement={storeSettings.announcement}
+            isAnnouncementActive={storeSettings.isAnnouncementActive}
+          />
+        </>
+      )}
+
+      <Routes>
+        <Route path="/admin" element={
           <AdminPanel 
-            isOpen={isAdminOpen} 
-            onClose={() => setIsAdminOpen(false)} 
+            isOpen={true}
+            onClose={() => navigate('/')}
             items={menuItems}
             categories={dbCategories}
             orders={orders}
             coupons={coupons}
-            customOffers={customOffers}
-            foodRatings={foodRatings}
-            complaints={complaints}
             isStoreOpen={isStoreOpen}
             promoSettings={promoSettings}
             storeSettings={storeSettings}
+            onAddItem={async (item) => { await addDoc(collection(db, 'menuItems'), item); }}
+            onUpdateItem={async (item) => { if (item.id) await updateDoc(doc(db, 'menuItems', item.id), item as any); }}
+            onDeleteItem={async (id) => { await deleteDoc(doc(db, 'menuItems', id)); }}
+            onAddCategory={async (name) => { await addDoc(collection(db, 'categories'), { name, isUnavailable: false, startTime: '00:00', endTime: '23:59' }); }}
+            onDeleteCategory={async (id) => { await deleteDoc(doc(db, 'categories', id)); }}
+            onUpdateOrderStatus={async (id, s, pm, fid) => {
+              if (fid) await updateDoc(doc(db, 'orders', fid), { status: s });
+              else {
+                const q = query(collection(db, 'orders'), where("id", "==", id));
+                const snap = await getDocs(q);
+                for (const d of snap.docs) await updateDoc(d.ref, { status: s });
+              }
+            }}
             riderLocation={riderLocation}
-            onAddItem={async i => { const {id, ...d} = i; await addDoc(collection(db, 'menuItems'), d); }}
-            onUpdateItem={async i => { if(i.id) await updateDoc(doc(db, 'menuItems', i.id), {...i}); }}
-            onDeleteItem={async id => await deleteDoc(doc(db, 'menuItems', id))}
-            onAddCategory={n => addDoc(collection(db, 'categories'), {name: n, startTime: '00:00', endTime: '23:59', isUnavailable: false, order: dbCategories.length})}
-            onUpdateCategory={async c => {
-              await updateDoc(doc(db, 'categories', c.id), {name: c.name, startTime: c.startTime || '00:00', endTime: c.endTime || '23:59', isUnavailable: c.isUnavailable || false});
-              if (c.isUnavailable) {
-                const snap = await getDocs(query(collection(db, 'menuItems'), where('category', '==', c.name)));
-                snap.forEach(d => updateDoc(d.ref, {isUnavailable: true}));
-              }
-            }}
-            onDeleteCategory={async n => { const q = query(collection(db, 'categories'), where("name", "==", n)); const s = await getDocs(q); s.forEach(d => deleteDoc(d.ref)); }}
-            onReorderCategory={async (dir: 'up' | 'down', index: number) => {
-              const newArray = [...dbCategories];
-              if (dir === 'up' && index > 0) {
-                [newArray[index], newArray[index - 1]] = [newArray[index - 1], newArray[index]];
-              } else if (dir === 'down' && index < newArray.length - 1) {
-                [newArray[index], newArray[index + 1]] = [newArray[index + 1], newArray[index]];
-              } else return;
-              setDbCategories(newArray);
-              await Promise.all(newArray.map((cat, i) => updateDoc(doc(db, 'categories', cat.id), { order: i })));
-            }}
-            onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string, fid?: string) => { 
-              try {
-                const updates: any = { status: s };
-                if (pm) updates.paymentMethod = pm;
-                if (s === 'ready' || s === 'out_for_delivery') {
-                  updates.assignedAt = Date.now();
-                }
-
-                if (fid) {
-                  await updateDoc(doc(db, 'orders', fid), updates);
-                } else {
-                  const q = query(collection(db, 'orders'), where("id", "==", id)); 
-                  const snap = await getDocs(q); 
-                  for (const d of snap.docs) {
-                    await updateDoc(d.ref, updates);
-                  }
-                }
-              } catch(e) {
-                console.error("Status update error", e);
-              }
-            }}
-            onAddCoupon={c => addDoc(collection(db, 'coupons'), c)} onDeleteCoupon={id => deleteDoc(doc(db, 'coupons', id))}
-            onAddCustomOffer={o => addDoc(collection(db, 'customOffers'), o)}
-            onUpdateCustomOffer={async o => { if(o.id) await updateDoc(doc(db, 'customOffers', o.id), {...o}); }}
-            onDeleteCustomOffer={async id => await deleteDoc(doc(db, 'customOffers', id))}
-            onUpdateStoreSettings={s => setDoc(doc(db, 'settings', 'general'), s, {merge: true})}
-            onUpdatePromos={p => setDoc(doc(db, 'settings', 'general'), p, {merge: true})}
-            onTestNotification={async () => {
-              try {
-                await addDoc(collection(db, 'test_notifications'), {
-                  title: 'Test Notification',
-                  body: 'This is a real push notification test for the background service.',
-                  timestamp: Date.now()
-                });
-                alert("Test notification triggered! If your app is in the background, it should ring soon.");
-              } catch (e) {
-                console.error("Failed to trigger test notification:", e);
-                fireNotification('System Alert', { body: 'Local Fallback: Push Notifications are enabled, but server test failed.', icon: '/pwa-icon.svg', vibrate: [200, 100, 200] });
-              }
-            }}
-            loyaltyAccounts={loyaltyAccounts}
-            onAddLoyaltyAccount={async (phone: string, points: number) => { await addDoc(collection(db, 'loyalty'), { phone, points, lastUpdated: Date.now() }); }}
-            onUpdateLoyaltyAccount={async (id: string, points: number) => { await updateDoc(doc(db, 'loyalty', id), { points, lastUpdated: Date.now() }); }}
-            onUpdateComplaint={async (id: string, st: 'open' | 'resolved') => { await updateDoc(doc(db, 'complaints', id), { status: st }); }}
-            onDeleteComplaint={async (id: string) => await deleteDoc(doc(db, 'complaints', id))}
-            onAddOrder={handleAddOrder}
+            onAddCoupon={async (c) => { await addDoc(collection(db, 'coupons'), c); }}
+            onDeleteCoupon={async (id) => { await deleteDoc(doc(db, 'coupons', id)); }}
+            onUpdateStoreSettings={async (s) => { await setDoc(doc(db, 'settings', 'general'), s); }}
+            onUpdatePromos={async (p) => { await updateDoc(doc(db, 'settings', 'general'), p); }}
+            foodRatings={foodRatings}
+            customOffers={customOffers}
           />
-        </div>
-      } />
-      <Route path="/delivery" element={
-        <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
-          <DeliveryPanel 
-            orders={orders}
-            onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string, fid?: string) => { 
-                console.log(`[Status Update] Attempting to update Order ${id} (FID: ${fid}) to status: ${s}`);
-                try {
-                  const updates: any = { status: s };
-                  if (pm) updates.paymentMethod = pm;
-                  if (s === 'ready' || s === 'out_for_delivery') {
-                      updates.assignedAt = Date.now();
-                  }
-
-                  if (fid) {
-                    await updateDoc(doc(db, 'orders', fid), updates);
-                    console.log(`[Status Update] Successfully updated FID: ${fid} via direct Doc reference.`);
-                  } else {
-                    const q = query(collection(db, 'orders'), where("id", "==", id)); 
-                    const snap = await getDocs(q); 
-                    if (snap.empty) {
-                        alert("Critical Sync Error: Order ID not found on server.");
-                        return;
-                    }
-                    for (const d of snap.docs) {
-                      await updateDoc(d.ref, updates);
-                    }
-                    console.log(`[Status Update] Successfully updated ID: ${id} via query.`);
-                  }
-                } catch(e: any) {
-                  console.error("Status update error", e);
-                  alert("Error updating status: " + e.message);
-                }
-            }}
-            onUpdateRiderLocation={async (lat: number, lng: number) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }}
-            deliveryUpiId={storeSettings.deliveryUpiId}
-          />
-        </div>
-      } />
-      <Route path="/kitchen" element={
-        <KitchenPanel 
-          orders={orders}
-          onUpdateOrderStatus={async (id, s, pm, fid) => { 
-              try {
-                const updates: any = { status: s };
-                if (s === 'ready') updates.assignedAt = Date.now();
-
-                if (fid) {
-                  await updateDoc(doc(db, 'orders', fid), updates);
-                } else {
-                  const q = query(collection(db, 'orders'), where("id", "==", id)); 
-                  const snap = await getDocs(q); 
-                  for (const d of snap.docs) {
-                    await updateDoc(d.ref, updates);
-                  }
-                }
-              } catch(e) {
-                console.error("Status update error", e);
+        } />
+        <Route path="/kitchen" element={<KitchenPanel orders={orders} onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string, fid?: string) => { 
+            try {
+              const updates: any = { status: s };
+              if (s === 'ready') updates.assignedAt = Date.now();
+              if (fid) {
+                await updateDoc(doc(db, 'orders', fid), updates);
+              } else {
+                const q = query(collection(db, 'orders'), where("id", "==", id)); 
+                const snap = await getDocs(q); 
+                for (const d of snap.docs) await updateDoc(d.ref, updates);
               }
-          }}
-        />
-      } />
-      <Route path="/offers" element={
-        <OffersPage 
-          isFlashSaleActive={isFlashSaleActive}
-          isHappyHourActive={isHappyHourActive}
-          flashSaleEndTime={promoSettings.flashSaleEndTime}
-          happyHourStartTime={promoSettings.happyHourStartTime}
-          happyHourEndTime={promoSettings.happyHourEndTime}
-          customOffers={customOffers}
-        />
-      } />
-      <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} onEnrollLoyalty={async (phone: string, name: string) => { await addDoc(collection(db, 'loyalty'), { phone, customerName: name, points: 0, lastUpdated: Date.now() }); }} />} />
-      <Route path="/feedback" element={<FeedbackModal />} />
-      <Route path="/complaints" element={<ComplaintsPage />} />
-      <Route path="/*" element={
-        <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden">
-          <div className="fixed inset-0 bg-stone-950 -z-10" />
-      
-      <NotificationTicker 
-        isFlashSaleActive={isFlashSaleActive} 
-        isHappyHourActive={isHappyHourActive}
-        flashSaleEndTime={promoSettings.flashSaleEndTime}
-        isStoreOpen={isStoreOpen}
-        startTime={storeSettings.startTime}
-        announcement={storeSettings.announcement}
-        isAnnouncementActive={storeSettings.isAnnouncementActive}
-      />
-
-      <Navbar 
-        currentTime={currentTime}
-        cartItemCount={cartItems.reduce((acc, i) => acc + i.quantity, 0)} 
-        onOpenCart={() => setIsCartOpen(true)} 
-        onOpenTracker={() => {
-            setInitialTrackId('');
-            setIsTrackerOpen(true);
-        }}
-        hasTicker={!isStoreOpen || isFlashSaleActive || isHappyHourActive || storeSettings.isAnnouncementActive}
-      />
-      
-      <Hero />
-      
-      <StoreStatusAlert 
-        isStoreOpen={isStoreOpen} 
-        startTime={storeSettings.startTime} 
-        endTime={storeSettings.endTime} 
-      />
-
-      <ChefsChoice 
-        items={menuItems.filter(item => item.isChefChoice && !item.isExclusive)} 
-        onAdd={addToCart} 
-        isFlashSaleActive={isFlashSaleActive}
-        checkAvailability={checkAvailability}
-        isStoreOpen={isStoreOpen}
-        cartItems={cartItems}
-        allMenuItems={menuItems}
-        onShowSuggestion={(s) => setSuggestion(s)}
-      />
-
-      <section id="menu" className="pb-24 pt-12 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24 md:scroll-mt-32">
-        <div className="text-center mb-10 md:mb-16 space-y-4 md:space-y-6">
-          <span className="text-brand-500 uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold block">Our Selection</span>
-          <h2 className="text-3xl md:text-6xl font-serif text-stone-50 relative inline-block">
-            Curated Menu
-            <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 md:w-24 h-1 bg-brand-500 rounded-full"></span>
-          </h2>
-        </div>
-
-        <div className="max-w-md mx-auto mb-10 md:mb-12 px-2">
-            <div className="relative">
+            } catch(e) { console.error(e); }
+        }} />} />
+        <Route path="/delivery" element={<DeliveryPanel orders={orders} onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string, fid?: string) => {
+            try {
+              if (fid) await updateDoc(doc(db, 'orders', fid), { status: s });
+              else {
+                const q = query(collection(db, 'orders'), where("id", "==", id));
+                const snap = await getDocs(q);
+                for (const d of snap.docs) await updateDoc(d.ref, { status: s });
+              }
+            } catch(e) { console.error(e); }
+        }} onUpdateRiderLocation={async (lat: number, lng: number) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }} deliveryUpiId={storeSettings.deliveryUpiId} />} />
+        <Route path="/offers" element={<OffersPage isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} flashSaleEndTime={promoSettings.flashSaleEndTime} happyHourStartTime={promoSettings.happyHourStartTime} happyHourEndTime={promoSettings.happyHourEndTime} customOffers={customOffers} />} />
+        <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} onEnrollLoyalty={async (phone: string, name: string) => { await addDoc(collection(db, 'loyalty'), { phone, customerName: name, points: 0, lastUpdated: Date.now() }); }} />} />
+        <Route path="/complaints" element={<ComplaintsPage />} />
+        <Route path="/track" element={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><p className="text-stone-500 font-mono text-xs uppercase tracking-widest animate-pulse">Initializing Tracker...</p></div>} />
+        <Route path="/*" element={
+          <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
+            <Hero />
+            <StoreStatusAlert isStoreOpen={isStoreOpen} startTime={storeSettings.startTime} endTime={storeSettings.endTime} />
+            <ChefsChoice items={menuItems.filter(item => item.isChefChoice)} onAdd={addToCart} isFlashSaleActive={isFlashSaleActive} checkAvailability={checkAvailability} isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion} />
+            
+            <section id="menu" className="pb-24 pt-12 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24">
+              <div className="max-w-md mx-auto mb-12 px-2 relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" size={18} />
-                <input
-                    type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search menu..."
-                    className="block w-full pl-12 pr-4 py-4 bg-stone-900 border border-stone-800 rounded-full text-stone-200 focus:border-brand-500 focus:outline-none"
-                />
-            </div>
-        </div>
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search menu..." className="w-full pl-12 pr-4 py-4 bg-stone-900 border border-stone-800 rounded-full text-white focus:border-brand-500 outline-none" />
+              </div>
 
-        <div className="flex flex-col items-center gap-6 mb-12">
-            <div className="flex w-full overflow-x-auto scrollbar-hide md:flex-wrap md:justify-center gap-2 px-4 pb-4">
+              <div className="flex overflow-x-auto gap-2 pb-8 scrollbar-hide">
                 {orderedCats.map(cat => (
-                    <button key={cat} onClick={() => setActiveCategory(cat)}
-                        className={`flex-shrink-0 px-6 md:px-8 py-3 rounded-full border transition-all text-[10px] md:text-xs font-bold uppercase tracking-widest ${
-                            activeCategory === cat ? 'bg-brand-500 border-brand-500 text-white' : 'bg-transparent border-stone-800 text-stone-500'
-                        }`}
-                    >
-                        {cat}
-                    </button>
+                  <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-6 py-2 rounded-full border text-[10px] uppercase tracking-widest font-bold ${activeCategory === cat ? 'bg-brand-500 text-white' : 'border-stone-800 text-stone-500'}`}>{cat}</button>
                 ))}
-            </div>
-        </div>
+              </div>
 
-        {(isLoading || showSplash) ? (
-            <ShawarmaLoader />
-        ) : (
-            <>
-              {activeCategory === 'Flash Sale' && (
-                <FlashSaleView 
-                  items={menuItems.filter(i => i.isFlashSale)} 
-                  onAdd={addToCart} 
-                  isFlashSaleActive={isFlashSaleActive}
-                  flashSaleEndTime={promoSettings.flashSaleEndTime}
-                  checkAvailability={checkAvailability}
-                  isStoreOpen={isStoreOpen}
-                  cartItems={cartItems}
-                  allMenuItems={menuItems}
-                  onShowSuggestion={(s) => setSuggestion(s)}
-                />
-              )}
-              {activeCategory === 'Happy Hour' && (
-                <HappyHourView 
-                  items={menuItems.filter(i => i.isHappyHour)} 
-                  onAdd={addToCart} 
-                  isHappyHourActive={isHappyHourActive}
-                  checkAvailability={checkAvailability}
-                  isStoreOpen={isStoreOpen}
-                  cartItems={cartItems}
-                  allMenuItems={menuItems}
-                  onShowSuggestion={(s) => setSuggestion(s)}
-                />
-              )}
-              {activeCategory !== 'Flash Sale' && activeCategory !== 'Happy Hour' && (
-                <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                    {filteredItems.map((item, index) => (
-                        <MenuItemCard 
-                            key={item.id} item={item} onAdd={addToCart} index={index} 
-                            isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive}
-                            isAvailable={checkAvailability(item.category).isAvailable}
-                            isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} 
-                            onShowSuggestion={(s) => setSuggestion(s)}
-                        />
-                    ))}
-                </div>
-                {orderedCats.indexOf(activeCategory) !== -1 && orderedCats.indexOf(activeCategory) < orderedCats.length - 2 && (
-                    <div ref={observerTarget} className="w-full h-32 flex justify-center items-center opacity-70">
-                        <div className="flex flex-col items-center animate-pulse">
-                            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-stone-500 mb-4">Scroll to next</span>
-                            <div className="w-px h-12 bg-gradient-to-b from-stone-600 to-transparent"></div>
-                        </div>
-                    </div>
-                )}
-                </>
-              )}
-            </>
-        )}
-      </section>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredItems.map((item, i) => (
+                  <MenuItemCard key={item.id} item={item} onAdd={addToCart} index={i} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} isAvailable={checkAvailability(item.category).isAvailable} isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion} />
+                ))}
+              </div>
+              <div ref={observerTarget} className="h-20" />
+            </section>
+            <Footer onOpenAdmin={() => navigate('/admin')} onOpenTC={() => {}} />
+          </div>
+        } />
+      </Routes>
 
-      <Footer onOpenAdmin={() => navigate('/admin')} onOpenTC={() => {}} />
-      <BottomNav 
-        cartItemCount={cartItems.reduce((acc, i) => acc + i.quantity, 0)} 
-        onOpenCart={() => setIsCartOpen(true)} 
-        onOpenTracker={() => {
-            setInitialTrackId('');
-            setIsTrackerOpen(true);
-        }}
-        activeSection={activeSection}
-      />
-      <CartSidebar
-        isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cartItems}
-        onUpdateQuantity={(id, delta) => setCartItems(prev => prev.map(i => i.id === id ? {...i, quantity: Math.max(0, i.quantity + delta)} : i).filter(i => i.quantity > 0))}
-        onRemove={id => setCartItems(prev => prev.filter(i => i.id !== id))}
+      {!isAdminOpen && (
+        <BottomNav 
+          activeSection={activeSection}
+          onOpenCart={() => setIsCartOpen(true)} onOpenTracker={() => setIsTrackerOpen(true)} 
+          cartItemCount={cartItems.reduce((acc, i) => acc + i.quantity, 0)} 
+        />
+      )}
+
+      <CartSidebar 
+        isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cartItems} 
+        onUpdateQuantity={(id: string, delta: number) => setCartItems(prev => prev.map(i => i.id === id ? {...i, quantity: Math.max(0, i.quantity + delta)} : i).filter(i => i.quantity > 0))} 
+        onRemove={(id: string) => setCartItems(prev => prev.filter(i => i.id !== id))} 
         onClearCart={() => setCartItems([])} onShowNotification={() => {}} 
-        onAddOrder={handleAddOrder}
-        onTrackOrder={(id) => {
-            setIsCartOpen(false);
-            if (id && typeof id === 'string') setInitialTrackId(id);
-            setIsTrackerOpen(true);
-        }}
-        coupons={coupons}
-        allMenuItems={menuItems}
-        onAddToCart={addToCart}
-        loyaltyAccounts={loyaltyAccounts}
-        storeSettings={storeSettings}
+        onAddOrder={handleAddOrder} 
+        onTrackOrder={(id?: string) => { setIsCartOpen(false); if(id) setInitialTrackId(id); setIsTrackerOpen(true); }} 
+        coupons={coupons} allMenuItems={menuItems} onAddToCart={addToCart} 
+        loyaltyAccounts={loyaltyAccounts} storeSettings={storeSettings} 
       />
-
+      <OrderTrackerModal isOpen={isTrackerOpen} onClose={() => { setIsTrackerOpen(false); setInitialTrackId(''); }} initialOrderId={initialTrackId} riderLocation={riderLocation} orders={orders} />
       {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
-
-      <OrderTrackerModal 
-        isOpen={isTrackerOpen} 
-        onClose={() => {
-            setIsTrackerOpen(false);
-            setInitialTrackId('');
-        }} 
-        initialOrderId={initialTrackId}
-        riderLocation={riderLocation}
-        orders={orders}
-      />
-
+      
+      {showInstallBanner && (
+        <div className="fixed bottom-24 left-4 right-4 bg-stone-900 border border-brand-500/30 rounded-2xl p-4 z-[99999] flex justify-between items-center shadow-2xl">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-brand-500 rounded-lg flex items-center justify-center text-white font-black">C</div>
+             <div>
+               <h4 className="text-white text-xs font-bold uppercase">Install Chillies</h4>
+               <p className="text-stone-500 text-[10px]">Faster tracking & ordering</p>
+             </div>
+          </div>
+          <button onClick={handleInstallClick} className="bg-brand-500 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase">Install</button>
         </div>
-      } />
-    </Routes>
-    
-    {/* Global Components - Rendered on all paths */}
-    <CartSidebar
-        isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cartItems}
-        onUpdateQuantity={(id, delta) => setCartItems(prev => prev.map(i => i.id === id ? {...i, quantity: Math.max(0, i.quantity + delta)} : i).filter(i => i.quantity > 0))}
-        onRemove={id => setCartItems(prev => prev.filter(i => i.id !== id))}
-        onClearCart={() => setCartItems([])} onShowNotification={() => {}} 
-        onAddOrder={handleAddOrder}
-        onTrackOrder={(id) => {
-            setIsCartOpen(false);
-            if (id && typeof id === 'string') setInitialTrackId(id);
-            setIsTrackerOpen(true);
-        }}
-        coupons={coupons}
-        allMenuItems={menuItems}
-        onAddToCart={addToCart}
-        loyaltyAccounts={loyaltyAccounts}
-        storeSettings={storeSettings}
-    />
-
-    {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
-
-    <OrderTrackerModal 
-        isOpen={isTrackerOpen} 
-        onClose={() => {
-            setIsTrackerOpen(false);
-            setInitialTrackId('');
-        }} 
-        initialOrderId={initialTrackId}
-        riderLocation={riderLocation}
-        orders={orders}
-    />
+      )}
     </React.Suspense>
-    
-    {showInstallBanner && (deferredPrompt || isIOS) && (
-        <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-8 md:bottom-8 md:w-96 bg-stone-900 border border-brand-500/50 rounded-2xl p-4 shadow-2xl z-[9999] animate-fade-in flex flex-col gap-3">
-            <div className="flex justify-between items-start">
-                <div className="flex gap-3 items-center">
-                    <img src="/pwa-192x192.png" alt="App Icon" className="w-10 h-10 rounded-xl object-contain drop-shadow-md" onError={(e) => { (e.target as HTMLImageElement).src = 'https://cdn-icons-png.flaticon.com/512/3132/3132693.png'; }} />
-                    <div>
-                        <h4 className="text-white font-bold text-sm">Install Chillies App</h4>
-                        <p className="text-stone-400 text-xs text-balance">Get a faster, full-screen experience directly from your home screen.</p>
-                    </div>
-                </div>
-                <button onClick={() => setShowInstallBanner(false)} className="text-stone-500 hover:text-white p-1 transition-colors"><X size={16} /></button>
-            </div>
-            {isIOS ? (
-                <div className="mt-2 text-center text-xs text-stone-300 bg-stone-800 p-3 rounded-xl border border-stone-700">
-                    To install, tap the <strong className="text-white">Share</strong> icon below, then select <strong className="text-white">Add to Home Screen</strong>.
-                </div>
-            ) : (
-                <button onClick={handleInstallClick} className="w-full bg-brand-500 hover:bg-brand-400 text-white font-black uppercase tracking-widest text-[10px] py-3 rounded-xl transition-all shadow-lg active:scale-95">
-                    Install Now
-                </button>
-            )}
-        </div>
-    )}
-    </>
   );
 }
+
+const Footer = ({ onOpenAdmin, onOpenTC }: any) => (
+  <footer className="bg-stone-950 border-t border-white/5 py-12 px-4 text-center">
+    <h2 className="font-serif text-2xl text-white mb-2">Chillies Restaurant</h2>
+    <p className="text-stone-500 text-xs uppercase tracking-widest mb-8">Premium Dining Experience</p>
+    <div className="flex justify-center gap-8 mb-8 text-[10px] uppercase tracking-widest font-bold text-stone-500">
+      <button onClick={onOpenAdmin} className="hover:text-brand-500 transition-colors">Admin Login</button>
+      <button onClick={onOpenTC} className="hover:text-brand-500 transition-colors">Terms & Conditions</button>
+    </div>
+    <p className="text-stone-700 text-[10px]">&copy; 2026 Chillies Restaurant. All rights reserved.</p>
+  </footer>
+);
 
 export default App;
