@@ -837,8 +837,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Daily Revenue Chart */}
-                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8 group/chart">
-                            <div className="flex items-center justify-between mb-10">
+                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8 group/chart relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 blur-[100px] -z-10"></div>
+                            <div className="flex items-center justify-between mb-10 relative z-10">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-green-500/10 text-green-500 rounded-2xl flex items-center justify-center border border-green-500/10"><TrendingUp size={20} /></div>
                                     <div>
@@ -846,33 +847,51 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Inflow Last 7 Days</p>
                                     </div>
                                 </div>
+                                <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                    <span className="text-[9px] font-black uppercase text-green-500 tracking-widest">Growth Tracked</span>
+                                </div>
                             </div>
-                            <div className="h-64 flex items-end justify-between gap-2 px-2">
-                                {stats.dailyRev.map(([day, rev], i) => {
-                                    const maxRev = Math.max(...stats.dailyRev.map(d => d[1] as number), 1);
-                                    const height = (rev / maxRev) * 100;
-                                    return (
-                                        <div key={day} className="flex-1 flex flex-col items-center gap-3 group">
-                                            <div className="w-full relative flex flex-col justify-end h-full">
-                                                <div 
-                                                    style={{ height: `${height}%` }}
-                                                    className={`w-full bg-gradient-to-t from-gold-600 to-gold-400 rounded-t-lg transition-all duration-500 shadow-[0_0_20px_rgba(212,175,55,0.1)] ${rev > 0 ? 'opacity-40 group-hover:opacity-100 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]' : 'opacity-10'}`}
-                                                >
-                                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-2 whitespace-nowrap z-20">
-                                                        ₹{rev}
+
+                            <div className="h-64 relative">
+                                {/* Grid Lines */}
+                                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-[0.03]">
+                                    {[1, 2, 3, 4].map(i => <div key={i} className="w-full h-px bg-white"></div>)}
+                                </div>
+                                <div className="absolute -left-2 top-0 text-[8px] font-black text-stone-700 uppercase tracking-widest vertical-text h-full flex flex-col justify-between py-1 hidden sm:flex">
+                                    <span>Max ₹{Math.max(...stats.dailyRev.map(d => d[1] as number), 500)}</span>
+                                    <span>Scale</span>
+                                </div>
+
+                                <div className="h-full flex items-end justify-between gap-3 px-4 relative z-10">
+                                    {stats.dailyRev.map(([day, rev], i) => {
+                                        const maxRev = Math.max(...stats.dailyRev.map(d => d[1] as number), 1);
+                                        const height = (rev / maxRev) * 100;
+                                        return (
+                                            <div key={day} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer">
+                                                <div className="w-full relative flex flex-col justify-end h-full">
+                                                    <div 
+                                                        style={{ height: `${height}%` }}
+                                                        className={`w-full bg-gradient-to-t from-gold-600 via-gold-400 to-gold-300 rounded-full transition-all duration-700 shadow-[0_0_20px_rgba(212,175,55,0.05)] ${rev > 0 ? 'opacity-40 group-hover:opacity-100 group-hover:shadow-[0_0_40px_rgba(212,175,55,0.3)]' : 'opacity-[0.05]'}`}
+                                                    >
+                                                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-4 py-2 rounded-2xl text-[11px] font-black shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap z-50">
+                                                            ₹{rev}
+                                                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45"></div>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <span className="text-[10px] font-black uppercase text-stone-700 group-hover:text-gold-500 transition-colors tracking-tighter">{day}</span>
                                             </div>
-                                            <span className="text-[10px] font-black uppercase text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">{day}</span>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
 
                         {/* Busy Hours Chart */}
-                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8 group/chart">
-                            <div className="flex items-center justify-between mb-10">
+                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8 group/chart relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/5 blur-[100px] -z-10"></div>
+                            <div className="flex items-center justify-between mb-10 relative z-10">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-gold-500/10 text-gold-500 rounded-2xl flex items-center justify-center border border-gold-500/10"><BarChart3 size={20} /></div>
                                     <div>
@@ -880,30 +899,42 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Volume Breakdown</p>
                                     </div>
                                 </div>
+                                <div className="px-3 py-1 bg-gold-500/10 border border-gold-500/20 rounded-full flex items-center gap-2">
+                                    <Sparkles className="text-gold-500" size={10} />
+                                    <span className="text-[9px] font-black uppercase text-gold-500 tracking-widest">Peak Detected</span>
+                                </div>
                             </div>
-                            <div className="h-64 flex items-end justify-between gap-1">
-                                {stats.busyHours.map((count, hour) => {
-                                    const maxCount = Math.max(...stats.busyHours, 1);
-                                    const height = (count / maxCount) * 100;
-                                    const isBusy = count > 0;
-                                    return (
-                                        <div key={hour} className="flex-1 flex flex-col items-center gap-3 group h-full justify-end">
-                                            <div 
-                                                style={{ height: `${Math.max(4, height)}%` }}
-                                                className={`w-full rounded-t-sm transition-all duration-500 ${isBusy ? 'bg-gold-500 opacity-30 group-hover:opacity-100' : 'bg-stone-800 opacity-10'}`}
-                                            >
-                                                {count > 0 && (
-                                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-2 whitespace-nowrap z-20">
-                                                        {count} orders
-                                                    </div>
+
+                            <div className="h-64 relative">
+                                {/* Grid Lines */}
+                                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-[0.03]">
+                                    {[1, 2, 3, 4].map(i => <div key={i} className="w-full h-px bg-white"></div>)}
+                                </div>
+                                <div className="h-full flex items-end justify-between gap-1.5 px-2 relative z-10">
+                                    {stats.busyHours.map((count, hour) => {
+                                        const maxCount = Math.max(...stats.busyHours, 1);
+                                        const height = (count / maxCount) * 100;
+                                        const isBusy = count > 0;
+                                        return (
+                                            <div key={hour} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end cursor-pointer">
+                                                <div 
+                                                    style={{ height: `${Math.max(6, height)}%` }}
+                                                    className={`w-full rounded-full transition-all duration-500 ${isBusy ? 'bg-gold-500 opacity-40 group-hover:opacity-100 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]' : 'bg-stone-800 opacity-[0.15]'}`}
+                                                >
+                                                    {count > 0 && (
+                                                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-4 py-2 rounded-2xl text-[11px] font-black shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap z-50">
+                                                            {count} orders
+                                                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45"></div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {(hour % 6 === 0 || hour === 23) && (
+                                                    <span className="text-[8px] font-black text-stone-800 group-hover:text-gold-500 transition-colors uppercase">{hour}h</span>
                                                 )}
                                             </div>
-                                            {(hour % 4 === 0 || hour === 23) && (
-                                                <span className="text-[8px] font-black text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300">{hour}h</span>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </div>
