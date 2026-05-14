@@ -9,12 +9,16 @@ import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from '
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const riderIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
-    iconSize: [42, 42],
-    iconAnchor: [21, 21],
-    className: 'drop-shadow-xl saturate-200'
-});
+// Leaflet icons need to be handled carefully in React
+const getRiderIcon = () => {
+    if (typeof L === 'undefined') return null;
+    return new L.Icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
+        iconSize: [42, 42],
+        iconAnchor: [21, 21],
+        className: 'drop-shadow-xl saturate-200'
+    });
+};
 
 function MapUpdater({ center }: { center: [number, number] }) {
     const map = useMap();
@@ -215,7 +219,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   };
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-stone-950/90 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-stone-950/95" onClick={onClose}>
       {isPagerActive && (
          <div className="fixed inset-0 z-[110] bg-green-500 flex flex-col items-center justify-center p-6 animate-pulse" onClick={e => e.stopPropagation()}>
             <ShoppingBag size={120} className="text-stone-950 mb-8 animate-bounce" />
@@ -229,13 +233,16 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
             </button>
          </div>
       )}
-      <div className="bg-stone-900 border border-gold-500/30 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent"></div>
-        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-stone-950/50">
-            <h2 className="font-serif text-xl text-white">Track Your Order</h2>
-            <button onClick={onClose} className="text-stone-500 hover:text-white transition-colors p-1 hover:bg-stone-950/5 rounded-full"><X size={20} /></button>
+      <div className="bg-stone-900 border border-gold-500/50 rounded-3xl w-full max-w-md shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent z-20"></div>
+        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-stone-950 relative z-10">
+            <div>
+              <h2 className="font-serif text-xl text-white">Order Command Center</h2>
+              <p className="text-stone-500 text-[9px] uppercase tracking-widest font-black mt-1">Live Status Tracking</p>
+            </div>
+            <button onClick={onClose} className="text-stone-500 hover:text-white transition-colors p-2 bg-stone-900 rounded-full border border-white/5"><X size={20} /></button>
         </div>
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto scrollbar-hide flex-1">
             <form onSubmit={handleTrack} className="mb-6">
                 <div className="relative flex items-center">
                     <input type="text" value={orderId} onChange={(e) => setOrderId(e.target.value.toUpperCase())} placeholder="Order ID (e.g. A1234)" className="w-full bg-stone-950 border border-stone-800 rounded-lg py-3 pl-4 pr-12 text-white placeholder-stone-600 focus:border-gold-500 focus:outline-none transition-colors uppercase tracking-widest font-mono" />
@@ -371,7 +378,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                                     <CircleMarker center={[9.4818520, 76.3307510]} pathOptions={{ color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.5, weight: 2 }} radius={8}>
                                         <Tooltip permanent direction="top" className="bg-stone-900 border-none text-green-500 font-bold uppercase tracking-widest text-[9px] shadow-lg">Shop</Tooltip>
                                     </CircleMarker>
-                                    <Marker position={[riderLocation.lat, riderLocation.lng]} icon={riderIcon} />
+                                    <Marker position={[riderLocation.lat, riderLocation.lng]} icon={getRiderIcon() || undefined} />
                                 </MapContainer>
                             </div>
                         </div>
