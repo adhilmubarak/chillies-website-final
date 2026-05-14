@@ -74,6 +74,7 @@ export interface Order {
   pointsRedeemed?: number;
   pointsEarned?: number;
   firestoreId?: string; // Internal ID for direct updates
+  assignedAt?: number; // Timestamp when order status changed to 'ready' or 'out_for_delivery'
 }
 
 export interface FoodRating {
