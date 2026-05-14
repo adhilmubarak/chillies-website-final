@@ -11,10 +11,6 @@ import MenuItemCard from './components/MenuItemCard';
 import FlashSaleView from './components/FlashSaleView';
 import HappyHourView from './components/HappyHourView';
 import CartSidebar from './components/CartSidebar';
-import AdminPanel from './components/AdminPanel';
-import DeliveryPanel from './components/DeliveryPanel';
-import KitchenPanel from './components/KitchenPanel';
-import RewardsPage from './components/RewardsPage';
 import Footer from './components/Footer';
 import OrderTrackerModal from './components/OrderTrackerModal';
 import SmartSuggestion from './components/SmartSuggestion';
@@ -22,10 +18,16 @@ import NotificationTicker from './components/NotificationTicker';
 import StoreStatusAlert from './components/StoreStatusAlert';
 import BottomNav from './components/BottomNav';
 import FeedbackModal from './components/FeedbackModal';
-import OffersPage from './components/OffersPage';
-import ComplaintsPage from './components/ComplaintsPage';
 import { MENU_ITEMS as INITIAL_MENU_ITEMS } from './data';
 import ShawarmaLoader from './components/ShawarmaLoader';
+
+// Lazy load heavy components for faster initial load
+const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
+const DeliveryPanel = React.lazy(() => import('./components/DeliveryPanel'));
+const KitchenPanel = React.lazy(() => import('./components/KitchenPanel'));
+const RewardsPage = React.lazy(() => import('./components/RewardsPage'));
+const OffersPage = React.lazy(() => import('./components/OffersPage'));
+const ComplaintsPage = React.lazy(() => import('./components/ComplaintsPage'));
 import { MenuItem, CategoryConfig, CartItem, Order, Coupon, CustomOffer, FoodRating, LoyaltyAccount, Category, Complaint } from './types';
 import { Search, X } from 'lucide-react';
 
@@ -889,6 +891,7 @@ function App() {
   return (
     <>
 
+    <React.Suspense fallback={<ShawarmaLoader />}>
     <Routes>
       <Route path="/admin" element={
         <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
@@ -1228,6 +1231,7 @@ function App() {
         </div>
       } />
     </Routes>
+    </React.Suspense>
     
     {showInstallBanner && (deferredPrompt || isIOS) && (
         <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-8 md:bottom-8 md:w-96 bg-stone-900 border border-brand-500/50 rounded-2xl p-4 shadow-2xl z-[9999] animate-fade-in flex flex-col gap-3">
