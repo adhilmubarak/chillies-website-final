@@ -868,19 +868,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         const maxRev = Math.max(...stats.dailyRev.map(d => d[1] as number), 1);
                                         const height = (rev / maxRev) * 100;
                                         return (
-                                            <div key={day} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer">
+                                            <div key={day} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer h-full justify-end">
                                                 <div className="w-full relative flex flex-col justify-end h-full">
                                                     <div 
-                                                        style={{ height: `${height}%` }}
-                                                        className={`w-full bg-gradient-to-t from-gold-600 via-gold-400 to-gold-300 rounded-full transition-all duration-700 shadow-[0_0_20px_rgba(212,175,55,0.05)] ${rev > 0 ? 'opacity-40 group-hover:opacity-100 group-hover:shadow-[0_0_40px_rgba(212,175,55,0.3)]' : 'opacity-[0.05]'}`}
+                                                        style={{ height: `${Math.max(4, height)}%` }}
+                                                        className={`w-full bg-gradient-to-t from-gold-600 via-gold-500 to-gold-400 rounded-t-2xl transition-all duration-500 shadow-[0_0_20px_rgba(212,175,55,0.1)] ${rev > 0 ? 'opacity-80 group-hover:opacity-100 group-hover:shadow-[0_0_40px_rgba(212,175,55,0.3)]' : 'opacity-20'}`}
                                                     >
-                                                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-4 py-2 rounded-2xl text-[11px] font-black shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap z-50">
+                                                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-4 py-2 rounded-2xl text-[11px] font-black shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap z-50">
                                                             ₹{rev}
                                                             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45"></div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <span className="text-[10px] font-black uppercase text-stone-700 group-hover:text-gold-500 transition-colors tracking-tighter">{day}</span>
+                                                <span className="text-[10px] font-black uppercase text-stone-600 group-hover:text-gold-500 transition-colors tracking-tighter">{day}</span>
                                             </div>
                                         );
                                     })}
@@ -918,18 +918,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         return (
                                             <div key={hour} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end cursor-pointer">
                                                 <div 
-                                                    style={{ height: `${Math.max(6, height)}%` }}
-                                                    className={`w-full rounded-full transition-all duration-500 ${isBusy ? 'bg-gold-500 opacity-40 group-hover:opacity-100 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]' : 'bg-stone-800 opacity-[0.15]'}`}
+                                                    style={{ height: `${Math.max(8, height)}%` }}
+                                                    className={`w-full rounded-t-xl transition-all duration-500 ${isBusy ? 'bg-gold-500 opacity-80 group-hover:opacity-100 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]' : 'bg-stone-800 opacity-30'}`}
                                                 >
                                                     {count > 0 && (
-                                                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-4 py-2 rounded-2xl text-[11px] font-black shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap z-50">
+                                                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-4 py-2 rounded-2xl text-[11px] font-black shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap z-50">
                                                             {count} orders
                                                             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45"></div>
                                                         </div>
                                                     )}
                                                 </div>
                                                 {(hour % 6 === 0 || hour === 23) && (
-                                                    <span className="text-[8px] font-black text-stone-800 group-hover:text-gold-500 transition-colors uppercase">{hour}h</span>
+                                                    <span className="text-[8px] font-black text-stone-700 group-hover:text-gold-500 transition-colors uppercase">{hour}h</span>
                                                 )}
                                             </div>
                                         );
