@@ -5,6 +5,18 @@ import {
 } from 'lucide-react';
 import { Order } from '../types';
 
+const renderAddressWithLinks = (address: string) => {
+    if (!address) return null;
+    const parts = address.split(/(https?:\/\/[^\s,)]+)/g);
+    return parts.map((part, i) => 
+        part.match(/^https?:\/\//) ? (
+            <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline font-bold" onClick={(e) => e.stopPropagation()}>{part}</a>
+        ) : (
+            <span key={i}>{part}</span>
+        )
+    );
+};
+
 interface DeliveryPanelProps {
   orders: Order[];
   onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string, firestoreId?: string) => Promise<void>;
@@ -170,7 +182,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                     <div className="w-10 h-10 rounded-full bg-stone-950 flex items-center justify-center text-stone-500 shrink-0"><MapPin size={18} /></div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-stone-500 text-[10px] uppercase font-bold tracking-widest mb-0.5">Address</p>
-                                        <p className="text-stone-300 text-sm leading-relaxed">{order.address}</p>
+                                        <p className="text-stone-300 text-sm leading-relaxed">{renderAddressWithLinks(order.address)}</p>
                                     </div>
                                     <a 
                                         href={getDirectionsUrl(order.address)} 
