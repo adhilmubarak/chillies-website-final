@@ -801,7 +801,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             { label: 'View Orders', icon: ShoppingBag, color: 'bg-gold-500', action: () => { setActiveTab('orders'); setOrderStage('new'); } },
                             { label: 'Sales Report', icon: Download, color: 'bg-blue-500', action: downloadExcelReport },
                             { label: 'Live Map', icon: Navigation, color: 'bg-green-500', action: () => { setActiveTab('orders'); setOrderStage('active'); } },
-                            { label: 'New Promotion', icon: Sparkles, color: 'bg-purple-500', action: () => setActiveTab('offers') }
+                            { label: 'New Promotion', icon: Sparkles, color: 'bg-purple-500', action: () => setActiveTab('promotions') }
                         ].map((act, i) => (
                             <button 
                                 key={i} 
