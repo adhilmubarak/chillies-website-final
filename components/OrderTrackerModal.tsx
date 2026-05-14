@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User, Star, Navigation, MapPin, AlertCircle } from 'lucide-react';
+import { X, Search, Clock, CheckCircle, XCircle, ShoppingBag, Bike, Store, Flame, User, Star, Navigation, MapPin, AlertCircle, MessageSquare, Send } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, onSnapshot } from 'firebase/firestore';
 import { Order } from '../types';
 import SafeImage from './SafeImage';
 import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from 'react-leaflet';
@@ -42,6 +42,9 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   const [hoverRating, setHoverRating] = useState(0);
   const [myHistory, setMyHistory] = useState<Order[]>([]);
   const [isPagerActive, setIsPagerActive] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [orderMessages, setOrderMessages] = useState<any[]>([]);
 
   // Audio ref for the pager
   const pagerAudio = React.useRef<HTMLAudioElement | null>(null);
@@ -136,8 +139,39 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
     }
   };
 
-  const handleTrack = (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (!foundOrder?.id) return;
+    const q = query(collection(db, 'orders'), where("id", "==", foundOrder.id));
+    const unsub = onSnapshot(q, (snap) => {
+        if (!snap.empty) {
+            const data = snap.docs[0].data() as Order;
+            setFoundOrder(data);
+            setOrderMessages((data as any).messages || []);
+        }
+    });
+    return () => unsub();
+  }, [foundOrder?.id]);
+
+  const sendChatMessage = async () => {
+    if (!chatMessage.trim() || !foundOrder?.id) return;
+    const q = query(collection(db, 'orders'), where("id", "==", foundOrder.id));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+        const orderDoc = snap.docs[0];
+        const messages = orderDoc.data().messages || [];
+        await updateDoc(orderDoc.ref, {
+            messages: [...messages, {
+                text: chatMessage,
+                sender: 'customer',
+                timestamp: Date.now()
+            }]
+        });
+        setChatMessage('');
+    }
+  };
+
+  const handleTrack = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     fetchOrderDetails(orderId);
   };
 
@@ -406,6 +440,66 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                 </div>
             )}
         </div>
+
+        {/* Live Chat Overlay */}
+        {foundOrder && (
+            <div className={`fixed bottom-6 right-6 z-[2000] flex flex-col items-end gap-4 transition-all duration-500 ${isChatOpen ? 'w-full max-w-sm' : 'w-fit'}`}>
+                {isChatOpen && (
+                    <div className="w-full bg-stone-900 border border-stone-800 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col h-[500px] animate-fade-in">
+                        <div className="p-5 bg-stone-950 border-b border-stone-800 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-brand-500/20 rounded-lg flex items-center justify-center text-brand-500"><MessageSquare size={16} /></div>
+                                <span className="text-white font-bold text-sm tracking-tight">Support Chat</span>
+                            </div>
+                            <button onClick={() => setIsChatOpen(false)} className="text-stone-500 hover:text-white transition-colors"><X size={18} /></button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide">
+                            {orderMessages.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
+                                    <MessageSquare size={32} className="mb-2" />
+                                    <p className="text-[10px] font-black uppercase tracking-widest">Ask us anything about your order!</p>
+                                </div>
+                            ) : (
+                                orderMessages.map((msg, i) => (
+                                    <div key={i} className={`flex ${msg.sender === 'customer' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[85%] p-3 rounded-2xl text-xs ${msg.sender === 'customer' ? 'bg-brand-500 text-stone-950 font-bold rounded-tr-none shadow-lg' : 'bg-stone-800 text-stone-200 rounded-tl-none'}`}>
+                                            {msg.text}
+                                            <div className="text-[8px] mt-1 opacity-50">
+                                                {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="p-4 bg-stone-950 border-t border-stone-800 flex gap-2">
+                            <input 
+                                type="text" 
+                                value={chatMessage}
+                                onChange={(e) => setChatMessage(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                                placeholder="Type here..."
+                                className="flex-1 bg-stone-900 border border-stone-800 rounded-xl px-4 py-2 text-white text-xs focus:border-brand-500 outline-none"
+                            />
+                            <button onClick={sendChatMessage} className="p-3 bg-brand-500 text-stone-950 rounded-xl hover:bg-brand-400 transition-all shadow-lg"><Send size={16} /></button>
+                        </div>
+                    </div>
+                )}
+                
+                <button 
+                    onClick={() => setIsChatOpen(!isChatOpen)}
+                    className="w-16 h-16 bg-brand-500 text-stone-950 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all relative group"
+                >
+                    <MessageSquare size={28} className={isChatOpen ? 'hidden' : 'block group-hover:rotate-12 transition-transform'} />
+                    <X size={28} className={isChatOpen ? 'block' : 'hidden'} />
+                    {!isChatOpen && orderMessages.some(m => m.sender === 'admin') && (
+                         <div className="absolute top-0 right-0 w-5 h-5 bg-blue-500 border-4 border-stone-950 rounded-full animate-bounce"></div>
+                    )}
+                </button>
+            </div>
+        )}
       </div>
     </div>
   );

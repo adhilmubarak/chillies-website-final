@@ -10,6 +10,7 @@ import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, Loyal
 import { printThermalBill, printKOT, printNetworkKOT, discoverNetworkPrinters } from '../App';
 import SafeImage from './SafeImage';
 import { Html5Qrcode } from 'html5-qrcode';
+import * as XLSX from 'xlsx';
 import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -244,6 +245,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isRinging, setIsRinging] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
   const [latestNewOrderId, setLatestNewOrderId] = useState<string | null>(null);
+  const [activeChatOrderId, setActiveChatOrderId] = useState<string | null>(null);
+  const [chatMessage, setChatMessage] = useState('');
+  const [orderMessages, setOrderMessages] = useState<any[]>([]);
+  
   const prevPendingCountRef = useRef(orders.filter(o => o.status === 'pending').length);
   const prevOpenComplaintsCountRef = useRef((complaints || []).filter(c => c.status === 'open').length);
   const ringAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -447,7 +452,56 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
-  const handleStatusChange = (order: Order, newStatus: Order['status']) => {
+  const downloadExcelReport = () => {
+    const data = orders.map(o => ({
+      'Order ID': o.id,
+      'Date': o.date,
+      'Time': o.timestamp,
+      'Customer': o.customerName,
+      'Contact': o.contactNumber,
+      'Type': o.type,
+      'Status': o.status,
+      'Total (₹)': o.total,
+      'Payment': o.paymentMethod || 'N/A',
+      'Items': o.items.map(i => `${i.quantity}x ${i.name}`).join(', ')
+    }));
+    
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+    XLSX.writeFile(wb, `Chillies_Report_${new Date().toLocaleDateString()}.xlsx`);
+  };
+
+  const sendChatMessage = async (orderId: string) => {
+    if (!chatMessage.trim()) return;
+    const q = query(collection(db, 'orders'), where("id", "==", orderId));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+        const orderDoc = snap.docs[0];
+        const messages = orderDoc.data().messages || [];
+        await updateDoc(orderDoc.ref, {
+            messages: [...messages, {
+                text: chatMessage,
+                sender: 'admin',
+                timestamp: Date.now()
+            }]
+        });
+        setChatMessage('');
+    }
+  };
+
+  useEffect(() => {
+    if (!activeChatOrderId) return;
+    const q = query(collection(db, 'orders'), where("id", "==", activeChatOrderId));
+    const unsub = onSnapshot(q, (snap) => {
+        if (!snap.empty) {
+            setOrderMessages(snap.docs[0].data().messages || []);
+        }
+    });
+    return () => unsub();
+  }, [activeChatOrderId]);
+
+  const handleStatusChange = async (order: Order, newStatus: Order['status'], paymentMethod?: string) => {
     onUpdateOrderStatus(order.id, newStatus, undefined, order.firestoreId);
   };
 
@@ -747,7 +801,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     <h4 className="text-white font-serif text-xl">Revenue Trend</h4>
                                     <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Last 7 Days</p>
                                 </div>
-                                <TrendingUp className="text-green-500" size={24} />
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={downloadExcelReport}
+                                        className="bg-stone-800 text-gold-500 p-2.5 rounded-xl border border-gold-500/20 hover:bg-gold-500 hover:text-stone-950 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+                                    >
+                                        <Download size={16} /> Excel
+                                    </button>
+                                    <TrendingUp className="text-green-500" size={24} />
+                                </div>
                             </div>
                             <div className="h-64 flex items-end justify-between gap-2 px-2">
                                 {stats.dailyRev.map(([day, rev], i) => {
@@ -921,6 +983,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`, '_blank');
                                         }} title="WhatsApp Tracking Link" className="p-3 bg-stone-950 text-stone-600 hover:text-green-500 rounded-2xl border border-stone-900/5 transition-all flex justify-center items-center">
                                             <MessageCircle size={18} />
+                                        </button>
+                                        <button onClick={() => setActiveChatOrderId(order.id)} title="Live Chat" className="p-3 bg-stone-950 text-stone-600 hover:text-blue-500 rounded-2xl border border-stone-800 transition-all flex justify-center items-center relative">
+                                            <MessageSquare size={18} />
+                                            {order.messages?.some((m: any) => m.sender === 'customer' && !m.read) && (
+                                                <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                                            )}
                                         </button>
                                     </div>
                                 </div>
@@ -2391,6 +2459,61 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
         </div>
       )}
+
+        {/* Live Chat Modal */}
+        {activeChatOrderId && (
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 sm:p-6 bg-stone-950/90 backdrop-blur-sm animate-fade-in">
+                <div className="w-full max-w-lg bg-stone-900 border border-stone-800 rounded-[2.5rem] shadow-2xl flex flex-col h-[80vh] overflow-hidden">
+                    <div className="p-6 border-b border-stone-800 bg-stone-950 flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center"><MessageSquare size={20} /></div>
+                            <div>
+                                <h4 className="text-white font-serif text-lg">Order Chat #{activeChatOrderId}</h4>
+                                <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Direct Support</p>
+                            </div>
+                        </div>
+                        <button onClick={() => setActiveChatOrderId(null)} className="p-2 text-stone-500 hover:text-white transition-colors"><X size={20} /></button>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
+                        {orderMessages.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
+                                <MessageSquare size={48} className="mb-4" />
+                                <p className="text-xs font-bold uppercase tracking-widest">No messages yet</p>
+                            </div>
+                        ) : (
+                            orderMessages.map((msg, i) => (
+                                <div key={i} className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[80%] p-4 rounded-2xl text-sm ${msg.sender === 'admin' ? 'bg-gold-500 text-stone-950 font-medium rounded-tr-none' : 'bg-stone-800 text-white rounded-tl-none'}`}>
+                                        {msg.text}
+                                        <div className={`text-[8px] mt-1 opacity-50 ${msg.sender === 'admin' ? 'text-stone-900' : 'text-stone-400'}`}>
+                                            {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <div className="p-6 border-t border-stone-800 bg-stone-950 flex gap-3">
+                        <input 
+                            type="text" 
+                            value={chatMessage}
+                            onChange={(e) => setChatMessage(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && sendChatMessage(activeChatOrderId)}
+                            placeholder="Type a message..."
+                            className="flex-1 bg-stone-900 border border-stone-800 rounded-xl px-4 text-white text-sm focus:border-blue-500 outline-none"
+                        />
+                        <button 
+                            onClick={() => sendChatMessage(activeChatOrderId)}
+                            className="p-4 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all shadow-lg"
+                        >
+                            <Send size={18} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
     </div>
   );
 };
