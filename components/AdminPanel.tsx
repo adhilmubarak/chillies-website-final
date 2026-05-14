@@ -820,14 +820,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             <div className="w-full relative flex flex-col justify-end h-full">
                                                 <div 
                                                     style={{ height: `${height}%` }}
-                                                    className="w-full bg-gradient-to-t from-gold-600 to-gold-400 rounded-t-lg transition-all duration-700 group-hover:from-gold-400 group-hover:to-white shadow-[0_0_20px_rgba(212,175,55,0.2)]"
+                                                    className={`w-full bg-gradient-to-t from-gold-600 to-gold-400 rounded-t-lg transition-all duration-500 shadow-[0_0_20px_rgba(212,175,55,0.1)] ${rev > 0 ? 'opacity-40 group-hover:opacity-100 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]' : 'opacity-10'}`}
                                                 >
-                                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-stone-950 px-2 py-1 rounded text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-2 whitespace-nowrap z-20">
                                                         ₹{rev}
                                                     </div>
                                                 </div>
                                             </div>
-                                            <span className="text-[10px] font-black uppercase text-stone-600 group-hover:text-gold-500">{day}</span>
+                                            <span className="text-[10px] font-black uppercase text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">{day}</span>
                                         </div>
                                     );
                                 })}
@@ -852,16 +852,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         <div key={hour} className="flex-1 flex flex-col items-center gap-3 group h-full justify-end">
                                             <div 
                                                 style={{ height: `${Math.max(4, height)}%` }}
-                                                className={`w-full rounded-t-sm transition-all duration-300 ${isBusy ? 'bg-gold-500/60 hover:bg-gold-500' : 'bg-stone-800/30'}`}
+                                                className={`w-full rounded-t-sm transition-all duration-500 ${isBusy ? 'bg-gold-500 opacity-30 group-hover:opacity-100' : 'bg-stone-800 opacity-10'}`}
                                             >
                                                 {count > 0 && (
-                                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-stone-950 px-2 py-1 rounded text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-2 whitespace-nowrap z-20">
                                                         {count} orders
                                                     </div>
                                                 )}
                                             </div>
                                             {(hour % 4 === 0 || hour === 23) && (
-                                                <span className="text-[8px] font-black text-stone-700">{hour}h</span>
+                                                <span className="text-[8px] font-black text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300">{hour}h</span>
                                             )}
                                         </div>
                                     );
