@@ -120,28 +120,32 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
 
   const fetchOrderDetails = (idToFetch: string) => {
     if (!idToFetch.trim()) return;
+    setLoading(true);
     setError('');
     
-    const targetId = idToFetch.trim().toUpperCase();
-    const found = orders.find(o => o.id === targetId);
-    
-    if (!found) {
-        setError('Order not found. Please check your Order ID.');
-        setFoundOrder(null);
-    } else {
-        setFoundOrder(found);
+    setTimeout(() => {
+        const targetId = idToFetch.trim().toUpperCase();
+        const found = orders.find(o => o.id === targetId);
         
-        // Also save to standard history if not present
-        try {
-            const savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
-            if (!savedIds.includes(targetId)) {
-                savedIds.push(targetId);
-                localStorage.setItem('myOrders', JSON.stringify(savedIds));
-                const history = orders.filter(o => savedIds.includes(o.id)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                setMyHistory(history);
-            }
-        } catch(e) {}
-    }
+        if (!found) {
+            setError('Order not found. Please check your Order ID.');
+            setFoundOrder(null);
+        } else {
+            setFoundOrder(found);
+            
+            // Also save to standard history if not present
+            try {
+                const savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
+                if (!savedIds.includes(targetId)) {
+                    savedIds.push(targetId);
+                    localStorage.setItem('myOrders', JSON.stringify(savedIds));
+                    const history = orders.filter(o => savedIds.includes(o.id)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    setMyHistory(history);
+                }
+            } catch(e) {}
+        }
+        setLoading(false);
+    }, 500);
   };
 
   useEffect(() => {
@@ -219,7 +223,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   };
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-stone-950/95" onClick={onClose}>
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/95" onClick={onClose}>
       {isPagerActive && (
          <div className="fixed inset-0 z-[110] bg-green-500 flex flex-col items-center justify-center p-6 animate-pulse" onClick={e => e.stopPropagation()}>
             <ShoppingBag size={120} className="text-stone-950 mb-8 animate-bounce" />
@@ -346,41 +350,12 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                         )}
                     </div>
                     
-                    {foundOrder.status === 'out_for_delivery' && foundOrder.type === 'delivery' && riderLocation && (
-                        <div className="mb-6 rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.1)] relative bg-stone-950 animate-fade-in">
-                            <div className="p-3 bg-stone-950 border-b border-white/5 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 relative shrink-0">
-                                        <Bike size={16} />
-                                        <div className="absolute top-0 right-0 w-2 h-2 bg-purple-500 rounded-full animate-ping"></div>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-white font-bold text-xs uppercase tracking-widest leading-none mb-1">Live Rider Tracking</h4>
-                                        <p className="text-stone-500 text-[9px] uppercase tracking-[0.2em] font-mono leading-none">Last Synced: {new Date(riderLocation.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                                    </div>
-                                </div>
-                                <a href={`https://www.google.com/maps/search/?api=1&query=${riderLocation.lat},${riderLocation.lng}`} target="_blank" rel="noreferrer" className="text-purple-500 hover:text-white transition-colors p-2 bg-stone-900 rounded-lg shrink-0">
-                                    <MapPin size={16} />
-                                </a>
-                            </div>
-                            <div className="w-full h-48 relative z-0">
-                                <MapContainer 
-                                    center={[riderLocation.lat, riderLocation.lng]} 
-                                    zoom={16} 
-                                    scrollWheelZoom={false} 
-                                    style={{ height: '100%', width: '100%' }}
-                                    zoomControl={false}
-                                >
-                                    <TileLayer 
-                                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                                    />
-                                    <MapUpdater center={[riderLocation.lat, riderLocation.lng]} />
-                                    <CircleMarker center={[9.4818520, 76.3307510]} pathOptions={{ color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.5, weight: 2 }} radius={8}>
-                                        <Tooltip permanent direction="top" className="bg-stone-900 border-none text-green-500 font-bold uppercase tracking-widest text-[9px] shadow-lg">Shop</Tooltip>
-                                    </CircleMarker>
-                                    <Marker position={[riderLocation.lat, riderLocation.lng]} icon={getRiderIcon() || undefined} />
-                                </MapContainer>
-                            </div>
+                    {/* Map temporarily disabled for stability during fix */}
+                    {foundOrder.status === 'out_for_delivery' && foundOrder.type === 'delivery' && (
+                        <div className="mb-6 p-8 bg-stone-950 border border-purple-500/20 rounded-2xl text-center">
+                            <Bike className="mx-auto text-purple-500 mb-4 animate-bounce" size={48} />
+                            <h4 className="text-white font-bold text-sm uppercase tracking-widest">Rider is on the way!</h4>
+                            <p className="text-stone-500 text-[10px] mt-2">Live tracking will resume shortly.</p>
                         </div>
                     )}
                     

@@ -1232,6 +1232,38 @@ function App() {
         </div>
       } />
     </Routes>
+    
+    {/* Global Components - Rendered on all paths */}
+    <CartSidebar
+        isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cartItems}
+        onUpdateQuantity={(id, delta) => setCartItems(prev => prev.map(i => i.id === id ? {...i, quantity: Math.max(0, i.quantity + delta)} : i).filter(i => i.quantity > 0))}
+        onRemove={id => setCartItems(prev => prev.filter(i => i.id !== id))}
+        onClearCart={() => setCartItems([])} onShowNotification={() => {}} 
+        onAddOrder={handleAddOrder}
+        onTrackOrder={(id) => {
+            setIsCartOpen(false);
+            if (id && typeof id === 'string') setInitialTrackId(id);
+            setIsTrackerOpen(true);
+        }}
+        coupons={coupons}
+        allMenuItems={menuItems}
+        onAddToCart={addToCart}
+        loyaltyAccounts={loyaltyAccounts}
+        storeSettings={storeSettings}
+    />
+
+    {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
+
+    <OrderTrackerModal 
+        isOpen={isTrackerOpen} 
+        onClose={() => {
+            setIsTrackerOpen(false);
+            setInitialTrackId('');
+        }} 
+        initialOrderId={initialTrackId}
+        riderLocation={riderLocation}
+        orders={orders}
+    />
     </React.Suspense>
     
     {showInstallBanner && (deferredPrompt || isIOS) && (
