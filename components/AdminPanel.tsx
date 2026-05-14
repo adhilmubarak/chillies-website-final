@@ -760,56 +760,91 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             )}
             
             {activeTab === 'dashboard' && (
-                <div className="space-y-8 animate-fade-in max-w-7xl mx-auto">
+                <div className="space-y-10 animate-fade-in max-w-7xl mx-auto px-4 sm:px-8 py-8">
+                    {/* Header Section */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h1 className="text-4xl font-serif text-white mb-2">
+                                Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}, Admin
+                            </h1>
+                            <p className="text-stone-500 text-xs font-bold uppercase tracking-[0.3em]">
+                                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} • Chillies Central
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                             <div className={`flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all shadow-xl ${isStoreOpen ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
+                                <div className={`w-2.5 h-2.5 rounded-full ${isStoreOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                                <span className="text-[11px] font-black uppercase tracking-widest">{isStoreOpen ? 'Kitchen Live' : 'Kitchen Offline'}</span>
+                            </div>
+                        </div>
+                    </div>
+
                     {!isStoreOpen && openingCountdown && (
-                        <div className="bg-red-950 border border-red-800 p-6 rounded-2xl flex items-center justify-between shadow-lg shadow-red-500/5">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-red-500 text-white rounded-xl"><Clock size={24} /></div>
+                        <div className="bg-gradient-to-r from-red-950/40 to-transparent border border-red-800/30 p-8 rounded-[2rem] flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                                <div className="p-4 bg-red-500/20 text-red-500 rounded-2xl border border-red-500/20"><Clock size={28} /></div>
                                 <div>
-                                    <h4 className="text-white font-bold uppercase tracking-widest text-xs">Kitchen Offline</h4>
-                                    <p className="text-stone-400 text-[10px]">Prepare for your next service session.</p>
+                                    <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-1">Service Paused</h4>
+                                    <p className="text-stone-500 text-[10px] font-medium max-w-[200px]">The store is currently closed. Prepare your inventory for the next shift.</p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <span className="text-stone-500 text-[9px] uppercase tracking-[0.2em] font-black block mb-1">Resuming In</span>
-                                <span className="text-red-500 font-mono text-2xl font-bold">{openingCountdown}</span>
+                                <span className="text-stone-600 text-[9px] uppercase tracking-[0.2em] font-black block mb-2">Resuming In</span>
+                                <span className="text-red-500 font-mono text-4xl font-bold tracking-tighter">{openingCountdown}</span>
                             </div>
                         </div>
                     )}
+
+                    {/* Quick Actions Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                            { label: 'View Orders', icon: ShoppingBag, color: 'bg-gold-500', action: () => { setActiveTab('orders'); setOrderStage('new'); } },
+                            { label: 'Sales Report', icon: Download, color: 'bg-blue-500', action: downloadExcelReport },
+                            { label: 'Live Map', icon: Navigation, color: 'bg-green-500', action: () => { setActiveTab('orders'); setOrderStage('active'); } },
+                            { label: 'New Promotion', icon: Sparkles, color: 'bg-purple-500', action: () => setActiveTab('offers') }
+                        ].map((act, i) => (
+                            <button 
+                                key={i} 
+                                onClick={act.action}
+                                className="group bg-stone-900 border border-stone-800 p-5 rounded-2xl flex flex-col items-center gap-3 hover:border-gold-500/50 transition-all active:scale-95 shadow-lg shadow-black/20"
+                            >
+                                <div className={`p-3 rounded-xl ${act.color} text-stone-950 shadow-lg group-hover:scale-110 transition-transform`}>
+                                    <act.icon size={20} />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-stone-400 group-hover:text-white transition-colors">{act.label}</span>
+                            </button>
+                        ))}
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
-                            { label: 'Total Revenue', val: `₹${stats.totalRevenue}`, icon: Zap, color: 'text-green-500' },
-                            { label: 'Avg. Prep Time', val: `${stats.avgPrepTime}m`, icon: Clock, color: 'text-orange-500' },
-                            { label: 'Delivered', val: stats.deliveredOrders, icon: Check, color: 'text-blue-500' },
-                            { label: 'Avg. Order', val: `₹${stats.avgOrderValue}`, icon: Filter, color: 'text-purple-500' }
-                        ].map((s: {label: string, val: string | number, icon: any, color: string}, i: number) => (
-                            <div key={i} className="bg-stone-900 border border-stone-800 p-6 rounded-2xl group hover:border-gold-500 transition-colors">
-                                <div className="flex justify-between items-start mb-4">
+                            { label: 'Total Revenue', val: `₹${stats.totalRevenue}`, icon: Zap, color: 'text-green-500', sub: 'Real-time' },
+                            { label: 'Avg. Prep Time', val: `${stats.avgPrepTime}m`, icon: Clock, color: 'text-orange-500', sub: 'Performance' },
+                            { label: 'Delivered', val: stats.deliveredOrders, icon: Check, color: 'text-blue-500', sub: 'Completed' },
+                            { label: 'Avg. Order', val: `₹${stats.avgOrderValue}`, icon: Filter, color: 'text-purple-500', sub: 'Efficiency' }
+                        ].map((s: any, i: number) => (
+                            <div key={i} className="bg-stone-900/50 border border-stone-800/50 p-6 rounded-[2rem] group hover:border-gold-500/30 transition-all relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-gold-500/5 blur-[40px] rounded-full"></div>
+                                <div className="flex justify-between items-start mb-6">
                                     <div className={`p-3 rounded-xl bg-stone-950 border border-stone-800 ${s.color} shadow-lg shadow-black/40`}><s.icon size={20} /></div>
-                                    <span className="text-green-500 text-[10px] font-bold">+5.2%</span>
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-stone-600 bg-stone-950 px-2.5 py-1 rounded-full border border-stone-800">{s.sub}</div>
                                 </div>
                                 <p className="text-stone-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1">{s.label}</p>
-                                <h3 className="text-3xl font-serif text-white">{s.val}</h3>
+                                <h3 className="text-4xl font-serif text-white">{s.val}</h3>
                             </div>
                         ))}
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Daily Revenue Chart */}
-                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8">
-                            <div className="flex items-center justify-between mb-8">
-                                <div>
-                                    <h4 className="text-white font-serif text-xl">Revenue Trend</h4>
-                                    <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Last 7 Days</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button 
-                                        onClick={downloadExcelReport}
-                                        className="bg-stone-800 text-gold-500 p-2.5 rounded-xl border border-gold-500/20 hover:bg-gold-500 hover:text-stone-950 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
-                                    >
-                                        <Download size={16} /> Excel
-                                    </button>
-                                    <TrendingUp className="text-green-500" size={24} />
+                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8 group/chart">
+                            <div className="flex items-center justify-between mb-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-green-500/10 text-green-500 rounded-2xl flex items-center justify-center border border-green-500/10"><TrendingUp size={20} /></div>
+                                    <div>
+                                        <h4 className="text-white font-serif text-xl">Revenue Trend</h4>
+                                        <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Inflow Last 7 Days</p>
+                                    </div>
                                 </div>
                             </div>
                             <div className="h-64 flex items-end justify-between gap-2 px-2">
@@ -836,13 +871,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
 
                         {/* Busy Hours Chart */}
-                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8">
-                            <div className="flex items-center justify-between mb-8">
-                                <div>
-                                    <h4 className="text-white font-serif text-xl">Busy Hours</h4>
-                                    <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Orders per hour</p>
+                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8 group/chart">
+                            <div className="flex items-center justify-between mb-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gold-500/10 text-gold-500 rounded-2xl flex items-center justify-center border border-gold-500/10"><BarChart3 size={20} /></div>
+                                    <div>
+                                        <h4 className="text-white font-serif text-xl">Busy Hours</h4>
+                                        <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Volume Breakdown</p>
+                                    </div>
                                 </div>
-                                <BarChart3 className="text-gold-500" size={24} />
                             </div>
                             <div className="h-64 flex items-end justify-between gap-1">
                                 {stats.busyHours.map((count, hour) => {
