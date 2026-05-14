@@ -74,25 +74,17 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
     window.open(`tel:${cleanPhone}`, '_self');
   };
 
-  const handleDirections = (address?: string) => {
-    if (!address) {
-        alert("Error: No address found for this order.");
-        return;
-    }
-    const trimmed = address.trim();
+  const getDirectionsUrl = (address?: string) => {
+    if (!address) return '#';
+    // Clean line breaks and extra spaces
+    const cleaned = address.replace(/\s+/g, ' ').trim();
     
-    // Improved regex to find a URL and exclude trailing punctuation
-    const urlMatch = trimmed.match(/https?:\/\/[^\s,)]+/);
+    // Check for any URL in the string
+    const urlMatch = cleaned.match(/https?:\/\/[^\s,)]+/);
     
-    if (urlMatch) {
-        const url = urlMatch[0];
-        console.log("Opening direct location link:", url);
-        window.open(url, '_blank');
-    } else {
-        const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`;
-        console.log("Searching for address:", trimmed);
-        window.open(searchUrl, '_blank');
-    }
+    // If a link is found, return it directly. 
+    // Otherwise, use the standard Google Maps search format.
+    return urlMatch ? urlMatch[0] : `https://www.google.com/maps?q=${encodeURIComponent(cleaned)}`;
   };
 
   if (!isAuthenticated) {
@@ -168,9 +160,9 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                     <p className="text-stone-500 text-[10px] uppercase font-bold tracking-widest mb-0.5">Customer</p>
                                     <p className="text-stone-50 font-bold text-sm truncate">{order.customerName}</p>
                                 </div>
-                                <button onClick={() => handleCall(order.contactNumber)} className="p-3 bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white rounded-xl transition-all">
+                                <a href={`tel:${order.contactNumber?.replace(/\D/g, '')}`} className="p-3 bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white rounded-xl transition-all">
                                     <PhoneCall size={18} />
-                                </button>
+                                </a>
                             </div>
 
                             {order.address && (
@@ -180,9 +172,14 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                                         <p className="text-stone-500 text-[10px] uppercase font-bold tracking-widest mb-0.5">Address</p>
                                         <p className="text-stone-300 text-sm leading-relaxed">{order.address}</p>
                                     </div>
-                                    <button onClick={() => handleDirections(order.address)} className="p-3 bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white rounded-xl transition-all">
+                                    <a 
+                                        href={getDirectionsUrl(order.address)} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="p-3 bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white rounded-xl transition-all"
+                                    >
                                         <Navigation size={18} />
-                                    </button>
+                                    </a>
                                 </div>
                             )}
                         </div>
