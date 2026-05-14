@@ -14,7 +14,8 @@ import * as XLSX from 'xlsx';
 import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { messaging } from '../firebase';
+import { messaging, db } from '../firebase';
+import { collection, query, where, getDocs, updateDoc, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 const riderIcon = new L.Icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
     iconSize: [42, 42],
