@@ -96,6 +96,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
         }
     } else if (isOpen) {
         setFoundOrder(null);
+        setOrderId(''); // Reset input if opened empty
     }
   }, [initialOrderId, isOpen]);
 
@@ -214,7 +215,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/90 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-stone-950/90 animate-fade-in" onClick={onClose}>
       {isPagerActive && (
          <div className="fixed inset-0 z-[110] bg-green-500 flex flex-col items-center justify-center p-6 animate-pulse" onClick={e => e.stopPropagation()}>
             <ShoppingBag size={120} className="text-stone-950 mb-8 animate-bounce" />

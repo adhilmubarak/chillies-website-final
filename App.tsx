@@ -1198,18 +1198,6 @@ function App() {
         }}
         activeSection={activeSection}
       />
-      <OrderTrackerModal 
-        isOpen={isTrackerOpen} 
-        onClose={() => {
-            setIsTrackerOpen(false);
-            setInitialTrackId('');
-        }} 
-        initialOrderId={initialTrackId}
-        riderLocation={riderLocation}
-        orders={orders}
-      />
-      {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
-      
       <CartSidebar
         isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cartItems}
         onUpdateQuantity={(id, delta) => setCartItems(prev => prev.map(i => i.id === id ? {...i, quantity: Math.max(0, i.quantity + delta)} : i).filter(i => i.quantity > 0))}
@@ -1226,6 +1214,19 @@ function App() {
         onAddToCart={addToCart}
         loyaltyAccounts={loyaltyAccounts}
         storeSettings={storeSettings}
+      />
+
+      {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
+
+      <OrderTrackerModal 
+        isOpen={isTrackerOpen} 
+        onClose={() => {
+            setIsTrackerOpen(false);
+            setInitialTrackId('');
+        }} 
+        initialOrderId={initialTrackId}
+        riderLocation={riderLocation}
+        orders={orders}
       />
 
         </div>
