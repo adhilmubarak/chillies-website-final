@@ -3,7 +3,7 @@ import {
   X, Plus, Trash2, Tag, List, 
   Settings, LayoutDashboard, Search, 
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
-  ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight,
+  ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight, TrendingUp, BarChart3,
   Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount, Complaint } from '../types';
@@ -338,14 +338,52 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   }, [isStoreOpen, storeSettings.startTime]);
 
   const stats = useMemo(() => {
-    const totalRev = orders.filter(o => o.status === 'delivered').reduce((acc, o) => acc + (o.total || 0), 0);
-    const delivered = orders.filter(o => o.status === 'delivered').length;
+    const deliveredOrders = orders.filter(o => o.status === 'delivered');
+    const totalRev = deliveredOrders.reduce((acc, o) => acc + (o.total || 0), 0);
+    const deliveredCount = deliveredOrders.length;
+    
+    // Preparation Time Analytics
+    const preppedOrders = orders.filter(o => o.assignedAt && o.createdAt && (o.status === 'ready' || o.status === 'out_for_delivery' || o.status === 'delivered'));
+    const totalPrepTime = preppedOrders.reduce((acc, o) => {
+        const prepTime = Math.max(0, (o.assignedAt! - o.createdAt) / (1000 * 60)); // minutes
+        return acc + prepTime;
+    }, 0);
+    const avgPrepTime = preppedOrders.length ? Math.round(totalPrepTime / preppedOrders.length) : 0;
+
+    // Daily Revenue (Last 7 days)
+    const dailyRevData: Record<string, number> = {};
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateStr = date.toLocaleDateString('en-IN', { weekday: 'short' });
+        dailyRevData[dateStr] = 0;
+    }
+    
+    deliveredOrders.forEach(o => {
+        const date = new Date(o.createdAt);
+        const dateStr = date.toLocaleDateString('en-IN', { weekday: 'short' });
+        if (dailyRevData[dateStr] !== undefined) {
+            dailyRevData[dateStr] += (o.total || 0);
+        }
+    });
+
+    // Busy Hours
+    const hourStats = Array(24).fill(0);
+    orders.forEach(o => {
+        const hour = new Date(o.createdAt).getHours();
+        hourStats[hour]++;
+    });
+
     return {
       totalItems: items.length,
       totalOrders: orders.length,
-      deliveredOrders: delivered,
+      deliveredOrders: deliveredCount,
       totalRevenue: totalRev,
-      avgOrderValue: delivered ? Math.round(totalRev / delivered) : 0,
+      avgOrderValue: deliveredCount ? Math.round(totalRev / deliveredCount) : 0,
+      avgPrepTime,
+      dailyRev: Object.entries(dailyRevData).reverse(),
+      busyHours: hourStats
     };
   }, [items, orders]);
 
@@ -676,7 +714,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
                             { label: 'Total Revenue', val: `₹${stats.totalRevenue}`, icon: Zap, color: 'text-green-500' },
-                            { label: 'Total Orders', val: stats.totalOrders, icon: ShoppingBag, color: 'text-gold-500' },
+                            { label: 'Avg. Prep Time', val: `${stats.avgPrepTime}m`, icon: Clock, color: 'text-orange-500' },
                             { label: 'Delivered', val: stats.deliveredOrders, icon: Check, color: 'text-blue-500' },
                             { label: 'Avg. Order', val: `₹${stats.avgOrderValue}`, icon: Filter, color: 'text-purple-500' }
                         ].map((s: {label: string, val: string | number, icon: any, color: string}, i: number) => (
@@ -689,6 +727,75 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 <h3 className="text-3xl font-serif text-white">{s.val}</h3>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Daily Revenue Chart */}
+                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8">
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <h4 className="text-white font-serif text-xl">Revenue Trend</h4>
+                                    <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Last 7 Days</p>
+                                </div>
+                                <TrendingUp className="text-green-500" size={24} />
+                            </div>
+                            <div className="h-64 flex items-end justify-between gap-2 px-2">
+                                {stats.dailyRev.map(([day, rev], i) => {
+                                    const maxRev = Math.max(...stats.dailyRev.map(d => d[1] as number), 1);
+                                    const height = (rev / maxRev) * 100;
+                                    return (
+                                        <div key={day} className="flex-1 flex flex-col items-center gap-3 group">
+                                            <div className="w-full relative flex flex-col justify-end h-full">
+                                                <div 
+                                                    style={{ height: `${height}%` }}
+                                                    className="w-full bg-gradient-to-t from-gold-600 to-gold-400 rounded-t-lg transition-all duration-700 group-hover:from-gold-400 group-hover:to-white shadow-[0_0_20px_rgba(212,175,55,0.2)]"
+                                                >
+                                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-stone-950 px-2 py-1 rounded text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        ₹{rev}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase text-stone-600 group-hover:text-gold-500">{day}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Busy Hours Chart */}
+                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8">
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <h4 className="text-white font-serif text-xl">Busy Hours</h4>
+                                    <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Orders per hour</p>
+                                </div>
+                                <BarChart3 className="text-gold-500" size={24} />
+                            </div>
+                            <div className="h-64 flex items-end justify-between gap-1">
+                                {stats.busyHours.map((count, hour) => {
+                                    const maxCount = Math.max(...stats.busyHours, 1);
+                                    const height = (count / maxCount) * 100;
+                                    const isBusy = count > 0;
+                                    return (
+                                        <div key={hour} className="flex-1 flex flex-col items-center gap-3 group h-full justify-end">
+                                            <div 
+                                                style={{ height: `${Math.max(4, height)}%` }}
+                                                className={`w-full rounded-t-sm transition-all duration-300 ${isBusy ? 'bg-gold-500/60 hover:bg-gold-500' : 'bg-stone-800/30'}`}
+                                            >
+                                                {count > 0 && (
+                                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-stone-950 px-2 py-1 rounded text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                        {count} orders
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {(hour % 4 === 0 || hour === 23) && (
+                                                <span className="text-[8px] font-black text-stone-700">{hour}h</span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
