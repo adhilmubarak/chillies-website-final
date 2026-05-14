@@ -338,41 +338,51 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   }, [isStoreOpen, storeSettings.startTime]);
 
   const stats = useMemo(() => {
+    const validOrders = orders.filter(o => o.status !== 'cancelled');
     const deliveredOrders = orders.filter(o => o.status === 'delivered');
     const totalRev = deliveredOrders.reduce((acc, o) => acc + (o.total || 0), 0);
     const deliveredCount = deliveredOrders.length;
     
-    // Preparation Time Analytics
-    const preppedOrders = orders.filter(o => o.assignedAt && o.createdAt && (o.status === 'ready' || o.status === 'out_for_delivery' || o.status === 'delivered'));
+    // Preparation Time Analytics (Time from pending to ready)
+    const preppedOrders = orders.filter(o => o.assignedAt && o.createdAt);
     const totalPrepTime = preppedOrders.reduce((acc, o) => {
-        const prepTime = Math.max(0, (o.assignedAt! - o.createdAt) / (1000 * 60)); // minutes
+        const prepTime = Math.max(0, (o.assignedAt! - o.createdAt) / (1000 * 60)); 
         return acc + prepTime;
     }, 0);
     const avgPrepTime = preppedOrders.length ? Math.round(totalPrepTime / preppedOrders.length) : 0;
 
-    // Daily Revenue (Last 7 days)
+    // Daily Revenue (Last 7 days) - Includes all non-cancelled orders for the trend
     const dailyRevData: Record<string, number> = {};
     const today = new Date();
+    
+    // Initialize last 7 days
     for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        const dateStr = date.toLocaleDateString('en-IN', { weekday: 'short' });
-        dailyRevData[dateStr] = 0;
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const dayKey = d.toLocaleDateString('en-US', { weekday: 'short' });
+        dailyRevData[dayKey] = 0;
     }
     
-    deliveredOrders.forEach(o => {
-        const date = new Date(o.createdAt);
-        const dateStr = date.toLocaleDateString('en-IN', { weekday: 'short' });
-        if (dailyRevData[dateStr] !== undefined) {
-            dailyRevData[dateStr] += (o.total || 0);
+    validOrders.forEach(o => {
+        const orderDate = new Date(o.createdAt);
+        const dayKey = orderDate.toLocaleDateString('en-US', { weekday: 'short' });
+        if (dailyRevData[dayKey] !== undefined) {
+            // Check if it's within the last 7 days
+            const diffTime = Math.abs(today.getTime() - orderDate.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays <= 7) {
+                dailyRevData[dayKey] += (o.total || 0);
+            }
         }
     });
 
-    // Busy Hours
+    // Busy Hours (All valid orders)
     const hourStats = Array(24).fill(0);
-    orders.forEach(o => {
+    validOrders.forEach(o => {
         const hour = new Date(o.createdAt).getHours();
-        hourStats[hour]++;
+        if (hour >= 0 && hour < 24) {
+            hourStats[hour]++;
+        }
     });
 
     return {
