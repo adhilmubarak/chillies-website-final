@@ -499,8 +499,12 @@ function App() {
     return () => observer.disconnect();
   }, [activeCategory, orderedCats]);
 
+  if (showSplash) {
+    return <div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>;
+  }
+
   return (
-    <React.Suspense fallback={<ShawarmaLoader />}>
+    <React.Suspense fallback={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>}>
       {!isAdminOpen && (
         <>
           <Navbar 
