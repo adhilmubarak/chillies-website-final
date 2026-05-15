@@ -221,6 +221,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isRiderMapOpen, setIsRiderMapOpen] = useState(false);
   const [newCatInput, setNewCatInput] = useState('');
+  const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
+  const [categoryInput, setCategoryInput] = useState('');
   const [editingCategory, setEditingCategory] = useState<CategoryConfig | null>(null);
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponVal, setNewCouponVal] = useState(0);
@@ -665,15 +667,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
          </div>
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-stone-900 border-r border-stone-800 flex flex-col shrink-0 h-full transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-8 border-b border-stone-800 flex items-center gap-3">
-            <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center font-serif text-stone-950 font-bold text-xl shadow-lg shadow-gold-500/40">C</div>
-            <div>
-                <h1 className="text-white font-serif font-bold text-lg leading-none uppercase tracking-tight">CHILLIES</h1>
-                <span className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">Admin Console</span>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-stone-950 border-r border-gold-500/10 flex flex-col shrink-0 h-full transition-transform duration-500 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full shadow-none'}`}>
+        <div className="p-8 border-b border-white/5 flex items-center gap-4 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-gold-500/5 to-transparent"></div>
+            <div className="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center font-serif text-stone-950 font-black text-2xl shadow-[0_10px_30px_rgba(212,175,55,0.3)] relative z-10">C</div>
+            <div className="relative z-10">
+                <h1 className="text-white font-serif font-black text-xl leading-none uppercase tracking-tighter">CHILLIES</h1>
+                <span className="text-[9px] text-gold-500/60 uppercase tracking-[0.3em] font-black mt-1 block">Command Center</span>
             </div>
         </div>
-        <nav className="flex-1 p-6 space-y-2 overflow-y-auto scrollbar-hide">
+        <nav className="flex-1 p-6 space-y-1.5 overflow-y-auto scrollbar-hide">
+            <div className="text-[9px] text-stone-600 font-black uppercase tracking-[0.2em] mb-4 px-4">Menu Navigation</div>
             {[
                 { id: 'dashboard', icon: LayoutDashboard, label: 'Overview' },
                 { id: 'orders', icon: ShoppingBag, label: 'Orders' },
@@ -690,12 +694,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button 
                     key={tab.id}
                     onClick={() => { setActiveTab(tab.id as any); setIsMobileMenuOpen(false); }}
-                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 relative group ${
-                        activeTab === tab.id ? 'bg-gold-500 text-stone-950 shadow-xl' : 'text-stone-400 hover:text-white hover:bg-stone-900'
+                    className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 relative group ${
+                        activeTab === tab.id ? 'bg-white text-stone-950 shadow-[0_20px_40px_rgba(0,0,0,0.5)] scale-[1.02]' : 'text-stone-500 hover:text-stone-200 hover:bg-white/5'
                     }`}
                 >
-                    <tab.icon size={18} className={activeTab === tab.id ? 'stroke-[2.5]' : ''} />
-                    <span className="text-sm font-bold tracking-wide flex-1">{tab.label}</span>
+                    <tab.icon size={18} className={activeTab === tab.id ? 'stroke-[2.5]' : 'opacity-50'} />
+                    <span className="text-[11px] font-black tracking-[0.1em] uppercase flex-1 text-left">{tab.label}</span>
                     
                     {tab.id === 'orders' && orders.filter(o => o.status === 'pending').length > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${activeTab === 'orders' ? 'bg-stone-950 text-gold-500' : 'bg-gold-500 text-stone-950 animate-pulse'}`}>
@@ -819,19 +823,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
-                            { label: 'Total Revenue', val: `₹${stats.totalRevenue}`, icon: Zap, color: 'text-green-500', sub: 'Real-time' },
-                            { label: 'Avg. Prep Time', val: `${stats.avgPrepTime}m`, icon: Clock, color: 'text-orange-500', sub: 'Performance' },
-                            { label: 'Delivered', val: stats.deliveredOrders, icon: Check, color: 'text-blue-500', sub: 'Completed' },
-                            { label: 'Avg. Order', val: `₹${stats.avgOrderValue}`, icon: Filter, color: 'text-purple-500', sub: 'Efficiency' }
+                            { label: 'Total Revenue', val: `₹${stats.totalRevenue}`, icon: Zap, color: 'text-green-500', sub: 'Real-time', glow: 'shadow-green-500/20' },
+                            { label: 'Avg. Prep Time', val: `${stats.avgPrepTime}m`, icon: Clock, color: 'text-orange-500', sub: 'Performance', glow: 'shadow-orange-500/20' },
+                            { label: 'Delivered', val: stats.deliveredOrders, icon: Check, color: 'text-blue-500', sub: 'Completed', glow: 'shadow-blue-500/20' },
+                            { label: 'Avg. Order', val: `₹${stats.avgOrderValue}`, icon: Filter, color: 'text-purple-500', sub: 'Efficiency', glow: 'shadow-purple-500/20' }
                         ].map((s: any, i: number) => (
-                            <div key={i} className="bg-stone-900/50 border border-stone-800/50 p-6 rounded-[2rem] group hover:border-gold-500/30 transition-all relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-gold-500/5 blur-[40px] rounded-full"></div>
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className={`p-3 rounded-xl bg-stone-950 border border-stone-800 ${s.color} shadow-lg shadow-black/40`}><s.icon size={20} /></div>
-                                    <div className="text-[9px] font-black uppercase tracking-widest text-stone-600 bg-stone-950 px-2.5 py-1 rounded-full border border-stone-800">{s.sub}</div>
+                            <div key={i} className={`bg-stone-900 border border-white/5 p-8 rounded-[2.5rem] group hover:border-gold-500/30 transition-all relative overflow-hidden shadow-2xl ${s.glow}`}>
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/5 blur-[50px] rounded-full group-hover:bg-gold-500/10 transition-all"></div>
+                                <div className="flex justify-between items-start mb-8 relative z-10">
+                                    <div className={`p-4 rounded-2xl bg-stone-950 border border-white/5 ${s.color} shadow-xl group-hover:scale-110 transition-transform`}><s.icon size={24} /></div>
+                                    <div className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-500 bg-stone-950 px-3 py-1.5 rounded-full border border-white/5">{s.sub}</div>
                                 </div>
-                                <p className="text-stone-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1">{s.label}</p>
-                                <h3 className="text-4xl font-serif text-white">{s.val}</h3>
+                                <p className="text-stone-500 text-[10px] uppercase tracking-[0.3em] font-black mb-2 opacity-60">{s.label}</p>
+                                <h3 className="text-4xl font-serif text-white group-hover:text-gold-400 transition-colors">{s.val}</h3>
                             </div>
                         ))}
                     </div>
@@ -1263,71 +1267,104 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             )}
 
             {activeTab === 'categories' && (
-                <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-12">
-                    <div className="bg-stone-900 border border-white/5 p-10 rounded-[3rem] shadow-xl">
-                        <div className="flex items-center gap-4 mb-10">
-                            <div className="w-12 h-12 bg-gold-500/10 rounded-2xl flex items-center justify-center text-gold-500 border border-gold-500/20"><Tag size={24} /></div>
-                            <div>
-                                <h4 className="text-2xl font-serif text-white">Menu Categories</h4>
-                                <p className="text-stone-500 text-xs uppercase tracking-widest font-bold">Structure your offerings</p>
-                            </div>
+                <div className="space-y-12 animate-fade-in max-w-7xl mx-auto pb-20">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-stone-900 border border-white/5 p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-gold-500/5 to-transparent"></div>
+                        <div className="relative z-10">
+                            <h2 className="text-4xl font-serif text-white mb-2">Departments</h2>
+                            <p className="text-stone-500 text-[10px] font-black uppercase tracking-[0.3em]">Operational Menu Sections & Time Schedules</p>
                         </div>
-                        <div className="flex gap-4 mb-12">
-                            <div className="relative flex-1">
-                                <Layers size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-stone-500" />
-                                <input type="text" placeholder="Enter new category name..." value={newCatInput} onChange={(e) => setNewCatInput(e.target.value)} className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 pl-14 pr-6 text-white focus:border-gold-500 outline-none transition-all" />
+                        <div className="flex w-full md:w-auto gap-4 relative z-10">
+                            <div className="relative flex-1 md:w-80">
+                                <Layers size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-stone-600" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Add new department..." 
+                                    value={newCatInput} 
+                                    onChange={(e) => setNewCatInput(e.target.value)} 
+                                    className="w-full bg-stone-950 border border-white/5 rounded-2xl py-5 pl-14 pr-6 text-white text-sm focus:border-gold-500 outline-none transition-all shadow-inner" 
+                                />
                             </div>
-                            <button onClick={() => { if(newCatInput.trim()) { onAddCategory(newCatInput.trim()); setNewCatInput(''); } }} className="bg-gold-500 text-stone-950 px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2 transition-all shadow-lg"> <Plus size={18} /> Add </button>
+                            <button 
+                                onClick={() => { if(newCatInput.trim()) { onAddCategory(newCatInput.trim()); setNewCatInput(''); } }}
+                                className="bg-gold-500 text-stone-950 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-[0_20px_40px_rgba(212,175,55,0.2)] hover:bg-gold-400 transition-all active:scale-95 flex items-center gap-3"
+                            >
+                                <Plus size={18} /> Deploy
+                            </button>
                         </div>
-                        <div className="grid grid-cols-1 gap-4">
-                            {categories.map((cat, index) => (
-                                <div key={cat.id} className={`flex items-center justify-between p-6 bg-stone-950/50 rounded-2xl border transition-all group ${cat.isUnavailable ? 'border-red-500/20 opacity-60 grayscale' : 'border-white/5 hover:border-gold-500/30'}`}>
-                                    <div className="flex items-center gap-4">
-                                        
-                                        <div className="flex flex-col items-center justify-center -ml-2 mr-2 opacity-50 hover:opacity-100 transition-opacity">
-                                            <button 
-                                                disabled={index === 0} 
-                                                onClick={() => onReorderCategory && onReorderCategory('up', index)} 
-                                                className="p-1 text-stone-500 hover:text-gold-500 disabled:opacity-20 transition-all rounded"
-                                            >
-                                                <ChevronUp size={20} className="stroke-[3]" />
-                                            </button>
-                                            <button 
-                                                disabled={index === categories.length - 1} 
-                                                onClick={() => onReorderCategory && onReorderCategory('down', index)} 
-                                                className="p-1 text-stone-500 hover:text-gold-500 disabled:opacity-20 transition-all rounded"
-                                            >
-                                                <ChevronDown size={20} className="stroke-[3]" />
-                                            </button>
-                                        </div>
+                    </div>
 
-                                        <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-gold-500 group-hover:scale-110 transition-transform"><Tag size={18} /></div>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-white font-bold tracking-tight">{cat.name}</p>
-                                                {cat.isUnavailable && <span className="text-[8px] font-black uppercase tracking-widest text-red-500 bg-red-500/10 px-2 py-0.5 rounded-sm">Offline</span>}
-                                            </div>
-                                            {cat.startTime && cat.endTime && <p className="text-[9px] text-stone-500 font-mono">{cat.startTime} - {cat.endTime}</p>}
-                                            <p className="text-[10px] text-stone-500 uppercase font-black">{items.filter(i => i.category === cat.name).length} Dishes</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {categories.sort((a, b) => (a.order || 0) - (b.order || 0)).map((cat, index) => (
+                            <div key={cat.id} className="bg-stone-900 border border-white/5 rounded-[3rem] p-10 group hover:border-gold-500/30 transition-all relative overflow-hidden shadow-2xl">
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-gold-500/5 blur-[80px] -z-10 group-hover:bg-gold-500/10 transition-all"></div>
+                                
+                                <div className="flex justify-between items-start mb-10">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-stone-950 border border-white/5 rounded-xl flex items-center justify-center text-gold-500 shadow-inner group-hover:scale-110 transition-transform"><Tag size={18} /></div>
+                                            <span className="text-stone-600 text-[8px] font-black uppercase tracking-[0.2em] font-mono">SEC-0{index + 1}</span>
                                         </div>
+                                        <h3 className="text-white text-3xl font-serif tracking-tight pr-4">{cat.name}</h3>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <button 
-                                            onClick={() => onUpdateCategory && onUpdateCategory({ ...cat, isUnavailable: !cat.isUnavailable })}
-                                            className={`group relative flex h-5 w-9 shrink-0 cursor-pointer rounded-full p-0.5 transition-all duration-300 ease-in-out focus:outline-none ${!cat.isUnavailable ? 'bg-gold-500 shadow-[0_0_10px_rgba(212,175,55,0.3)]' : 'bg-stone-800 border border-stone-700'}`}
-                                        >
-                                            <span
-                                                aria-hidden="true"
-                                                className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full shadow-lg ring-0 transition duration-300 ease-in-out ${!cat.isUnavailable ? 'translate-x-4 bg-stone-950' : 'translate-x-0 bg-stone-900'}`}
-                                            />
-                                        </button>
-                                        <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
-                                        <button onClick={() => setEditingCategory(cat)} className="p-2 text-stone-600 hover:text-gold-500 hover:bg-gold-500/5 rounded-xl transition-all"> <Edit2 size={16} /> </button>
-                                        <button onClick={() => onDeleteCategory(cat.name)} className="p-2 text-stone-600 hover:text-red-500 hover:bg-red-500/5 rounded-xl transition-all"> <Trash2 size={18} /> </button>
+                                    <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-lg ${!cat.isUnavailable ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                                        {!cat.isUnavailable ? '● Live' : '○ Hidden'}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+
+                                <div className="space-y-5 mb-12">
+                                    <div className="flex items-center gap-4 text-stone-400 bg-stone-950/50 p-4 rounded-2xl border border-white/5">
+                                        <div className="p-2 bg-stone-950 rounded-lg text-gold-500 shadow-inner"><Clock size={16} /></div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] text-stone-600 uppercase font-black tracking-widest mb-1">Operational Hours</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-white">
+                                                {cat.startTime && cat.endTime ? `${cat.startTime} — ${cat.endTime}` : 'UNRESTRICTED (24/7)'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-stone-400 bg-stone-950/50 p-4 rounded-2xl border border-white/5">
+                                        <div className="p-2 bg-stone-950 rounded-lg text-gold-500 shadow-inner"><Layers size={16} /></div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] text-stone-600 uppercase font-black tracking-widest mb-1">Inventory Volume</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-white">
+                                                {items.filter(i => i.category === cat.name).length} REGISTERED ITEMS
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 pt-8 border-t border-white/5 relative z-10">
+                                    <button 
+                                        onClick={() => { setEditingCategory(cat); setCategoryInput(cat.name); setIsCategoryFormOpen(true); }}
+                                        className="flex-1 py-4 bg-stone-950 border border-white/5 text-stone-400 hover:text-white hover:border-gold-500/30 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-inner active:scale-95"
+                                    >
+                                        Configure
+                                    </button>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => onReorderCategory && onReorderCategory('up', index)}
+                                            className="p-4 bg-stone-950 border border-white/5 text-stone-500 hover:text-gold-500 rounded-2xl transition-all shadow-inner active:scale-95"
+                                            disabled={index === 0}
+                                        >
+                                            <ChevronUp size={18} strokeWidth={3} />
+                                        </button>
+                                        <button 
+                                            onClick={() => onReorderCategory && onReorderCategory('down', index)}
+                                            className="p-4 bg-stone-950 border border-white/5 text-stone-500 hover:text-gold-500 rounded-2xl transition-all shadow-inner active:scale-95"
+                                            disabled={index === categories.length - 1}
+                                        >
+                                            <ChevronDown size={18} strokeWidth={3} />
+                                        </button>
+                                    </div>
+                                    <button 
+                                        onClick={() => onDeleteCategory(cat.name)}
+                                        className="p-4 bg-stone-950 border border-white/5 text-stone-500 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all shadow-inner active:scale-95"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
@@ -2607,6 +2644,67 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             className="p-4 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all shadow-lg"
                         >
                             <Send size={18} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Category Configuration Modal */}
+        {isCategoryFormOpen && (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md animate-fade-in">
+                <div className="bg-stone-900 border border-white/5 w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden relative">
+                    <div className="p-8 border-b border-white/5 flex justify-between items-center bg-stone-900/50">
+                        <div>
+                            <h3 className="text-2xl font-serif text-white">{editingCategory ? 'Update Department' : 'New Department'}</h3>
+                            <p className="text-[10px] text-stone-500 uppercase tracking-widest font-black mt-1">Operational Configuration</p>
+                        </div>
+                        <button onClick={() => { setIsCategoryFormOpen(false); setEditingCategory(null); }} className="p-3 text-stone-500 hover:text-white hover:bg-white/5 rounded-full"><X size={24} /></button>
+                    </div>
+                    <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto scrollbar-hide">
+                        <div className="space-y-3">
+                            <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2"><Tag size={14} className="text-gold-500" /> Department Name</label>
+                            <input type="text" value={categoryInput} onChange={e => setCategoryInput(e.target.value)} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-white text-sm focus:border-gold-500 outline-none shadow-inner" placeholder="e.g. Signature Cocktails" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-3">
+                                <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2"><Clock size={14} className="text-gold-500" /> Start Time</label>
+                                <input type="time" value={editingCategory?.startTime || ''} onChange={e => setEditingCategory(prev => prev ? {...prev, startTime: e.target.value} : null)} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-white text-xs outline-none focus:border-gold-500 [color-scheme:dark]" />
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-[10px] text-stone-600 uppercase tracking-widest font-black flex items-center gap-2"><Clock size={14} className="text-gold-500" /> End Time</label>
+                                <input type="time" value={editingCategory?.endTime || ''} onChange={e => setEditingCategory(prev => prev ? {...prev, endTime: e.target.value} : null)} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-white text-xs outline-none focus:border-gold-500 [color-scheme:dark]" />
+                            </div>
+                        </div>
+                        <div className="p-6 bg-stone-950 rounded-2xl border border-white/5 flex items-center justify-between">
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] text-white font-black uppercase tracking-widest">Visibility Status</span>
+                                <span className="text-[9px] text-stone-600 uppercase font-bold">Show or hide this section from customers</span>
+                            </div>
+                            <button 
+                                onClick={() => setEditingCategory(prev => prev ? {...prev, isUnavailable: !prev.isUnavailable} : null)}
+                                className={`relative w-14 h-7 rounded-full transition-all duration-500 ${!editingCategory?.isUnavailable ? 'bg-gold-500 shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'bg-stone-800'}`}
+                            >
+                                <div className={`absolute top-1 w-5 h-5 bg-stone-950 rounded-full transition-all duration-500 ${!editingCategory?.isUnavailable ? 'left-8' : 'left-1'}`}></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-8 bg-stone-900 border-t border-white/5 flex gap-4">
+                        <button onClick={() => { setIsCategoryFormOpen(false); setEditingCategory(null); }} className="flex-1 py-5 bg-stone-950 text-stone-500 hover:text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all">Discard</button>
+                        <button 
+                            onClick={() => {
+                                if (editingCategory && onUpdateCategory) {
+                                    onUpdateCategory({ ...editingCategory, name: categoryInput });
+                                    setIsCategoryFormOpen(false);
+                                    setEditingCategory(null);
+                                } else if (!editingCategory && onAddCategory) {
+                                    onAddCategory(categoryInput);
+                                    setIsCategoryFormOpen(false);
+                                }
+                            }}
+                            className="flex-1 py-5 bg-gold-500 text-stone-950 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl hover:bg-gold-400 transition-all active:scale-95"
+                        >
+                            {editingCategory ? 'Sync Department' : 'Deploy Section'}
                         </button>
                     </div>
                 </div>

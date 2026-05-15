@@ -223,8 +223,8 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
 
   return (
     <>
-      <div className={`fixed inset-0 bg-stone-950/60 backdrop-blur-sm z-[110] transition-opacity duration-700 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={handleClose} />
-      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-stone-950/90 backdrop-blur-2xl border-l border-white/5 z-[120] transform transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-[0_0_100px_rgba(0,0,0,1)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-0 bg-stone-950/40 z-[110] transition-opacity duration-700 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={handleClose} />
+      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-stone-950 border-l border-white/5 z-[120] transform transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-[0_0_100px_rgba(0,0,0,1)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full relative pb-20 md:pb-0">
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-gold-500/50 to-transparent animate-pulse"></div>
 
