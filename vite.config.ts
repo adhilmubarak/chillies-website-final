@@ -29,6 +29,15 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-    sourcemap: false
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor_react: ['react', 'react-dom', 'react-router-dom'],
+          vendor_firebase: ['firebase/app', 'firebase/firestore', 'firebase/storage', 'firebase/messaging'],
+          vendor_lucide: ['lucide-react']
+        }
+      }
+    }
   }
 });

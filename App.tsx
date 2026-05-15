@@ -1,12 +1,13 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MenuItemCard from './components/MenuItemCard';
 import CartSidebar from './components/CartSidebar';
-import OrderTrackerModal from './components/OrderTrackerModal';
-import AdminPanel from './components/AdminPanel';
+
+const OrderTrackerModal = lazy(() => import('./components/OrderTrackerModal'));
+const AdminPanel = lazy(() => import('./components/AdminPanel'));
 import { Category, MenuItem, CartItem, Order, CategoryConfig, Coupon, CustomOffer, LoyaltyAccount, FoodRating, Complaint } from './types';
 import { MENU_ITEMS } from './data.ts';
 import { db } from './firebase';
@@ -19,15 +20,16 @@ import ChefsChoice from './components/ChefsChoice';
 import FlashSaleView from './components/FlashSaleView';
 import HappyHourView from './components/HappyHourView';
 import StoreStatusAlert from './components/StoreStatusAlert';
-import OffersPage from './components/OffersPage';
-import RewardsPage from './components/RewardsPage';
 import FeedbackModal from './components/FeedbackModal';
-import ComplaintsPage from './components/ComplaintsPage';
-import DeliveryPanel from './components/DeliveryPanel';
-import KitchenPanel from './components/KitchenPanel';
 import ShawarmaLoader from './components/ShawarmaLoader';
-import ARViewerModal from './components/ARViewerModal';
 import { Capacitor } from '@capacitor/core';
+
+const OffersPage = lazy(() => import('./components/OffersPage'));
+const RewardsPage = lazy(() => import('./components/RewardsPage'));
+const ComplaintsPage = lazy(() => import('./components/ComplaintsPage'));
+const DeliveryPanel = lazy(() => import('./components/DeliveryPanel'));
+const KitchenPanel = lazy(() => import('./components/KitchenPanel'));
+const ARViewerModal = lazy(() => import('./components/ARViewerModal'));
 import { App as CapApp } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { registerPlugin } from '@capacitor/core';
@@ -520,6 +522,7 @@ function App() {
         </>
       )}
 
+      <Suspense fallback={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>}>
       <Routes>
         <Route path="/admin" element={
           <AdminPanel 
@@ -623,6 +626,7 @@ function App() {
           </div>
         } />
       </Routes>
+      </Suspense>
 
       {!isAdminOpen && (
         <BottomNav 
@@ -642,9 +646,13 @@ function App() {
         coupons={coupons} allMenuItems={menuItems} onAddToCart={addToCart} 
         loyaltyAccounts={loyaltyAccounts} storeSettings={storeSettings} 
       />
+      <Suspense fallback={null}>
       <OrderTrackerModal isOpen={isTrackerOpen} onClose={() => { setIsTrackerOpen(false); setInitialTrackId(''); }} initialOrderId={initialTrackId} riderLocation={riderLocation} orders={orders} />
+      </Suspense>
       {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
+      <Suspense fallback={null}>
       <ARViewerModal isOpen={!!arItem} onClose={() => setArItem(null)} itemName={arItem?.name || ''} modelUrl={arItem?.threeDModel} />
+      </Suspense>
       
       {showInstallBanner && !isAdminOpen && (
         <div className="fixed bottom-24 right-4 left-4 sm:left-auto sm:w-[320px] bg-stone-900/90 backdrop-blur-xl border border-brand-500/30 rounded-3xl p-4 z-[99999] flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in-up">
