@@ -42,24 +42,44 @@ const ARViewerModal: React.FC<ARViewerModalProps> = ({ isOpen, onClose, itemName
         </div>
 
         {/* 3D Viewer Area */}
-        <div className="flex-grow relative bg-[radial-gradient(circle_at_center,_#292524_0%,_#0c0c0c_100%)]">
-            {React.createElement('model-viewer' as any, {
-                src: actualModel,
-                alt: `A 3D model of ${itemName}`,
-                ar: true,
-                'ar-modes': "webxr scene-viewer quick-look",
-                'camera-controls': true,
-                'shadow-intensity': "2",
-                exposure: "1",
-                'environment-image': "neutral",
-                'auto-rotate': true,
-                className: "w-full h-full",
-                style: { width: '100%', height: '100%' }
-            }, (
-                <div slot="ar-button" className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gold-500 text-stone-950 px-8 py-4 rounded-full font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl flex items-center gap-3 hover:scale-105 active:scale-95 transition-all">
-                    <Smartphone size={16} /> View in Your Room
+        <div className="flex-grow relative bg-[radial-gradient(circle_at_center,_#292524_0%,_#0c0c0c_100%)] flex items-center justify-center overflow-hidden">
+            {modelUrl ? (
+                React.createElement('model-viewer' as any, {
+                    src: modelUrl,
+                    alt: `A 3D model of ${itemName}`,
+                    ar: true,
+                    'ar-modes': "webxr scene-viewer quick-look",
+                    'camera-controls': true,
+                    'shadow-intensity': "2",
+                    exposure: "1",
+                    'environment-image': "neutral",
+                    'auto-rotate': true,
+                    className: "w-full h-full",
+                    style: { width: '100%', height: '100%' }
+                }, (
+                    <div slot="ar-button" className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gold-500 text-stone-950 px-8 py-4 rounded-full font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl flex items-center gap-3 hover:scale-105 active:scale-95 transition-all">
+                        <Smartphone size={16} /> View in Your Room
+                    </div>
+                ))
+            ) : (
+                <div className="relative group perspective-1000">
+                    <div className="absolute inset-0 bg-gold-500/20 blur-[100px] rounded-full animate-pulse"></div>
+                    <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-[3rem] overflow-hidden border border-gold-500/30 shadow-[0_50px_100px_rgba(0,0,0,0.5)] rotate-y-12 group-hover:rotate-y-0 transition-transform duration-1000">
+                        <img 
+                            src={window.localStorage.getItem('last_ar_image') || ''} 
+                            alt={itemName} 
+                            className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-gold-500/20 to-transparent"></div>
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:100%_4px] opacity-20"></div>
+                    </div>
+                    <div className="mt-8 text-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 border border-gold-500/20 rounded-full text-gold-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                            <Box size={14} /> Generating 3D Projection
+                        </div>
+                    </div>
                 </div>
-            ))}
+            )}
 
             {/* Hint Overlay */}
             <div className="absolute top-8 right-8 pointer-events-none text-right">

@@ -148,14 +148,13 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10 max-w-[90%]">
             {item.isChefChoice && <div className="bg-gold-500 text-stone-950 p-2 rounded-full shadow-lg border border-gold-300"><ChefHat size={12} /></div>}
             {item.isVegetarian && <div className="bg-stone-950 text-green-400 p-2 rounded-full border border-green-800"><Leaf size={12} /></div>}
-            {onViewAR && (
-                <button 
-                    onClick={(e) => { e.stopPropagation(); onViewAR(item); }}
-                    className="bg-stone-900/80 backdrop-blur-md text-gold-400 p-2 rounded-full border border-gold-500/30 shadow-xl hover:bg-gold-500 hover:text-stone-950 transition-all animate-pulse"
-                >
-                    <Box size={12} />
-                </button>
-            )}
+            <button 
+                onClick={(e) => { e.stopPropagation(); onViewAR && onViewAR(item); }}
+                className="bg-stone-900/90 backdrop-blur-xl text-gold-500 px-3 py-2 rounded-2xl border border-gold-500/40 shadow-[0_10px_30px_rgba(212,175,55,0.2)] hover:bg-gold-500 hover:text-stone-950 transition-all flex items-center gap-2 group/ar animate-pulse-slow"
+            >
+                <Box size={14} className="group-hover/ar:rotate-12 transition-transform" />
+                <span className="text-[8px] font-black uppercase tracking-[0.2em]">3D View</span>
+            </button>
             {renderSpicyTag()}
         </div>
 
