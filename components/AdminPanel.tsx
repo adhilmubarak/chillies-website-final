@@ -838,50 +838,48 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Daily Revenue Chart */}
-                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8 group/chart relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 blur-[100px] -z-10"></div>
-                            <div className="flex items-center justify-between mb-10 relative z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-green-500/10 text-green-500 rounded-2xl flex items-center justify-center border border-green-500/10"><TrendingUp size={20} /></div>
+                        <div className="bg-stone-900 border border-white/5 rounded-[2.5rem] p-8 group/chart relative overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+                            <div className="absolute top-0 right-0 w-80 h-80 bg-gold-500/5 blur-[120px] -z-10"></div>
+                            <div className="flex items-center justify-between mb-12 relative z-10">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-14 h-14 bg-stone-950 text-gold-500 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl"><TrendingUp size={24} /></div>
                                     <div>
-                                        <h4 className="text-white font-serif text-xl">Revenue Trend</h4>
-                                        <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Inflow Last 7 Days</p>
+                                        <h4 className="text-white font-serif text-2xl tracking-tight">Revenue Trend</h4>
+                                        <p className="text-stone-500 text-[10px] uppercase tracking-[0.2em] font-black mt-1">7-Day Performance Insight</p>
                                     </div>
                                 </div>
-                                <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                                    <span className="text-[9px] font-black uppercase text-green-500 tracking-widest">Growth Tracked</span>
+                                <div className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                                    <span className="text-[9px] font-black uppercase text-green-500 tracking-widest">Live Data Feed</span>
                                 </div>
                             </div>
 
-                            <div className="h-64 relative">
-                                {/* Grid Lines */}
-                                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-[0.03]">
-                                    {[1, 2, 3, 4].map(i => <div key={i} className="w-full h-px bg-white"></div>)}
+                            <div className="h-72 relative mt-4">
+                                {/* Technical Grid lines */}
+                                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-[0.02] z-0">
+                                    {[1, 2, 3, 4, 5].map(i => <div key={i} className="w-full h-px bg-white"></div>)}
                                 </div>
-                                <div className="absolute -left-2 top-0 text-[8px] font-black text-stone-700 uppercase tracking-widest vertical-text h-full flex flex-col justify-between py-1 hidden sm:flex">
-                                    <span>Max ₹{Math.max(...stats.dailyRev.map(d => d[1] as number), 500)}</span>
-                                    <span>Scale</span>
-                                </div>
-
-                                <div className="h-full flex items-end justify-between gap-3 px-4 relative z-10">
+                                
+                                <div className="h-full flex items-end justify-between gap-4 px-2 relative z-10">
                                     {stats.dailyRev.map(([day, rev], i) => {
                                         const maxRev = Math.max(...stats.dailyRev.map(d => d[1] as number), 1);
                                         const height = (rev / maxRev) * 100;
                                         return (
-                                            <div key={day} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer h-full justify-end">
+                                            <div key={day} className="flex-1 flex flex-col items-center gap-5 group cursor-pointer h-full justify-end">
                                                 <div className="w-full relative flex flex-col justify-end h-full">
                                                     <div 
                                                         style={{ height: `${Math.max(4, height)}%` }}
-                                                        className={`w-full bg-gradient-to-t from-gold-600 via-gold-500 to-gold-400 rounded-t-2xl transition-all duration-500 shadow-[0_0_20px_rgba(212,175,55,0.1)] ${rev > 0 ? 'opacity-80 group-hover:opacity-100 group-hover:shadow-[0_0_40px_rgba(212,175,55,0.3)]' : 'opacity-20'}`}
+                                                        className={`w-full bg-gradient-to-t from-gold-700 via-gold-500 to-gold-300 rounded-t-xl transition-all duration-700 shadow-[0_0_30px_rgba(212,175,55,0.05)] relative overflow-hidden group-hover:shadow-[0_0_50px_rgba(212,175,55,0.3)] group-hover:scale-x-[1.05] origin-bottom ${rev > 0 ? 'opacity-90' : 'opacity-10'}`}
                                                     >
-                                                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-4 py-2 rounded-2xl text-[11px] font-black shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap z-50">
-                                                            ₹{rev}
-                                                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45"></div>
-                                                        </div>
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                    </div>
+                                                    {/* Tooltip */}
+                                                    <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-stone-900/95 backdrop-blur-xl border border-gold-500/30 text-white px-4 py-2.5 rounded-2xl text-[12px] font-black shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 whitespace-nowrap z-50 pointer-events-none">
+                                                        <span className="text-gold-500 mr-2">₹</span>{rev.toLocaleString()}
+                                                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 border-r border-b border-gold-500/30 rotate-45"></div>
                                                     </div>
                                                 </div>
-                                                <span className="text-[10px] font-black uppercase text-stone-600 group-hover:text-gold-500 transition-colors tracking-tighter">{day}</span>
+                                                <span className="text-[9px] font-black uppercase text-stone-600 group-hover:text-white transition-colors tracking-widest">{day}</span>
                                             </div>
                                         );
                                     })}
@@ -890,47 +888,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
 
                         {/* Busy Hours Chart */}
-                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] p-8 group/chart relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/5 blur-[100px] -z-10"></div>
-                            <div className="flex items-center justify-between mb-10 relative z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gold-500/10 text-gold-500 rounded-2xl flex items-center justify-center border border-gold-500/10"><BarChart3 size={20} /></div>
+                        <div className="bg-stone-900 border border-white/5 rounded-[2.5rem] p-8 group/chart relative overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+                            <div className="absolute top-0 right-0 w-80 h-80 bg-gold-500/5 blur-[120px] -z-10"></div>
+                            <div className="flex items-center justify-between mb-12 relative z-10">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-14 h-14 bg-stone-950 text-gold-400 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl"><BarChart3 size={24} /></div>
                                     <div>
-                                        <h4 className="text-white font-serif text-xl">Busy Hours</h4>
-                                        <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold">Volume Breakdown</p>
+                                        <h4 className="text-white font-serif text-2xl tracking-tight">Busy Hours</h4>
+                                        <p className="text-stone-500 text-[10px] uppercase tracking-[0.2em] font-black mt-1">Order Volume Distribution</p>
                                     </div>
                                 </div>
-                                <div className="px-3 py-1 bg-gold-500/10 border border-gold-500/20 rounded-full flex items-center gap-2">
-                                    <Sparkles className="text-gold-500" size={10} />
+                                <div className="px-4 py-2 bg-gold-500/10 border border-gold-500/20 rounded-full flex items-center gap-2">
+                                    <Sparkles className="text-gold-500" size={14} />
                                     <span className="text-[9px] font-black uppercase text-gold-500 tracking-widest">Peak Detected</span>
                                 </div>
                             </div>
 
-                            <div className="h-64 relative">
-                                {/* Grid Lines */}
-                                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-[0.03]">
-                                    {[1, 2, 3, 4].map(i => <div key={i} className="w-full h-px bg-white"></div>)}
-                                </div>
-                                <div className="h-full flex items-end justify-between gap-1.5 px-2 relative z-10">
+                            <div className="h-72 relative mt-4">
+                                <div className="h-full flex items-end justify-between gap-1.5 px-1 relative z-10">
                                     {stats.busyHours.map((count, hour) => {
                                         const maxCount = Math.max(...stats.busyHours, 1);
                                         const height = (count / maxCount) * 100;
                                         const isBusy = count > 0;
                                         return (
-                                            <div key={hour} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end cursor-pointer">
+                                            <div key={hour} className="flex-1 flex flex-col items-center gap-5 group h-full justify-end cursor-pointer">
                                                 <div 
                                                     style={{ height: `${Math.max(8, height)}%` }}
-                                                    className={`w-full rounded-t-xl transition-all duration-500 ${isBusy ? 'bg-gold-500 opacity-80 group-hover:opacity-100 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]' : 'bg-stone-800 opacity-30'}`}
+                                                    className={`w-full rounded-t-lg transition-all duration-700 origin-bottom ${isBusy ? 'bg-gold-500/80 group-hover:bg-gold-400 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] group-hover:scale-x-110' : 'bg-stone-800 opacity-20'}`}
                                                 >
                                                     {count > 0 && (
-                                                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-white text-stone-950 px-4 py-2 rounded-2xl text-[11px] font-black shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap z-50">
-                                                            {count} orders
-                                                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45"></div>
+                                                        <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-stone-900/95 backdrop-blur-xl border border-gold-500/30 text-white px-4 py-2.5 rounded-2xl text-[11px] font-black shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 whitespace-nowrap z-50 pointer-events-none">
+                                                            {count} <span className="text-stone-500 ml-1">Orders</span>
+                                                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 border-r border-b border-gold-500/30 rotate-45"></div>
                                                         </div>
                                                     )}
                                                 </div>
-                                                {(hour % 6 === 0 || hour === 23) && (
-                                                    <span className="text-[8px] font-black text-stone-700 group-hover:text-gold-500 transition-colors uppercase">{hour}h</span>
+                                                {(hour % 4 === 0 || hour === 23) && (
+                                                    <span className="text-[8px] font-black text-stone-700 group-hover:text-white transition-colors uppercase tracking-widest">{hour}h</span>
                                                 )}
                                             </div>
                                         );

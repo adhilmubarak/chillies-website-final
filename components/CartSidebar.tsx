@@ -223,10 +223,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
 
   return (
     <>
-      <div className={`fixed inset-0 bg-stone-950 z-[110] transition-opacity duration-500 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={handleClose} />
-      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-stone-950 border-l border-stone-800 z-[120] transform transition-transform duration-500 shadow-2xl ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-0 bg-stone-950/60 backdrop-blur-sm z-[110] transition-opacity duration-700 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={handleClose} />
+      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-stone-950/90 backdrop-blur-2xl border-l border-white/5 z-[120] transform transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-[0_0_100px_rgba(0,0,0,1)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full relative pb-20 md:pb-0">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent"></div>
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-gold-500/50 to-transparent animate-pulse"></div>
 
           {step === 'confirmation' && confirmedOrder ? (
               <div className="flex flex-col h-full animate-fade-in">
@@ -366,14 +366,44 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
               </div>
           ) : (
             <>
-                <div className="p-6 md:p-8 pb-4 border-b border-stone-800 flex justify-between items-center bg-stone-950"><h2 className="font-serif text-2xl md:text-3xl text-white">Your Selection</h2><button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2 hover:bg-stone-900 rounded-full"><X size={24} /></button></div>
-                <div className="px-6 md:px-8 py-6 border-b border-stone-800 bg-stone-950"><div className="grid grid-cols-2 gap-2 p-1 bg-stone-900 rounded-xl border border-stone-800 shadow-inner"><button onClick={() => setOrderType('delivery')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'delivery' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Bike size={16} /><span>Delivery</span></button><button onClick={() => setOrderType('pickup')} className={`flex items-center justify-center gap-2 py-3 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${orderType === 'pickup' ? 'bg-gold-500 text-stone-950 shadow-lg' : 'text-stone-500 hover:text-stone-300'}`}><Store size={16} /><span>Pickup</span></button></div></div>
-                <div className="flex-1 overflow-y-auto pt-6 md:pt-8 bg-stone-950 space-y-6 scrollbar-hide min-h-0">
+                <div className="p-6 md:p-8 pb-4 border-b border-white/5 flex justify-between items-center bg-transparent">
+                  <h2 className="font-serif text-3xl text-white tracking-tight">Cart</h2>
+                  <button onClick={handleClose} className="text-stone-500 hover:text-white transition-colors p-2.5 hover:bg-white/5 rounded-full"><X size={24} /></button>
+                </div>
+                <div className="px-6 md:px-8 py-6 border-b border-white/5 bg-transparent">
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
+                    <button onClick={() => setOrderType('delivery')} className={`flex items-center justify-center gap-2 py-3.5 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest ${orderType === 'delivery' ? 'bg-gold-500 text-stone-950 shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}><Bike size={16} /><span>Delivery</span></button>
+                    <button onClick={() => setOrderType('pickup')} className={`flex items-center justify-center gap-2 py-3.5 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest ${orderType === 'pickup' ? 'bg-gold-500 text-stone-950 shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}><Store size={16} /><span>Pickup</span></button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto pt-6 bg-transparent space-y-6 scrollbar-hide min-h-0">
                     <div className="px-6 md:px-8 space-y-4">
-                    {cartItems.length === 0 ? (<div className="h-full flex flex-col items-center justify-center text-stone-500 space-y-6 animate-fade-in py-10"><ShoppingBag size={32} className="opacity-20" /><p className="font-light tracking-widest uppercase text-[10px]">Cart is empty</p><button onClick={() => { onClose(); document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gold-400 hover:text-gold-300 uppercase text-[10px] tracking-widest font-black border-b border-gold-400/30 pb-1 transition-all">Explore Menu</button></div>) : (cartItems.map((item) => (
-                        <div key={item.id} className="flex gap-4 items-center bg-stone-900 border border-stone-800 p-4 rounded-2xl group hover:border-gold-500/20 transition-all">
-                          <SafeImage src={item.image} containerClassName="w-14 h-14 md:w-16 md:h-16 rounded-xl shrink-0" className="w-full h-full object-cover" />
-                          <div className="flex-grow min-w-0"><h4 className="text-stone-200 font-medium text-xs md:text-sm truncate">{item.name}</h4><p className="text-gold-400 text-xs mt-1 font-bold">₹{item.price}</p></div><div className="flex items-center bg-stone-950 rounded-xl border border-stone-800 p-1"><button onClick={() => onUpdateQuantity(item.id, -1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Minus size={12} /></button><span className="w-6 text-center text-[10px] font-bold text-white">{item.quantity}</span><button onClick={() => onUpdateQuantity(item.id, 1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Plus size={12} /></button></div></div>)))}
+                    {cartItems.length === 0 ? (
+                      <div className="h-full flex flex-col items-center justify-center text-stone-600 space-y-8 animate-fade-in py-20">
+                        <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center border border-white/5 relative">
+                           <ShoppingBag size={40} className="opacity-20" />
+                           <div className="absolute inset-0 bg-gold-500/5 blur-2xl rounded-full animate-pulse"></div>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-serif text-xl text-stone-400 mb-2">Your cart is empty</p>
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-stone-600 font-black">Time to discover excellence</p>
+                        </div>
+                        <button onClick={() => { onClose(); document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' }); }} className="bg-gold-500/10 text-gold-500 px-8 py-4 rounded-full border border-gold-500/20 uppercase text-[10px] tracking-widest font-black hover:bg-gold-500 hover:text-stone-950 transition-all">Explore Menu</button>
+                      </div>
+                    ) : (cartItems.map((item) => (
+                        <div key={item.id} className="flex gap-4 items-center bg-white/5 border border-white/5 p-4 rounded-2xl group hover:border-gold-500/20 hover:bg-white/10 transition-all">
+                          <SafeImage src={item.image} containerClassName="w-16 h-16 rounded-xl shrink-0 shadow-2xl" className="w-full h-full object-cover" />
+                          <div className="flex-grow min-w-0">
+                            <h4 className="text-white font-medium text-sm truncate">{item.name}</h4>
+                            <p className="text-gold-500 text-xs mt-1 font-black">₹{item.price}</p>
+                          </div>
+                          <div className="flex items-center bg-stone-950/50 backdrop-blur-md rounded-xl border border-white/5 p-1">
+                            <button onClick={() => onUpdateQuantity(item.id, -1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Minus size={12} /></button>
+                            <span className="w-6 text-center text-[10px] font-black text-white">{item.quantity}</span>
+                            <button onClick={() => onUpdateQuantity(item.id, 1)} className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-white transition-colors"><Plus size={12} /></button>
+                          </div>
+                        </div>
+                    )))}
                     </div>
 
                     {cartItems.length > 0 && suggestedItems.length > 0 && (
@@ -405,10 +435,49 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                     )}
                 </div>
                 {cartItems.length > 0 && (
-                    <div className="p-6 md:p-8 bg-stone-950 border-t border-stone-800 space-y-6">
-                    <div className="space-y-2">{!appliedCoupon ? (<div className="flex gap-2"><div className="relative flex-grow"><input type="text" value={couponInput} onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(''); }} placeholder="Coupon?" className="w-full bg-stone-900 border border-stone-800 rounded-xl py-3 pl-10 pr-3 text-[10px] text-white focus:outline-none focus:border-gold-500 uppercase tracking-widest" /><Ticket size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-600" /></div><button onClick={handleApplyCoupon} className="bg-stone-800 text-stone-300 hover:bg-gold-500 hover:text-black px-5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Apply</button></div>) : (<div className="flex items-center justify-between bg-gold-500/10 border border-gold-500/20 rounded-xl p-3.5"><div className="flex items-center gap-3"><Tag size={16} className="text-gold-500" /><div><span className="text-[10px] text-gold-500 font-black block uppercase tracking-widest">{appliedCoupon.code}</span><span className="text-[9px] text-stone-500 uppercase tracking-widest">Active Discount</span></div></div><button onClick={handleRemoveCoupon} className="text-stone-600 hover:text-red-500 transition-colors"><X size={16} /></button></div>)}{couponError && <p className="text-red-500 text-[9px] pl-1 font-bold uppercase tracking-widest">{couponError}</p>}</div>
-                    <div className="space-y-3 text-stone-400 text-sm"><div className="flex justify-between text-[10px] font-black uppercase tracking-widest"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>{orderType === 'delivery' && (<div className="flex justify-between text-[10px] text-stone-500 font-black uppercase tracking-widest"><span>Delivery</span><span>+₹{DELIVERY_FEE.toFixed(2)}</span></div>)}{appliedCoupon && <div className="flex justify-between text-[10px] text-green-600 font-black uppercase tracking-widest"><span>Savings</span><span>-₹{discountAmount.toFixed(2)}</span></div>}{pointsRedeemed > 0 && <div className="flex justify-between text-[10px] text-gold-500 font-black uppercase tracking-widest"><span>Points Redeemed</span><span>-₹{pointsRedeemed.toFixed(2)}</span></div>}<div className="flex justify-between pt-4 border-t border-stone-800 text-xl md:text-2xl font-serif text-white"><span>Total</span><span className="text-gold-400">₹{total.toFixed(2)}</span></div></div>
-                    <button onClick={() => setStep('details')} className="w-full py-5 bg-gold-500 text-stone-950 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 transition-all hover:bg-gold-400 shadow-xl active:scale-[0.98]"><span>Next Step</span><ArrowRight size={18} /></button>
+                    <div className="p-6 md:p-8 bg-stone-900 border-t border-white/5 space-y-6 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+                      <div className="space-y-2">
+                        {!appliedCoupon ? (
+                          <div className="flex gap-2">
+                            <div className="relative flex-grow">
+                              <input type="text" value={couponInput} onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(''); }} placeholder="Coupon?" className="w-full bg-stone-950 border border-white/5 rounded-xl py-3.5 pl-10 pr-3 text-[10px] text-white focus:outline-none focus:border-gold-500 uppercase tracking-widest shadow-inner" />
+                              <Ticket size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-600" />
+                            </div>
+                            <button onClick={handleApplyCoupon} className="bg-stone-800 text-stone-300 hover:bg-gold-500 hover:text-stone-950 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Apply</button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between bg-gold-500/10 border border-gold-500/20 rounded-xl p-4">
+                            <div className="flex items-center gap-3">
+                              <Tag size={16} className="text-gold-500" />
+                              <div>
+                                <span className="text-[10px] text-gold-500 font-black block uppercase tracking-widest">{appliedCoupon.code}</span>
+                                <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">Active Savings</span>
+                              </div>
+                            </div>
+                            <button onClick={handleRemoveCoupon} className="text-stone-600 hover:text-red-500 transition-colors"><X size={16} /></button>
+                          </div>
+                        )}
+                        {couponError && <p className="text-red-500 text-[9px] pl-1 font-bold uppercase tracking-widest">{couponError}</p>}
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em]"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
+                          {orderType === 'delivery' && (<div className="flex justify-between text-[10px] text-stone-500 font-bold uppercase tracking-[0.2em]"><span>Delivery Charge</span><span className="text-blue-400">+₹{DELIVERY_FEE.toFixed(2)}</span></div>)}
+                          {appliedCoupon && <div className="flex justify-between text-[10px] text-green-500 font-bold uppercase tracking-[0.2em]"><span>Discount Applied</span><span>-₹{discountAmount.toFixed(2)}</span></div>}
+                          {pointsRedeemed > 0 && <div className="flex justify-between text-[10px] text-gold-500 font-bold uppercase tracking-[0.2em]"><span>Loyalty Points</span><span>-₹{pointsRedeemed.toFixed(2)}</span></div>}
+                        </div>
+                        
+                        <div className="bg-gold-500 rounded-2xl p-6 flex justify-between items-center shadow-xl shadow-gold-500/10 transition-transform active:scale-95 cursor-default">
+                          <span className="font-serif text-stone-950 text-2xl">Total</span>
+                          <span className="font-serif text-stone-950 text-3xl font-black">₹{total.toFixed(2)}</span>
+                        </div>
+                      </div>
+
+                      <button onClick={() => setStep('details')} className="w-full py-5 bg-stone-100 text-stone-950 rounded-xl font-black uppercase tracking-[0.3em] text-[10px] flex items-center justify-center gap-3 transition-all hover:bg-white shadow-[0_20px_40px_rgba(255,255,255,0.1)] active:scale-95 group">
+                        <span>Check Out</span>
+                        <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                      </button>
                     </div>
                 )}
             </>
