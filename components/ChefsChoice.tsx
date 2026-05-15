@@ -14,6 +14,7 @@ interface ChefsChoiceProps {
   cartItems?: CartItem[];
   allMenuItems?: MenuItem[];
   onShowSuggestion?: (suggestion: MenuItem) => void;
+  onViewAR?: (item: MenuItem) => void;
 }
 
 const ChefsChoice: React.FC<ChefsChoiceProps> = ({ 
@@ -24,7 +25,8 @@ const ChefsChoice: React.FC<ChefsChoiceProps> = ({
   isStoreOpen = true,
   cartItems,
   allMenuItems,
-  onShowSuggestion
+  onShowSuggestion,
+  onViewAR
 }) => {
   if (items.length === 0) return null;
 
@@ -77,6 +79,7 @@ const ChefsChoice: React.FC<ChefsChoiceProps> = ({
                       cartItems={cartItems}
                       allMenuItems={allMenuItems}
                       onShowSuggestion={onShowSuggestion}
+                      onViewAR={onViewAR}
                     />
                  </div>
               </div>

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Leaf, Check, ChefHat, Lock, Ban, Flame, Clock } from 'lucide-react';
+import { Plus, Leaf, Check, ChefHat, Lock, Ban, Flame, Clock, Box } from 'lucide-react';
 import { MenuItem, CartItem } from '../types';
 import SafeImage from './SafeImage';
 
@@ -16,12 +16,13 @@ interface MenuItemCardProps {
   cartItems?: CartItem[];
   allMenuItems?: MenuItem[];
   onShowSuggestion?: (suggestion: MenuItem) => void;
+  onViewAR?: (item: MenuItem) => void;
 }
 
 const MenuItemCard: React.FC<MenuItemCardProps> = ({ 
   item, onAdd, index = 0, isFlashSaleActive = false, isHappyHourActive = false, 
   isAvailable = true, availabilityTime, isStoreOpen = true, cartItems = [], 
-  allMenuItems = [], onShowSuggestion 
+  allMenuItems = [], onShowSuggestion, onViewAR 
 }) => {
   const [isAdded, setIsAdded] = useState(false);
 
@@ -147,6 +148,14 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10 max-w-[90%]">
             {item.isChefChoice && <div className="bg-gold-500 text-stone-950 p-2 rounded-full shadow-lg border border-gold-300"><ChefHat size={12} /></div>}
             {item.isVegetarian && <div className="bg-stone-950 text-green-400 p-2 rounded-full border border-green-800"><Leaf size={12} /></div>}
+            {onViewAR && (
+                <button 
+                    onClick={(e) => { e.stopPropagation(); onViewAR(item); }}
+                    className="bg-stone-900/80 backdrop-blur-md text-gold-400 p-2 rounded-full border border-gold-500/30 shadow-xl hover:bg-gold-500 hover:text-stone-950 transition-all animate-pulse"
+                >
+                    <Box size={12} />
+                </button>
+            )}
             {renderSpicyTag()}
         </div>
 

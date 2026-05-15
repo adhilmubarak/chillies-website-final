@@ -18,6 +18,7 @@ export interface MenuItem {
   tags?: string[];
   isUnavailable?: boolean; // Mark as Sold Out/Unavailable
   sortOrder?: number; // Added for admin rearrangement
+  threeDModel?: string; // URL for .glb/AR model
 }
 
 export interface CartItem extends MenuItem {

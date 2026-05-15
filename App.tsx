@@ -26,6 +26,7 @@ import ComplaintsPage from './components/ComplaintsPage';
 import DeliveryPanel from './components/DeliveryPanel';
 import KitchenPanel from './components/KitchenPanel';
 import ShawarmaLoader from './components/ShawarmaLoader';
+import ARViewerModal from './components/ARViewerModal';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
@@ -184,6 +185,7 @@ function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery') || Capacitor.isNativePlatform());
   const [isLoading, setIsLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
+  const [arItem, setArItem] = useState<MenuItem | null>(null);
 
   useEffect(() => {
     const isSpecialPath = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery');
@@ -526,7 +528,7 @@ function App() {
           <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
             <Hero />
             <StoreStatusAlert isStoreOpen={isStoreOpen} startTime={storeSettings.startTime} endTime={storeSettings.endTime} />
-            <ChefsChoice items={menuItems.filter(item => item.isChefChoice)} onAdd={addToCart} isFlashSaleActive={isFlashSaleActive} checkAvailability={checkAvailability} isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion} />
+            <ChefsChoice items={menuItems.filter(item => item.isChefChoice)} onAdd={addToCart} isFlashSaleActive={isFlashSaleActive} checkAvailability={checkAvailability} isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion} onViewAR={setArItem} />
             
             <section id="menu" className="pb-24 pt-12 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24">
               <div className="max-w-md mx-auto mb-12 px-2 relative">
@@ -542,7 +544,7 @@ function App() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredItems.map((item, i) => (
-                  <MenuItemCard key={item.id} item={item} onAdd={addToCart} index={i} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} isAvailable={checkAvailability(item.category).isAvailable} isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion} />
+                  <MenuItemCard key={item.id} item={item} onAdd={addToCart} index={i} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} isAvailable={checkAvailability(item.category).isAvailable} isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion} onViewAR={setArItem} />
                 ))}
               </div>
               <div ref={observerTarget} className="h-20" />
@@ -572,6 +574,7 @@ function App() {
       />
       <OrderTrackerModal isOpen={isTrackerOpen} onClose={() => { setIsTrackerOpen(false); setInitialTrackId(''); }} initialOrderId={initialTrackId} riderLocation={riderLocation} orders={orders} />
       {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
+      <ARViewerModal isOpen={!!arItem} onClose={() => setArItem(null)} itemName={arItem?.name || ''} modelUrl={arItem?.threeDModel} />
       
       {showInstallBanner && !isAdminOpen && (
         <div className="fixed bottom-24 right-4 left-4 sm:left-auto sm:w-[320px] bg-stone-900/90 backdrop-blur-xl border border-brand-500/30 rounded-3xl p-4 z-[99999] flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in-up">
