@@ -214,3 +214,48 @@ exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}",
     console.log(`Test notification: ${result.successCount} sent, ${result.failureCount} failed.`);
 });
 
+exports.sendGlobalBroadcast = onDocumentCreated("broadcasts/{broadcastId}", async (event) => {
+    const broadcastData = event.data.data();
+    
+    const settingsDoc = await admin.firestore().collection("settings").doc("general").get();
+    if (!settingsDoc.exists) return;
+    
+    const adminTokens = settingsDoc.data().adminTokens || [];
+    if (adminTokens.length === 0) return;
+
+    const title = broadcastData.title || "Management Update";
+    const bodyText = broadcastData.body || "A new update is available. Check the app for details.";
+
+    const payload = {
+        data: {
+            title: title,
+            body: bodyText,
+            type: "broadcast",
+            url: "/"
+        },
+        android: {
+            priority: "high",
+            ttl: 86400
+        },
+        apns: {
+            payload: {
+                aps: {
+                    alert: { title, body: bodyText },
+                    sound: "default"
+                }
+            }
+        },
+        webpush: {
+            notification: {
+                title: title,
+                body: bodyText,
+                icon: "/pwa-192x192.png",
+                badge: "/pwa-192x192.png"
+            }
+        }
+    };
+
+    const result = await sendMulticastBatched(adminTokens, payload);
+    console.log(`Global broadcast: ${result.successCount} sent, ${result.failureCount} failed.`);
+});
+

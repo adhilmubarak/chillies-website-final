@@ -286,6 +286,22 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const q = query(collection(db, 'complaints'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setComplaints(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Complaint)));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, 'foodRatings'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setFoodRatings(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FoodRating)));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const settingsRef = doc(db, 'settings', 'general');
     const unsubscribe = onSnapshot(settingsRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -500,6 +516,19 @@ function App() {
             onUpdatePromos={async (p) => { await updateDoc(doc(db, 'settings', 'general'), p); }}
             foodRatings={foodRatings}
             customOffers={customOffers}
+            complaints={complaints}
+            onUpdateComplaint={async (id, status) => { await updateDoc(doc(db, 'complaints', id), { status }); }}
+            onDeleteComplaint={async (id) => { await deleteDoc(doc(db, 'complaints', id)); }}
+            onTestNotification={async () => {
+                await addDoc(collection(db, 'test_notifications'), {
+                    title: "Test Alert",
+                    body: "This is a real-time test notification from your Admin Panel.",
+                    createdAt: Date.now()
+                });
+            }}
+            loyaltyAccounts={loyaltyAccounts}
+            onAddLoyaltyAccount={async (phone, points) => { await addDoc(collection(db, 'loyalty'), { phone, points, lastUpdated: Date.now() }); }}
+            onUpdateLoyaltyAccount={async (id, points) => { await updateDoc(doc(db, 'loyalty', id), { points, lastUpdated: Date.now() }); }}
           />
         } />
         <Route path="/kitchen" element={<KitchenPanel orders={orders} onUpdateOrderStatus={async (id: string, s: Order['status'], pm?: string, fid?: string) => { 

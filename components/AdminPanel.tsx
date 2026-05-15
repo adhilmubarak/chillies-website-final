@@ -15,7 +15,7 @@ import { MapContainer, TileLayer, Marker, useMap, CircleMarker, Tooltip } from '
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { messaging, db } from '../firebase';
-import { collection, query, where, getDocs, updateDoc, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, onSnapshot, doc, setDoc, deleteDoc, addDoc } from 'firebase/firestore';
 const riderIcon = new L.Icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
     iconSize: [42, 42],
@@ -2040,13 +2040,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     />
                                 </div>
                                 <button 
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (pushTitle && pushBody) {
-                                            onUpdateStoreSettings({ 
-                                                ...storeSettings, 
-                                                latestBroadcast: { title: pushTitle, body: pushBody, timestamp: Date.now() }
-                                            });
-                                            alert("Push notification broadcasted to all connected devices!");
+                                            try {
+                                                await addDoc(collection(db, 'broadcasts'), {
+                                                    title: pushTitle,
+                                                    body: pushBody,
+                                                    timestamp: Date.now()
+                                                });
+                                                alert("Broadcast sequence initiated! All registered devices will receive the push shortly.");
+                                            } catch (e) {
+                                                console.error("Broadcast failed:", e);
+                                                alert("Failed to initiate broadcast. Check connection.");
+                                            }
                                         }
                                     }}
                                     className="w-full bg-brand-500 text-white font-black py-4 rounded-xl uppercase tracking-widest text-[10px] hover:bg-brand-400 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
