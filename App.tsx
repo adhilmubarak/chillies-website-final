@@ -457,12 +457,17 @@ function App() {
   };
 
   const handleAddOrder = async (order: Order) => {
-    setOrders(prev => [order, ...prev]);
     try {
-        const savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
-        savedIds.push(order.id);
-        localStorage.setItem('myOrders', JSON.stringify(savedIds));
-    } catch(e) {}
+      await addDoc(collection(db, 'orders'), {
+        ...order,
+        createdAt: Date.now()
+      });
+      const savedIds = JSON.parse(localStorage.getItem('myOrders') || '[]');
+      savedIds.push(order.id);
+      localStorage.setItem('myOrders', JSON.stringify(savedIds));
+    } catch(e) {
+      console.error('Error adding order to Firestore:', e);
+    }
   };
 
   const orderedCats = dbCategories.map(c => c.name);
