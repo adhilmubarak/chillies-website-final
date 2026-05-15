@@ -2270,8 +2270,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Item Add/Edit Modal */}
       {isItemFormOpen && editingItem && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950 animate-fade-in overflow-y-auto">
-            <div className="bg-stone-900 border border-stone-800 rounded-[3rem] w-full max-w-2xl shadow-[0_0_100px_rgba(0,0,0,0.8)] my-8 overflow-hidden">
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-sm animate-fade-in">
+            <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="p-8 border-b border-stone-800 flex justify-between items-center bg-stone-950">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center text-stone-950 shadow-lg shadow-gold-500/20"><Plus size={24} className="stroke-[3]" /></div>
@@ -2280,7 +2280,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <button onClick={() => setIsItemFormOpen(false)} className="text-stone-500 hover:text-white transition-all"><X size={28} /></button>
                 </div>
 
-                <div className="p-8 space-y-8">
+                <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-6">
                             <div className="space-y-2">
@@ -2414,7 +2414,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     )}
                 </div>
 
-                <div className="p-8 border-t border-stone-800 bg-stone-950 flex gap-4">
+                <div className="p-8 border-t border-stone-800 bg-stone-950 flex gap-4 shrink-0">
                     <button onClick={() => { 
                         if(!editingItem || !editingItem.name || !editingItem.price) return; 
                         if(editingItem.id) onUpdateItem(editingItem as MenuItem); 
