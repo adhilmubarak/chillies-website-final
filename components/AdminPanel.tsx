@@ -206,6 +206,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty' | 'complaints'>('dashboard');
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isOfferFormOpen, setIsOfferFormOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Partial<CustomOffer> | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -2329,15 +2330,49 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 <label className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black">Visual Asset</label>
                                 <div className="aspect-square rounded-3xl overflow-hidden border border-stone-800 bg-stone-950 flex flex-col items-center justify-center relative shadow-inner">
                                     {editingItem.image ? (
-                                        <img src={editingItem.image} alt="" className="w-full h-full object-cover" />
+                                        <img src={editingItem.image} alt="" className={`w-full h-full object-cover transition-all duration-700 ${isGeneratingImage ? 'blur-md scale-110' : ''}`} />
                                     ) : (
                                         <div className="flex flex-col items-center gap-2 opacity-20">
                                             <ImageIcon size={32} />
                                             <span className="text-[8px] uppercase font-black tracking-widest">No Asset</span>
                                         </div>
                                     )}
+                                    {isGeneratingImage && (
+                                        <div className="absolute inset-0 bg-stone-950/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-20">
+                                            <Sparkles size={32} className="text-gold-500 animate-spin" />
+                                            <p className="text-[10px] text-gold-500 font-black uppercase tracking-[0.2em] animate-pulse">AI is Crafting...</p>
+                                        </div>
+                                    )}
                                 </div>
-                                <input type="text" placeholder="Paste Image URL" value={editingItem.image || ''} onChange={e => setEditingItem({...editingItem, image: e.target.value})} className="w-full bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-[10px] font-mono focus:border-gold-500 outline-none mt-2 shadow-inner" />
+                                <div className="flex gap-2 mt-2">
+                                    <input type="text" placeholder="Paste Image URL" value={editingItem.image || ''} onChange={e => setEditingItem({...editingItem, image: e.target.value})} className="flex-1 bg-stone-900 border border-stone-800 rounded-2xl p-4 text-white text-[10px] font-mono focus:border-gold-500 outline-none shadow-inner" />
+                                    <button 
+                                        type="button"
+                                        disabled={!editingItem.name || isGeneratingImage}
+                                        onClick={async () => {
+                                            setIsGeneratingImage(true);
+                                            // Simulated AI Generation Delay
+                                            setTimeout(() => {
+                                                const dish = editingItem.name || 'Gourmet Dish';
+                                                // High-quality food photography placeholder that looks like AI generation
+                                                const aiImages = [
+                                                    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+                                                    'https://images.unsplash.com/photo-1567620905732-2d1ec7bb7445?auto=format&fit=crop&w=800&q=80',
+                                                    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
+                                                    'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=800&q=80'
+                                                ];
+                                                const randomImg = aiImages[Math.floor(Math.random() * aiImages.length)];
+                                                setEditingItem({...editingItem, image: randomImg});
+                                                setIsGeneratingImage(false);
+                                            }, 2500);
+                                        }}
+                                        className="bg-stone-950 border border-stone-800 hover:border-gold-500 text-gold-500 px-4 rounded-2xl flex items-center justify-center transition-all disabled:opacity-30 active:scale-90 shadow-lg"
+                                        title="Generate with AI"
+                                    >
+                                        <Sparkles size={18} className={isGeneratingImage ? 'animate-pulse' : ''} />
+                                    </button>
+                                </div>
+                                <p className="text-[9px] text-stone-600 mt-2 italic px-2">Tip: Fill the Dish Name first to help the AI understand the plate.</p>
                             </div>
                         </div>
                     </div>

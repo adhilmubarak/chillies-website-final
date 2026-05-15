@@ -171,6 +171,8 @@ function App() {
       selectedTheme: 'classic' as 'classic' | 'professional'
   });
 
+  const [lastSuggestionTime, setLastSuggestionTime] = useState(0);
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [initialTrackId, setInitialTrackId] = useState('');
@@ -357,6 +359,40 @@ function App() {
       if (existing) return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1, price } : i);
       return [...prev, { ...item, quantity: 1, price }];
     });
+
+    // --- AI Smart Pairing Logic ---
+    const now = Date.now();
+    // Only suggest if we haven't shown one in the last 45 seconds to avoid annoyance
+    if (now - lastSuggestionTime > 45000) {
+        let targetCategory = '';
+        const cat = item.category?.toLowerCase() || '';
+        
+        if (cat.includes('starter') || cat.includes('bread')) targetCategory = 'Main Course';
+        else if (cat.includes('main')) targetCategory = 'Drinks';
+        else if (cat.includes('drink')) targetCategory = 'Desserts';
+        else if (cat.includes('dessert')) targetCategory = 'Drinks';
+
+        if (targetCategory) {
+            const potential = menuItems.filter(m => 
+                m.category === targetCategory && 
+                !cartItems.find(c => c.id === m.id) &&
+                checkAvailability(m.category).isAvailable
+            );
+            
+            if (potential.length > 0) {
+                // Prioritize Chef's Choice or high-rated items
+                const highQuality = potential.filter(m => m.isChefChoice);
+                const pool = highQuality.length > 0 ? highQuality : potential;
+                const randomSuggestion = pool[Math.floor(Math.random() * pool.length)];
+                
+                // Show suggestion with a slight delay for better UX
+                setTimeout(() => {
+                    setSuggestion(randomSuggestion);
+                    setLastSuggestionTime(now);
+                }, 800);
+            }
+        }
+    }
   };
 
   const handleAddOrder = async (order: Order) => {
