@@ -212,6 +212,9 @@ function App() {
   }, [location.search, location.pathname]);
 
   useEffect(() => {
+    const isDismissed = localStorage.getItem('install_prompt_dismissed');
+    if (isDismissed) return;
+
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
     const isStandalone = ('standalone' in window.navigator) && !!(window.navigator as any).standalone;
@@ -236,8 +239,14 @@ function App() {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
       setShowInstallBanner(false);
+      localStorage.setItem('install_prompt_dismissed', 'true');
     }
     setDeferredPrompt(null);
+  };
+
+  const dismissInstallBanner = () => {
+    setShowInstallBanner(false);
+    localStorage.setItem('install_prompt_dismissed', 'true');
   };
 
   useEffect(() => {
@@ -564,16 +573,32 @@ function App() {
       <OrderTrackerModal isOpen={isTrackerOpen} onClose={() => { setIsTrackerOpen(false); setInitialTrackId(''); }} initialOrderId={initialTrackId} riderLocation={riderLocation} orders={orders} />
       {suggestion && <SmartSuggestion suggestion={suggestion} onAdd={addToCart} onClose={() => setSuggestion(null)} isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} />}
       
-      {showInstallBanner && (
-        <div className="fixed bottom-24 left-4 right-4 bg-stone-900 border border-brand-500/30 rounded-2xl p-4 z-[99999] flex justify-between items-center shadow-2xl">
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-brand-500 rounded-lg flex items-center justify-center text-white font-black">C</div>
+      {showInstallBanner && !isAdminOpen && (
+        <div className="fixed bottom-24 right-4 left-4 sm:left-auto sm:w-[320px] bg-stone-900/90 backdrop-blur-xl border border-brand-500/30 rounded-3xl p-4 z-[99999] flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in-up">
+          <div className="flex items-center gap-4">
+             <div className="w-12 h-12 bg-gradient-to-br from-brand-400 to-brand-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-500/20 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent"></div>
+                C
+             </div>
              <div>
-               <h4 className="text-white text-xs font-bold uppercase">Install Chillies</h4>
-               <p className="text-stone-500 text-[10px]">Faster tracking & ordering</p>
+               <h4 className="text-white text-xs font-black uppercase tracking-widest">Chillies App</h4>
+               <p className="text-stone-500 text-[9px] font-bold uppercase tracking-widest mt-0.5">Fast-track ordering</p>
              </div>
           </div>
-          <button onClick={handleInstallClick} className="bg-brand-500 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase">Install</button>
+          <div className="flex items-center gap-2">
+            <button 
+                onClick={handleInstallClick} 
+                className="bg-brand-500 text-stone-950 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-brand-400 active:scale-95 transition-all"
+            >
+                Install
+            </button>
+            <button 
+                onClick={dismissInstallBanner}
+                className="p-2 text-stone-600 hover:text-white transition-colors"
+            >
+                <X size={18} />
+            </button>
+          </div>
         </div>
       )}
     </React.Suspense>

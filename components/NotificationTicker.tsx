@@ -32,14 +32,15 @@ const NotificationTicker: React.FC<NotificationTickerProps> = ({
     return `${h}:${minutes.toString().padStart(2, '0')} ${suffix}`;
   };
 
-  const tickerClass = `fixed top-0 left-0 w-full z-[100] backdrop-blur-md text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] overflow-hidden h-10 flex items-center border-b shadow-lg transition-all duration-700 ${
+  const tickerClass = `fixed top-0 left-0 w-full z-[100] backdrop-blur-xl text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] overflow-hidden h-10 flex items-center shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all duration-700 ${
     !isStoreOpen 
-      ? 'bg-red-950/80 border-red-500/30 text-red-100' 
-      : 'bg-stone-950/80 border-gold-500/20 text-white'
+      ? 'bg-red-950/80 text-red-100' 
+      : 'bg-stone-950/90 text-white'
   }`;
 
   return (
     <div className={tickerClass}>
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"></div>
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_3s_infinite] pointer-events-none"></div>
       <div className="animate-marquee whitespace-nowrap flex items-center gap-16 w-full">
         {/* Repeat content to ensure smooth loop */}
