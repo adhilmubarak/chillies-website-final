@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
+import SafeImage from './SafeImage';
 
 const Hero: React.FC = () => {
   const scrollToMenu = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -11,10 +12,12 @@ const Hero: React.FC = () => {
   return (
     <section id="home" className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden px-4">
       <div className="absolute inset-0 z-0 select-none">
-        <img
+        <SafeImage
           src="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
           alt="Fine Dining"
+          priority={true}
           className="w-full h-full object-cover scale-105" 
+          containerClassName="w-full h-full"
         />
         <div className="absolute inset-0 bg-stone-950/70"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent"></div>

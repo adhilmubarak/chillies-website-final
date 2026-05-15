@@ -4,6 +4,7 @@ import { Utensils } from 'lucide-react';
 interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
   containerClassName?: string;
+  priority?: boolean;
 }
 
 const SafeImage: React.FC<SafeImageProps> = ({ 
@@ -12,15 +13,13 @@ const SafeImage: React.FC<SafeImageProps> = ({
   className, 
   containerClassName = "",
   fallbackSrc = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
+  priority = false,
   ...props 
 }) => {
-  // Use explicit type cast to any to handle potential string | Blob mismatch from environment types
   const [imgSrc, setImgSrc] = useState<string | undefined>(src as any);
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
 
   useEffect(() => {
-    // Reset state if src prop changes
-    // Casting src to any to resolve string | Blob conflict
     setImgSrc(src as any);
     setStatus('loading');
   }, [src]);
@@ -37,19 +36,28 @@ const SafeImage: React.FC<SafeImageProps> = ({
   };
 
   return (
-    <div className={`relative overflow-hidden ${containerClassName}`}>
+    <div className={`relative overflow-hidden bg-stone-900 ${containerClassName}`}>
+      {/* Skeleton Shimmer Overlay */}
       {status === 'loading' && (
-        <div className="absolute inset-0 bg-stone-850 animate-pulse flex items-center justify-center z-0">
-          <Utensils className="text-stone-300/50 w-1/4 h-1/4" />
+        <div className="absolute inset-0 z-0 flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+            <Utensils className="text-stone-800 w-1/4 h-1/4" />
         </div>
       )}
+      
       <img
         {...props}
         src={imgSrc || fallbackSrc}
         alt={alt}
         onLoad={handleLoad}
         onError={handleError}
-        className={`${className} transition-opacity duration-500 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        className={`${className} transition-all duration-700 ease-out ${
+          status === 'loaded' 
+            ? 'opacity-100 blur-0 scale-100' 
+            : 'opacity-0 blur-2xl scale-110'
+        }`}
       />
     </div>
   );

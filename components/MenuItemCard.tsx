@@ -112,7 +112,6 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
           alt={item.name}
           containerClassName="w-full h-full"
           className={`w-full h-full object-cover transition-transform duration-700 ${isItemInteractable ? 'group-hover:scale-105' : ''}`}
-          loading="lazy"
         />
         
         {item.isUnavailable && (
