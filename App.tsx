@@ -198,6 +198,27 @@ function App() {
     }, 3000);
     return () => clearTimeout(splashTimer);
   }, []);
+
+  useEffect(() => {
+    const setupForegroundMessaging = async () => {
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        const { messaging } = await import('./firebase');
+        if (messaging) {
+            const { onMessage } = await import('firebase/messaging');
+            onMessage(messaging, (payload) => {
+                console.log("Foreground message received:", payload);
+                const title = payload.notification?.title || payload.data?.title || 'New Update';
+                const body = payload.notification?.body || payload.data?.body || '';
+                new Notification(title, {
+                    body: body,
+                    icon: '/pwa-192x192.png'
+                });
+            });
+        }
+      }
+    };
+    setupForegroundMessaging();
+  }, []);
   
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
@@ -297,6 +318,14 @@ function App() {
     const q = query(collection(db, 'foodRatings'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setFoodRatings(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FoodRating)));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, 'loyalty'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setLoyaltyAccounts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LoyaltyAccount)));
     });
     return () => unsubscribe();
   }, []);
