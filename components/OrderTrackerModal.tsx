@@ -116,7 +116,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
     }
   }, [isOpen, orders]);
 
-  if (!isOpen) return null;
+  // Early return removed from here and moved to JSX level to prevent Hook mismatch error #310
 
   const fetchOrderDetails = async (idToFetch: string) => {
     if (!idToFetch.trim()) return;
@@ -240,6 +240,8 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
         return { icon: <Clock size={48} />, title: 'Unknown', desc: '', color: 'text-stone-500', bg: 'bg-stone-800' };
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/95" onClick={onClose}>
