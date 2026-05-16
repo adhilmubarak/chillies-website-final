@@ -29,65 +29,69 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
       if (account) setSearchedAccount(account);
     }
   }, [loyaltyAccounts, phoneInput, searchedAccount]);
-
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-200 font-sans selection:bg-gold-500/30 selection:text-gold-200 relative overflow-hidden">
-      {/* Background Effects (Optimized) */}
+    <div className="min-h-screen bg-[#030303] text-stone-200 font-sans selection:bg-gold-500/30 selection:text-gold-200 relative overflow-hidden">
+      {/* Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-full md:w-[60%] h-[50%] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_60%)]"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-full md:w-[50%] h-[50%] bg-[radial-gradient(circle_at_center,_rgba(120,113,108,0.12)_0%,_transparent_60%)]"></div>
+        <div className="absolute top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-gold-900/10 to-transparent"></div>
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[radial-gradient(circle,_rgba(212,175,55,0.05)_0%,_transparent_60%)] opacity-70 blur-3xl"></div>
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E")' }}></div>
       </div>
 
-      <nav className="fixed top-0 w-full z-50 bg-stone-950/80 backdrop-blur-md border-b border-white/5 pb-4 pt-6 px-6">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 bg-stone-900 text-stone-400 hover:text-white rounded-full transition-colors border border-white/5">
-            <ArrowLeft size={20} />
+      <nav className="fixed top-0 w-full z-50 bg-[#030303]/80 backdrop-blur-xl border-b border-white/[0.03] pb-4 pt-6 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <button onClick={() => navigate(-1)} className="p-2.5 bg-stone-900/50 hover:bg-stone-800 text-stone-400 hover:text-gold-400 rounded-full transition-all border border-white/5 shadow-inner group">
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
           </button>
-          <span className="font-serif text-xl md:text-2xl text-gold-400 font-bold tracking-wider uppercase">
-            Chillies <span className="text-white">Rewards</span><span className="text-gold-500">.</span>
+          <span className="font-serif text-lg md:text-xl text-stone-100 tracking-[0.3em] uppercase">
+            Chillies <span className="text-gold-500 font-bold">Elite</span>
           </span>
+          <div className="w-10"></div> {/* Balancer */}
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto pt-32 px-4 pb-24 relative z-10 flex flex-col md:flex-row gap-12">
-        <div className="md:w-1/2 space-y-8 animate-fade-in">
-            <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold-500/10 text-gold-500 text-[10px] font-black uppercase tracking-widest rounded-md">
-                    <Sparkles size={12} /> Elite Tiers
+      <main className="max-w-[1000px] mx-auto pt-32 px-6 pb-24 relative z-10 flex flex-col md:flex-row gap-16 md:items-center min-h-[90vh]">
+        
+        {/* Left Side: Copy & Value Prop */}
+        <div className="md:w-1/2 space-y-10 animate-fade-in">
+            <div className="space-y-6">
+                <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-gradient-to-r from-gold-500/10 to-transparent border-l-2 border-gold-500 text-gold-400 text-[10px] font-black uppercase tracking-[0.3em]">
+                    <Sparkles size={14} className="animate-pulse" /> Exclusive Access
                 </div>
-                <h1 className="text-4xl md:text-6xl font-serif text-white leading-tight">
-                    Earn Points <br/>
-                    <span className="text-stone-500 italic font-light">With Every Bite.</span>
+                <h1 className="text-5xl md:text-[5rem] font-serif text-white leading-[1.1] tracking-tight drop-shadow-lg">
+                    Elevate <br/>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-500 to-gold-600 italic font-medium pr-4">Every Bite.</span>
                 </h1>
-                <p className="text-stone-400 text-sm leading-relaxed max-w-sm">
-                    No sign-ups required. Your WhatsApp number is your key. Automatically earn and redeem points on every order.
+                <p className="text-stone-400 text-sm md:text-base leading-relaxed max-w-sm font-light">
+                    Your WhatsApp number is your key to the Elite tier. Unlock seamless rewards, VIP privileges, and automated cashback on every order.
                 </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-4">
-                <div className="bg-stone-900 border border-white/5 p-6 rounded-3xl">
-                    <Award size={24} className="text-gold-500 mb-4" />
-                    <h3 className="text-white font-bold mb-1">Earn</h3>
-                    <p className="text-stone-500 text-xs">1 point for every ₹10 spent on the menu.</p>
+            <div className="grid grid-cols-2 gap-5 pt-4">
+                <div className="bg-stone-900/30 backdrop-blur-sm border border-white/5 p-6 rounded-[2rem] hover:border-gold-500/30 transition-all group">
+                    <Award size={26} className="text-gold-500 mb-5 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" strokeWidth={1.5} />
+                    <h3 className="text-stone-200 font-bold mb-2 tracking-wide uppercase text-xs">Accumulate</h3>
+                    <p className="text-stone-500 text-xs leading-relaxed">Earn 1 point instantly for every ₹10 spent on our premium menu.</p>
                 </div>
-                <div className="bg-stone-900 border border-white/5 p-6 rounded-3xl">
-                    <Gift size={24} className="text-gold-500 mb-4" />
-                    <h3 className="text-white font-bold mb-1">Redeem</h3>
-                    <p className="text-stone-500 text-xs">₹1 flat discount for every point redeemed.</p>
+                <div className="bg-stone-900/30 backdrop-blur-sm border border-white/5 p-6 rounded-[2rem] hover:border-gold-500/30 transition-all group">
+                    <Gift size={26} className="text-gold-500 mb-5 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" strokeWidth={1.5} />
+                    <h3 className="text-stone-200 font-bold mb-2 tracking-wide uppercase text-xs">Indulge</h3>
+                    <p className="text-stone-500 text-xs leading-relaxed">Redeem points for flat discounts. 1 Point = ₹1 Off. No limits.</p>
                 </div>
             </div>
         </div>
 
-        <div className="md:w-1/2 mt-8 md:mt-0 animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <div className="bg-stone-900/95 md:bg-stone-900/50 md:backdrop-blur-xl border border-white/5 p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.15)_0%,_transparent_70%)] rounded-full translate-x-12 -translate-y-12"></div>
+        {/* Right Side: Interactive Terminal */}
+        <div className="md:w-1/2 animate-fade-in" style={{ animationDelay: '150ms' }}>
+            <div className="bg-[#0a0a0a]/90 backdrop-blur-2xl border border-white/[0.05] p-8 md:p-12 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden group/terminal">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle_at_top_right,_rgba(212,175,55,0.08)_0%,_transparent_70%)] rounded-full transition-all duration-1000 group-hover/terminal:opacity-100 opacity-50"></div>
                 
-                <h2 className="text-2xl font-serif text-white mb-2">Check Balance</h2>
-                <p className="text-stone-400 text-xs mb-8">Enter your registered WhatsApp number</p>
+                <h2 className="text-2xl font-serif text-stone-100 mb-3 tracking-wide">Access Portal</h2>
+                <p className="text-stone-500 text-xs mb-8">Authenticate with your WhatsApp number</p>
 
-                <form onSubmit={handleCheckBalance} className="space-y-6">
+                <form onSubmit={handleCheckBalance} className="space-y-6 relative z-10">
                     <div>
-                        <div className="relative">
+                        <div className="relative group">
                             <input 
                                 type="tel" 
                                 value={phoneInput} 
@@ -97,23 +101,24 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                     setSearchedAccount(undefined);
                                     setIsEnrolling(false);
                                 }} 
-                                placeholder="10-digit number"
+                                placeholder="10-DIGIT NUMBER"
                                 maxLength={10}
-                                className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-white focus:outline-none focus:border-gold-500 transition-all text-center text-lg tracking-[0.2em] font-mono shadow-inner font-black"
+                                className="w-full bg-[#050505] border border-white/10 rounded-2xl py-6 px-6 text-stone-100 focus:outline-none focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/50 transition-all text-center text-xl tracking-[0.3em] font-mono shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] font-black placeholder:text-stone-800"
                             />
+                            <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5 pointer-events-none"></div>
                         </div>
                     </div>
                     <button 
                         type="submit"
                         disabled={phoneInput.length !== 10}
-                        className="w-full py-5 bg-gold-500 text-stone-950 font-black uppercase tracking-widest text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-gold-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-gold-500/20"
+                        className="w-full py-5 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 bg-[length:200%_auto] hover:bg-right text-[#050505] font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(212,175,55,0.2)] disabled:shadow-none"
                     >
-                        <Search size={16} /> Fetch Points
+                        <Search size={16} strokeWidth={2.5} /> Verify Identity
                     </button>
                 </form>
 
                 {searchedAccount !== undefined && (
-                    <div className={`mt-8 p-6 rounded-2xl border transition-all animate-fade-in ${searchedAccount ? 'bg-gold-500/10 border-gold-500/30' : 'bg-stone-950/80 border-white/5'}`}>
+                    <div className={`mt-10 pt-10 border-t border-white/[0.05] transition-all animate-fade-in relative z-10`}>
                         {searchedAccount ? (
                             <div className="flex flex-col items-center gap-8 animate-fade-in w-full">
                                 {/* The Ultra-Premium Elite Card */}
@@ -205,17 +210,15 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-30 pointer-events-none mix-blend-screen"></div>
                                 </div>
 
-                                <div className="text-center w-full max-w-[360px] px-2 flex items-center justify-between gap-4">
-                                   <div className="text-left flex-1">
-                                        <p className="text-stone-300 text-sm mb-1">Your reward is active.</p>
-                                        <p className="text-stone-400 text-xs">Enjoy <strong className="text-gold-400">₹{searchedAccount.points} off</strong> on your next order!</p>
+                                <div className="w-full max-w-[380px] flex items-center justify-between gap-5 bg-white/[0.02] border border-white/[0.05] p-4 rounded-2xl">
+                                   <div className="text-left flex-1 pl-2">
+                                        <p className="text-stone-400 text-[10px] uppercase tracking-widest font-bold mb-1">Status: <span className="text-gold-400">Active</span></p>
+                                        <p className="text-stone-300 text-sm leading-tight">Present this QR code in-store to redeem <strong className="text-white">₹{searchedAccount.points}</strong> instantly.</p>
                                    </div>
                                     
-                                   <div className="bg-stone-900 border border-white/5 rounded-2xl p-3 shrink-0 flex flex-col items-center group relative overflow-hidden hover:border-gold-500/20 transition-all">
-                                        <div className="bg-white p-1.5 rounded-lg mb-2 shadow-lg ring-2 ring-white/5 group-hover:ring-gold-500/20 transition-all">
-                                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${searchedAccount.id}&bgcolor=ffffff&color=000000&margin=0`} alt="Loyalty QR" className="w-16 h-16 rounded object-contain" />
-                                        </div>
-                                        <p className="text-stone-500 text-[8px] uppercase font-black tracking-[0.2em] px-1">Scan to Use</p>
+                                   <div className="bg-white p-2 rounded-xl shrink-0 shadow-[0_10px_20px_rgba(0,0,0,0.5),0_0_15px_rgba(212,175,55,0.15)] relative group cursor-pointer hover:scale-105 transition-transform duration-300">
+                                        <div className="absolute inset-0 bg-gold-500 opacity-0 group-hover:opacity-20 rounded-xl transition-opacity blur-md"></div>
+                                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${searchedAccount.id}&bgcolor=ffffff&color=000000&margin=0`} alt="Loyalty QR" className="w-16 h-16 rounded relative z-10" />
                                    </div>
                                 </div>
                             </div>
@@ -226,35 +229,38 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                     await onEnrollLoyalty(phoneInput, enrollName.trim());
                                     setIsEnrolling(false);
                                 }
-                            }} className="text-center space-y-4 animate-fade-in">
-                                <div className="space-y-2 mb-4">
-                                    <h3 className="text-white font-serif text-xl">Join Elite Rewards</h3>
-                                    <p className="text-stone-400 text-xs">Complete your profile to start earning.</p>
+                            }} className="text-center space-y-6 animate-fade-in">
+                                <div className="space-y-2 mb-2">
+                                    <h3 className="text-white font-serif text-2xl">Initialize Profile</h3>
+                                    <p className="text-stone-500 text-xs">You are one step away from Elite status.</p>
                                 </div>
                                 <input 
                                     type="text" 
-                                    placeholder="Your Full Name" 
+                                    placeholder="CARDHOLDER NAME" 
                                     value={enrollName}
                                     onChange={e => setEnrollName(e.target.value)}
                                     required
-                                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-gold-500 shadow-inner font-bold text-center"
+                                    className="w-full bg-[#050505] border border-white/10 rounded-2xl py-5 px-6 text-stone-100 focus:outline-none focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/50 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] font-black text-center tracking-widest uppercase text-sm placeholder:text-stone-800"
                                 />
-                                <div className="flex gap-2">
-                                    <button type="button" onClick={() => setIsEnrolling(false)} className="w-1/3 py-4 bg-stone-900 border border-white/5 text-stone-400 hover:text-white hover:bg-stone-800 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all shadow-inner">Cancel</button>
-                                    <button type="submit" className="w-2/3 py-4 bg-gold-500 border border-gold-400 text-stone-950 font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all hover:bg-gold-400 shadow-[0_0_15px_rgba(212,175,55,0.3)]">Complete Setup</button>
+                                <div className="flex gap-3">
+                                    <button type="button" onClick={() => setIsEnrolling(false)} className="w-1/3 py-5 bg-white/5 hover:bg-white/10 text-stone-300 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all">Cancel</button>
+                                    <button type="submit" className="w-2/3 py-5 bg-gold-500 text-[#050505] font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl transition-all hover:bg-gold-400 shadow-[0_10px_30px_rgba(212,175,55,0.2)]">Mint Card</button>
                                 </div>
                             </form>
                         ) : (
-                            <div className="text-center space-y-4 animate-fade-in">
+                            <div className="text-center space-y-6 animate-fade-in py-4">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/10 mb-2">
+                                    <Sparkles size={24} className="text-stone-500" />
+                                </div>
                                 <div className="space-y-2">
-                                    <span className="block text-stone-500 text-sm">No account found for {phoneInput}.</span>
-                                    <p className="text-stone-600 text-[10px] uppercase font-bold tracking-widest">Join the elite tier today to start earning!</p>
+                                    <span className="block text-stone-300 text-base font-serif">Identity Not Found</span>
+                                    <p className="text-stone-500 text-xs uppercase font-bold tracking-[0.2em]">Ready to claim your Elite Card?</p>
                                 </div>
                                 <button 
                                     onClick={() => setIsEnrolling(true)}
-                                    className="px-8 py-4 bg-stone-900 border border-gold-500/30 text-gold-500 hover:bg-gold-500 hover:text-stone-950 transition-all font-black uppercase tracking-widest text-xs rounded-2xl shadow-[0_0_15px_rgba(212,175,55,0.15)]"
+                                    className="w-full py-5 bg-gradient-to-r from-stone-800 to-stone-900 border border-gold-500/30 text-gold-500 hover:text-gold-400 hover:border-gold-500/60 transition-all font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
                                 >
-                                    Enroll Now
+                                    Initialize Account
                                 </button>
                             </div>
                         )}
