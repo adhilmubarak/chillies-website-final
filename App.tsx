@@ -184,15 +184,29 @@ function App() {
   const [suggestion, setSuggestion] = useState<MenuItem | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const isInitialLoad = useRef(true);
   const [isAdminOpen, setIsAdminOpen] = useState(location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery') || Capacitor.isNativePlatform());
   const [isLoading, setIsLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const [arItem, setArItem] = useState<MenuItem | null>(null);
 
   useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      const defaultRoute = localStorage.getItem('defaultRoute');
+      if (defaultRoute && location.pathname === '/') {
+        navigate(defaultRoute, { replace: true });
+        return;
+      }
+    }
+
     const isSpecialPath = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery');
     setIsAdminOpen(isSpecialPath || Capacitor.isNativePlatform());
-  }, [location.pathname]);
+
+    if (isSpecialPath) {
+      localStorage.setItem('defaultRoute', location.pathname);
+    }
+  }, [location.pathname, navigate]);
 
   useEffect(() => {
     const splashTimer = setTimeout(() => {
