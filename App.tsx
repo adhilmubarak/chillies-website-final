@@ -194,7 +194,11 @@ function App() {
     if (isInitialLoad.current) {
       isInitialLoad.current = false;
       const defaultRoute = localStorage.getItem('defaultRoute');
-      if (defaultRoute && location.pathname === '/') {
+      
+      // Only auto-redirect if launched from Home Screen (PWA Standalone mode)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+      
+      if (defaultRoute && location.pathname === '/' && isStandalone) {
         navigate(defaultRoute, { replace: true });
         return;
       }
