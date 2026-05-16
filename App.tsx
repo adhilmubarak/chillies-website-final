@@ -505,7 +505,7 @@ function App() {
 
   return (
     <React.Suspense fallback={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>}>
-      {!isAdminOpen && (
+      {(!isAdminOpen && location.pathname !== '/rewards') && (
         <>
           <Navbar 
             currentTime={currentTime}
