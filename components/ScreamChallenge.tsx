@@ -16,7 +16,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
   const [maxDb, setMaxDb] = useState(0);
   const [averageDb, setAverageDb] = useState(0);
   
-  const [generatedCoupon, setGeneratedCoupon] = useState<{ code: string; value: number } | null>(null);
+  const [generatedCoupon, setGeneratedCoupon] = useState<{ code: string; value: number; isFreeItem?: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
@@ -170,23 +170,45 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
     setAverageDb(avg);
     setGameState('result');
     
-    // Calculate Reward value based on Peak volume reached
+    // Calculate Reward based on Peak volume reached
     let discountValue = 0;
+    let isFreeItem = false;
+
     if (max >= 85) {
-      discountValue = 15; // Extreme Heat
+      isFreeItem = true;
     } else if (max >= 70) {
       discountValue = 10; // Hot Heat
     } else if (max >= 50) {
       discountValue = 5;  // Mild Heat
     }
     
-    if (discountValue > 0) {
-      // Dynamic Coupon Generation
+    if (isFreeItem) {
+      const codePart = Math.random().toString(36).substring(2, 7).toUpperCase();
+      const uniqueCode = `FREE-ROLL-${codePart}`;
+      
+      try {
+        // Save secure free item claim ticket to Firestore
+        await addDoc(collection(db, 'coupons'), {
+          code: uniqueCode,
+          value: 100, // 100% equivalent
+          type: 'free_item',
+          description: `Scream Challenge Grand Winner - Free Shawarma Roll`,
+          expiry: Date.now() + (24 * 60 * 60 * 1000), // Valid for 24 hours
+          phone: phone,
+          createdAt: Date.now()
+        });
+        
+        setGeneratedCoupon({ code: uniqueCode, value: 100, isFreeItem: true });
+      } catch (err) {
+        console.error('Error saving free item claim pass to Firestore:', err);
+      }
+    } else if (discountValue > 0) {
+      // Dynamic Discount Coupon Generation
       const codePart = Math.random().toString(36).substring(2, 7).toUpperCase();
       const uniqueCode = `SCREAM-${discountValue}-${codePart}`;
       
       try {
-        // Save to Firestore
+        // Save standard discount to Firestore
         await addDoc(collection(db, 'coupons'), {
           code: uniqueCode,
           value: discountValue,
@@ -197,9 +219,9 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
           createdAt: Date.now()
         });
         
-        setGeneratedCoupon({ code: uniqueCode, value: discountValue });
+        setGeneratedCoupon({ code: uniqueCode, value: discountValue, isFreeItem: false });
       } catch (err) {
-        console.error('Error saving coupon to Firestore:', err);
+        console.error('Error saving discount coupon to Firestore:', err);
       }
     }
   };
@@ -572,38 +594,77 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
           <div className="text-center space-y-8 animate-fade-in">
             {generatedCoupon ? (
               <div className="space-y-6">
-                <div className="space-y-3">
-                  <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-gradient-to-r from-green-500/10 to-transparent border-l-2 border-green-500 text-green-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2">
-                    <Award size={14} className="animate-bounce" /> Challenge Won
-                  </div>
-                  <h2 className="text-3xl font-serif text-white">Sizzling Golden Roast!</h2>
-                  <p className="text-stone-400 text-xs leading-relaxed max-w-xs mx-auto font-light">
-                    You roasted the Shawarma to a peak intensity of <strong className="text-white font-bold">{maxDb} dB</strong> (average: {averageDb} dB). Unlocked <strong className="text-amber-400 font-bold">{generatedCoupon.value}% OFF</strong> coupon!
-                  </p>
-                </div>
+                {generatedCoupon.isFreeItem ? (
+                  <>
+                    <div className="space-y-3">
+                      <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-gradient-to-r from-yellow-500/10 to-transparent border-l-2 border-yellow-500 text-yellow-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2 animate-pulse">
+                        <Award size={14} className="text-red-500 animate-bounce" /> Grand Prize Winner
+                      </div>
+                      <h2 className="text-3xl font-serif text-white">Legendary Spit Roaster!</h2>
+                      <p className="text-stone-400 text-xs leading-relaxed max-w-xs mx-auto font-light">
+                        You roasted the virtual spit with a mind-blowing peak intensity of <strong className="text-white font-bold">{maxDb} dB</strong>! You've unlocked a <strong className="text-amber-400 font-bold">FREE SHAWARMA ROLL!</strong>
+                      </p>
+                    </div>
 
-                {/* Highly aesthetic Golden Coupon Ticket Card */}
-                <div className="relative w-full bg-[#050505] border border-white/10 p-8 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05),0_0_40px_rgba(var(--brand-500-rgb,212,175,55),0.08)] group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_top_right,_rgba(var(--brand-500-rgb,212,175,55),0.15)_0%,_transparent_70%)] rounded-full"></div>
-                  
-                  {/* Left & Right Ticket Cuts */}
-                  <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#030303] rounded-full border border-white/10 z-10"></div>
-                  <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#030303] rounded-full border border-white/10 z-10"></div>
+                    {/* Highly aesthetic Golden Claim Ticket Card */}
+                    <div className="relative w-full bg-gradient-to-br from-yellow-950/20 via-[#0a0a0a] to-[#0c0c0c] border border-yellow-500/30 p-8 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.05),0_0_40px_rgba(var(--brand-500-rgb,212,175,55),0.15)] group animate-pulse">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_top_right,_rgba(var(--brand-500-rgb,212,175,55),0.15)_0%,_transparent_70%)] rounded-full"></div>
+                      
+                      {/* Left & Right Ticket Cuts */}
+                      <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#030303] rounded-full border border-yellow-500/20 z-10"></div>
+                      <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#030303] rounded-full border border-yellow-500/20 z-10"></div>
 
-                  <div className="space-y-6 relative z-10">
-                    <div>
-                      <span className="text-[10px] text-stone-500 font-black uppercase tracking-[0.35em] block mb-1">Coupon Issued</span>
-                      <div className="font-mono text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 tracking-[0.1em] drop-shadow-md">
-                        {generatedCoupon.code}
+                      <div className="space-y-6 relative z-10">
+                        <div>
+                          <span className="text-[10px] text-yellow-500 font-black uppercase tracking-[0.35em] block mb-1">Grand Claim Pass</span>
+                          <div className="font-mono text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 tracking-[0.1em] drop-shadow-md">
+                            {generatedCoupon.code}
+                          </div>
+                        </div>
+                        
+                        <div className="border-t border-dashed border-yellow-500/25 pt-4 flex flex-col gap-2 text-xs">
+                          <span className="text-stone-300 font-bold flex items-center justify-center gap-1.5"><Gift size={14} className="text-red-500" /> 1x Free Hot Shawarma Roll</span>
+                          <span className="text-stone-500 uppercase tracking-widest text-[9px] font-black">Present this screen to cashiers/drivers to claim!</span>
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="border-t border-dashed border-white/10 pt-4 flex justify-between items-center text-xs">
-                      <span className="text-stone-400 font-light flex items-center gap-1.5"><Gift size={12} className="text-amber-500" /> {generatedCoupon.value}% Savings</span>
-                      <span className="text-stone-500 uppercase tracking-widest text-[9px] font-bold">Expires: 24h</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-3">
+                      <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-gradient-to-r from-green-500/10 to-transparent border-l-2 border-green-500 text-green-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2">
+                        <Award size={14} className="animate-bounce" /> Challenge Won
+                      </div>
+                      <h2 className="text-3xl font-serif text-white">Sizzling Golden Roast!</h2>
+                      <p className="text-stone-400 text-xs leading-relaxed max-w-xs mx-auto font-light">
+                        You roasted the Shawarma to a peak intensity of <strong className="text-white font-bold">{maxDb} dB</strong> (average: {averageDb} dB). Unlocked <strong className="text-amber-400 font-bold">{generatedCoupon.value}% OFF</strong> coupon!
+                      </p>
                     </div>
-                  </div>
-                </div>
+
+                    {/* Highly aesthetic Golden Coupon Ticket Card */}
+                    <div className="relative w-full bg-[#050505] border border-white/10 p-8 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05),0_0_40px_rgba(var(--brand-500-rgb,212,175,55),0.08)] group">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_top_right,_rgba(var(--brand-500-rgb,212,175,55),0.15)_0%,_transparent_70%)] rounded-full"></div>
+                      
+                      {/* Left & Right Ticket Cuts */}
+                      <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#030303] rounded-full border border-white/10 z-10"></div>
+                      <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#030303] rounded-full border border-white/10 z-10"></div>
+
+                      <div className="space-y-6 relative z-10">
+                        <div>
+                          <span className="text-[10px] text-stone-500 font-black uppercase tracking-[0.35em] block mb-1">Coupon Issued</span>
+                          <div className="font-mono text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 tracking-[0.1em] drop-shadow-md">
+                            {generatedCoupon.code}
+                          </div>
+                        </div>
+                        
+                        <div className="border-t border-dashed border-white/10 pt-4 flex justify-between items-center text-xs">
+                          <span className="text-stone-400 font-light flex items-center gap-1.5"><Gift size={12} className="text-amber-500" /> {generatedCoupon.value}% Savings</span>
+                          <span className="text-stone-500 uppercase tracking-widest text-[9px] font-bold">Expires: 24h</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="flex gap-4">
                   <button 
@@ -611,7 +672,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                     className="flex-1 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(var(--brand-500-rgb,212,175,55),0.15)] transition-all active:scale-[0.98]"
                   >
                     {copied ? <Check size={16} /> : <Copy size={16} />}
-                    {copied ? 'Copied!' : 'Copy Code'}
+                    {copied ? 'Copied!' : (generatedCoupon.isFreeItem ? 'Copy Claim Pass' : 'Copy Code')}
                   </button>
                   
                   <button 
@@ -621,7 +682,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                     }}
                     className="flex-1 py-5 bg-stone-900 border border-white/5 text-stone-300 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl transition-all hover:bg-stone-850"
                   >
-                    Apply & Order
+                    {generatedCoupon.isFreeItem ? 'Return to Menu' : 'Apply & Order'}
                   </button>
                 </div>
               </div>

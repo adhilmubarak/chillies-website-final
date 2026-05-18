@@ -42,7 +42,7 @@ export interface Coupon {
   id?: string;
   code: string;
   value: number;
-  type: 'flat' | 'percent';
+  type: 'flat' | 'percent' | 'free_item';
 }
 
 export interface CustomOffer {

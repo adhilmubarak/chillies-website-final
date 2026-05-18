@@ -63,7 +63,14 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   
   let discountAmount = 0;
   if (appliedCoupon) {
-      if (appliedCoupon.type === 'percent') {
+      if (appliedCoupon.type === 'free_item') {
+          const shawarmaItem = cartItems.find(item => item.name.toLowerCase().includes('shawarma'));
+          if (shawarmaItem) {
+              discountAmount = shawarmaItem.price;
+          } else {
+              discountAmount = 0;
+          }
+      } else if (appliedCoupon.type === 'percent') {
           discountAmount = (subtotal * appliedCoupon.value) / 100;
       } else {
           discountAmount = appliedCoupon.value;
@@ -102,10 +109,29 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     }
   }, [cartItems.length, step]);
 
+  useEffect(() => {
+    if (appliedCoupon && appliedCoupon.type === 'free_item') {
+        const hasShawarma = cartItems.some(item => item.name.toLowerCase().includes('shawarma'));
+        if (!hasShawarma) {
+            setAppliedCoupon(null);
+            setCouponError('Add a Shawarma Roll to apply this coupon!');
+            onShowNotification('Free Shawarma coupon removed: Add a Shawarma to cart!');
+        }
+    }
+  }, [cartItems, appliedCoupon]);
+
   const handleApplyCoupon = () => {
       if (!couponInput.trim()) return;
       const found = coupons.find(c => c.code === couponInput.trim().toUpperCase());
       if (found) {
+          if (found.type === 'free_item') {
+              const hasShawarma = cartItems.some(item => item.name.toLowerCase().includes('shawarma'));
+              if (!hasShawarma) {
+                  setCouponError('Add a Shawarma Roll to your cart first!');
+                  setAppliedCoupon(null);
+                  return;
+              }
+          }
           setAppliedCoupon(found);
           setCouponError('');
           onShowNotification('Coupon applied successfully!');
