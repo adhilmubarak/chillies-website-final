@@ -21,6 +21,23 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   
+  // Live Ticker Feed Data
+  const screamFeeds = [
+    "Adhil Mubarak just screamed a scorching 92 dB and claimed a FREE Shawarma! 🌯",
+    "Fahad roasted the spit at 78 dB and unlocked a 10% OFF discount! 🔥",
+    "Shereen roasted the mild spit (64 dB) for 5% OFF! ✨",
+    "Kevin hit a thunderous 88 dB and earned a Free Shawarma! 👑",
+    "Nour sparked the grill at 72 dB for a 10% OFF coupon! 🌶️",
+    "Javed claimed a Free Shawarma Roll at 90 dB! 🎉"
+  ];
+  const [feedIndex, setFeedIndex] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFeedIndex((prev) => (prev + 1) % screamFeeds.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+  
   // Audio state
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -289,6 +306,17 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
               <p className="text-stone-400 text-sm leading-relaxed max-w-xs mx-auto font-light">
                 How hot can you handle? Scream at your screen to roast the virtual Chillies Shawarma spit and unlock up to <strong className="text-gold-400 font-bold">15% off</strong> instantly!
               </p>
+            </div>
+
+            {/* Live Ticker Feed */}
+            <div className="bg-red-950/20 border border-red-500/10 rounded-2xl p-4 flex items-center justify-between gap-3 text-left overflow-hidden relative shadow-inner">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                <span className="text-[8px] text-red-500 font-black uppercase tracking-[0.2em] font-mono">Live Winners Feed</span>
+              </div>
+              <div className="flex-1 text-right text-[10px] font-bold text-stone-300 font-mono animate-fade-in truncate">
+                {screamFeeds[feedIndex]}
+              </div>
             </div>
 
             {/* Display Tiers */}
@@ -628,6 +656,18 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                       </p>
                     </div>
 
+                    {maxDb >= 75 && (
+                      <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 flex gap-3 text-left animate-pulse">
+                        <span className="text-xl shrink-0">😂</span>
+                        <div className="space-y-1">
+                          <h5 className="font-bold text-orange-400 text-[10px] uppercase tracking-wider font-mono">Voice Crack Detector Alert</h5>
+                          <p className="text-[11px] leading-normal text-stone-300 font-light">
+                            Our high-precision stoking sensors detected a highly entertaining vocal frequency crack at {Math.floor(maxDb - 6)} dB. We highly suggest warm honey tea or immediate warm Shawarma grease to repair your vocal cords.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Highly aesthetic Golden Claim Ticket Card */}
                     <div className="relative w-full bg-gradient-to-br from-yellow-950/20 via-[#0a0a0a] to-[#0c0c0c] border border-yellow-500/30 p-8 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.05),0_0_40px_rgba(var(--brand-500-rgb,212,175,55),0.15)] group animate-pulse">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_top_right,_rgba(var(--brand-500-rgb,212,175,55),0.15)_0%,_transparent_70%)] rounded-full"></div>
@@ -662,6 +702,18 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                         You roasted the Shawarma to a peak intensity of <strong className="text-white font-bold">{maxDb} dB</strong> (average: {averageDb} dB). Unlocked <strong className="text-amber-400 font-bold">{generatedCoupon.value}% OFF</strong> coupon!
                       </p>
                     </div>
+
+                    {maxDb >= 75 && (
+                      <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 flex gap-3 text-left animate-pulse">
+                        <span className="text-xl shrink-0">😂</span>
+                        <div className="space-y-1">
+                          <h5 className="font-bold text-orange-400 text-[10px] uppercase tracking-wider font-mono">Voice Crack Detector Alert</h5>
+                          <p className="text-[11px] leading-normal text-stone-300 font-light">
+                            Our high-precision stoking sensors detected a highly entertaining vocal frequency crack at {Math.floor(maxDb - 6)} dB. We highly suggest warm honey tea or immediate warm Shawarma grease to repair your vocal cords.
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Highly aesthetic Golden Coupon Ticket Card */}
                     <div className="relative w-full bg-[#050505] border border-white/10 p-8 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05),0_0_40px_rgba(var(--brand-500-rgb,212,175,55),0.08)] group">
