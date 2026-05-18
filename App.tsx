@@ -12,7 +12,7 @@ import { Category, MenuItem, CartItem, Order, CategoryConfig, Coupon, CustomOffe
 import { MENU_ITEMS } from './data.ts';
 import { db } from './firebase';
 import { collection, addDoc, query, onSnapshot, doc, setDoc, updateDoc, getDocs, where, deleteDoc } from 'firebase/firestore';
-import { Search, Bike, Store, Clock, Flame, ShoppingBag, CheckCircle, XCircle, User, Star, AlertCircle, MessageSquare, Send, X, Info } from 'lucide-react';
+import { Search, Bike, Store, Clock, Flame, ShoppingBag, CheckCircle, XCircle, User, Star, AlertCircle, MessageSquare, Send, X, Info, ChevronRight } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import NotificationTicker from './components/NotificationTicker';
 import SmartSuggestion from './components/SmartSuggestion';
@@ -514,7 +514,7 @@ function App() {
 
   return (
     <React.Suspense fallback={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>}>
-      {(!isAdminOpen && location.pathname !== '/rewards' && location.pathname !== '/feedback') && (
+      {(!isAdminOpen && location.pathname !== '/rewards' && location.pathname !== '/feedback' && location.pathname !== '/scream-challenge') && (
         <>
           <Navbar 
             currentTime={currentTime}
@@ -617,6 +617,43 @@ function App() {
           <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
             <Hero />
             <StoreStatusAlert isStoreOpen={isStoreOpen} startTime={storeSettings.startTime} endTime={storeSettings.endTime} />
+            
+            {/* Customer Scream Challenge Live Promo Banner */}
+            <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 mb-4">
+              <div 
+                onClick={() => navigate('/scream-challenge')}
+                className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-950/20 via-[#0a0a0a] to-stone-900/40 border border-red-500/20 hover:border-gold-500/40 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(239,68,68,0.05)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
+              >
+                {/* Glowing decorative background meshes */}
+                <div className="absolute inset-0 bg-gradient-to-r from-red-950/20 via-transparent to-gold-950/10 pointer-events-none z-0"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle_at_top_right,_rgba(212,175,55,0.08)_0%,_transparent_70%)] rounded-full pointer-events-none"></div>
+
+                <div className="flex items-center gap-5 relative z-10 text-center md:text-left flex-col md:flex-row">
+                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-red-600 via-orange-500 to-gold-500 flex items-center justify-center shrink-0 shadow-[0_10px_20px_rgba(239,68,68,0.25)] group-hover:scale-105 transition-transform duration-500 relative">
+                    <div className="absolute inset-0 border border-white/20 rounded-3xl"></div>
+                    <Flame size={28} className="text-white animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-red-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5 animate-bounce">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></div> Live Game
+                    </div>
+                    <h3 className="text-white text-xl md:text-2xl font-serif leading-tight">
+                      Scream For <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500 italic font-medium">Shawarma!</span>
+                    </h3>
+                    <p className="text-stone-400 text-xs mt-1.5 max-w-md font-light leading-relaxed">
+                      Scream at your screen to roast the virtual Chillies Shawarma spit and unlock up to <strong className="text-gold-400 font-bold">15% off</strong> your order instantly!
+                    </p>
+                  </div>
+                </div>
+
+                <div className="shrink-0 relative z-10 w-full md:w-auto">
+                  <button className="w-full md:w-auto px-8 py-4.5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl shadow-[0_10px_25px_rgba(var(--brand-500-rgb,212,175,55),0.15)] hover:opacity-95 transition-all flex items-center justify-center gap-2">
+                    Play Now <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <ChefsChoice items={menuItems.filter(item => item.isChefChoice)} onAdd={addToCart} isFlashSaleActive={isFlashSaleActive} checkAvailability={checkAvailability} isStoreOpen={isStoreOpen} cartItems={cartItems} allMenuItems={menuItems} onShowSuggestion={setSuggestion} onViewAR={handleViewAR} />
             
             <section id="menu" className="pb-24 pt-12 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24">
