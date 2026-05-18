@@ -243,10 +243,10 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
               </div>
               <h1 className="text-4xl md:text-5xl font-serif text-white leading-tight">
                 Scream For <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-500 to-gold-600 italic font-medium pr-4">Spice!</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-500 to-gold-600 italic font-medium pr-4">Shawarma!</span>
               </h1>
               <p className="text-stone-400 text-sm leading-relaxed max-w-xs mx-auto font-light">
-                How hot can you handle? Scream at your screen to stoke the virtual Chillies flame and unlock up to <strong className="text-gold-400 font-bold">15% off</strong> instantly!
+                How hot can you handle? Scream at your screen to roast the virtual Chillies Shawarma spit and unlock up to <strong className="text-gold-400 font-bold">15% off</strong> instantly!
               </p>
             </div>
 
@@ -254,15 +254,15 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
             <div className="bg-[#0a0a0a]/90 border border-white/[0.05] rounded-3xl p-5 space-y-3.5 text-left shadow-2xl">
               <div className="text-[10px] text-stone-500 font-black uppercase tracking-widest text-center border-b border-white/[0.03] pb-2.5">Volume Reward Tiers</div>
               <div className="flex justify-between items-center text-xs">
-                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-gold-600"></div> Mild Heat (50+ dB)</span>
+                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-gold-600"></div> Mild Roast (50+ dB)</span>
                 <span className="text-gold-400 font-bold font-mono">5% OFF</span>
               </div>
               <div className="flex justify-between items-center text-xs">
-                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div> Hot Heat (70+ dB)</span>
+                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div> Hot Sizzle (70+ dB)</span>
                 <span className="text-orange-400 font-bold font-mono">10% OFF</span>
               </div>
               <div className="flex justify-between items-center text-xs">
-                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></div> Extreme Heat (85+ dB)</span>
+                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></div> Golden Crispy (85+ dB)</span>
                 <span className="text-red-500 font-black font-mono">15% OFF</span>
               </div>
             </div>
@@ -370,19 +370,87 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                 </svg>
               </div>
 
-              {/* Flame Visualizer */}
+              {/* Shawarma Visualizer */}
               <div className={`transition-all duration-75 flex flex-col items-center justify-center z-10 ${currentDb >= 85 ? 'animate-bounce' : ''}`}>
-                <div className="relative">
-                  <Flame 
-                    size={80} 
-                    className={`bg-gradient-to-b bg-clip-text text-transparent transition-all duration-100 ${getFlameColor(currentDb)}`} 
-                  />
-                  {currentDb > 30 && (
-                    <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full scale-150 animate-pulse z-[-1]"></div>
+                <div className="relative flex items-center justify-center">
+                  <svg 
+                    className="w-32 h-44 transition-all duration-100 drop-shadow-[0_0_25px_rgba(212,175,55,0.2)]" 
+                    viewBox="0 0 100 150" 
+                    style={{ 
+                      transform: `scale(${1 + currentDb / 250})`, 
+                      filter: currentDb > 70 ? 'url(#sizzleFilter)' : '' 
+                    }}
+                  >
+                    <defs>
+                      {/* Sizzle turbulence heat waves filter */}
+                      <filter id="sizzleFilter">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.05 0.95" numOctaves="1" result="noise" />
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale={currentDb / 12} xChannelSelector="R" yChannelSelector="G" />
+                      </filter>
+
+                      {/* Roasted Shawarma meat base gradient */}
+                      <linearGradient id="roastedMeatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#78350f" />
+                        <stop offset="40%" stopColor="#d97706" />
+                        <stop offset="70%" stopColor="#b45309" />
+                        <stop offset="100%" stopColor="#92400e" />
+                      </linearGradient>
+
+                      {/* Glowing searing embers gradient */}
+                      <linearGradient id="sizzlingGlowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#ffd700" />
+                        <stop offset="50%" stopColor="#f97316" />
+                        <stop offset="100%" stopColor="#dc2626" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Skewer / spit rod */}
+                    <rect x="47" y="10" width="6" height="130" fill="#78716c" rx="3" />
+
+                    {/* Drip disc plate */}
+                    <ellipse cx="50" cy="130" rx="28" ry="6" fill="#44403c" />
+
+                    {/* Raw/Neutral Meat Layer base */}
+                    <path 
+                      d="M 32 30 C 32 30, 50 18, 68 30 C 72 50, 78 95, 62 120 C 58 125, 42 125, 38 120 C 22 95, 28 50, 32 30 Z" 
+                      fill="#57534e" 
+                    />
+
+                    {/* Juicy Roasted Meat Layer (fades in as they scream) */}
+                    <path 
+                      d="M 32 30 C 32 30, 50 18, 68 30 C 72 50, 78 95, 62 120 C 58 125, 42 125, 38 120 C 22 95, 28 50, 32 30 Z" 
+                      fill="url(#roastedMeatGrad)"
+                      opacity={currentDb > 0 ? Math.min(currentDb / 30, 1) : 0}
+                      className="transition-opacity duration-300"
+                    />
+
+                    {/* Hot Sizzling Grilling Mark lines */}
+                    <path d="M 34 45 Q 50 52, 66 45" stroke="#451a03" strokeWidth="3.5" fill="none" opacity={currentDb > 0 ? 0.8 : 0.2} />
+                    <path d="M 32 65 Q 50 72, 68 65" stroke="#451a03" strokeWidth="3.5" fill="none" opacity={currentDb > 0 ? 0.8 : 0.2} />
+                    <path d="M 32 85 Q 50 92, 68 85" stroke="#451a03" strokeWidth="3.5" fill="none" opacity={currentDb > 0 ? 0.8 : 0.2} />
+                    <path d="M 34 105 Q 50 110, 66 105" stroke="#451a03" strokeWidth="3.5" fill="none" opacity={currentDb > 0 ? 0.8 : 0.2} />
+
+                    {/* Searing Orange/Gold Heat glow overlay (grows with loudness) */}
+                    <path 
+                      d="M 32 30 C 32 30, 50 18, 68 30 C 72 50, 78 95, 62 120 C 58 125, 42 125, 38 120 C 22 95, 28 50, 32 30 Z" 
+                      fill="url(#sizzlingGlowGrad)"
+                      opacity={Math.min(currentDb / 100, 0.9)} 
+                      className="transition-opacity duration-75 mix-blend-screen"
+                    />
+                  </svg>
+                  
+                  {/* Glowing background heat blur */}
+                  {currentDb > 25 && (
+                    <div 
+                      className="absolute w-32 h-44 bg-gradient-to-t from-red-600 via-orange-500 to-gold-500 rounded-full blur-3xl opacity-30 z-[-1] transition-all duration-75"
+                      style={{ transform: `scale(${currentDb / 40})` }}
+                    />
                   )}
                 </div>
-                <div className="mt-4 font-mono text-3xl font-black text-white tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
-                  {currentDb} <span className="text-xs text-stone-500">dB</span>
+                
+                <div className="mt-6 font-mono text-3xl font-black text-white tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center gap-2">
+                  <span>{currentDb}</span>
+                  <span className="text-xs text-stone-500 uppercase tracking-widest font-bold">dB Sizzle</span>
                 </div>
               </div>
             </div>
@@ -390,7 +458,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
             {/* Max Decibel Record Bar */}
             <div className="space-y-2">
               <div className="flex justify-between text-[10px] text-stone-500 font-bold uppercase tracking-widest px-2">
-                <span>Peak Volume reached</span>
+                <span>Peak Sizzle reached</span>
                 <span>{maxDb} dB</span>
               </div>
               <div className="w-full h-3 bg-[#050505] rounded-full overflow-hidden border border-white/5 shadow-inner">
@@ -412,9 +480,9 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                   <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-gradient-to-r from-green-500/10 to-transparent border-l-2 border-green-500 text-green-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2">
                     <Award size={14} className="animate-bounce" /> Challenge Won
                   </div>
-                  <h2 className="text-3xl font-serif text-white">Absolute Decibel Heat!</h2>
+                  <h2 className="text-3xl font-serif text-white">Sizzling Golden Roast!</h2>
                   <p className="text-stone-400 text-xs leading-relaxed max-w-xs mx-auto font-light">
-                    You screamed with a peak intensity of <strong className="text-white font-bold">{maxDb} dB</strong> (average: {averageDb} dB). Unlocked <strong className="text-gold-400 font-bold">{generatedCoupon.value}% OFF</strong> coupon!
+                    You roasted the Shawarma to a peak intensity of <strong className="text-white font-bold">{maxDb} dB</strong> (average: {averageDb} dB). Unlocked <strong className="text-gold-400 font-bold">{generatedCoupon.value}% OFF</strong> coupon!
                   </p>
                 </div>
 
@@ -464,9 +532,9 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
             ) : (
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <h2 className="text-3xl font-serif text-white">Mild Sparkles...</h2>
+                  <h2 className="text-3xl font-serif text-white">Cold Spit...</h2>
                   <p className="text-stone-400 text-xs leading-relaxed max-w-xs mx-auto font-light">
-                    You reached a peak volume of <strong className="text-white font-bold">{maxDb} dB</strong>. We require at least <strong className="text-gold-400 font-bold">50 dB</strong> of pure screaming power to stoke the flame!
+                    You reached a peak volume of <strong className="text-white font-bold">{maxDb} dB</strong>. We require at least <strong className="text-gold-400 font-bold">50 dB</strong> of pure screaming power to sizzle the Shawarma!
                   </p>
                 </div>
 
