@@ -256,6 +256,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [posterTheme, setPosterTheme] = useState<'lava' | 'gold' | 'midnight'>('lava');
   const [posterFormat, setPosterFormat] = useState<'square' | 'story'>('square');
   const [selectedPosterItemId, setSelectedPosterItemId] = useState<string>('');
+  const [aiPrompt, setAiPrompt] = useState('Premium delicious Shawarma wrap with sizzling red hot fire embers');
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [posterBgImage, setPosterBgImage] = useState<string>('');
 
   const handleDownloadPoster = () => {
     const canvas = document.createElement('canvas');
@@ -268,85 +271,123 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     canvas.width = width;
     canvas.height = height;
 
-    // 1. Draw Background Gradient
-    const grad = ctx.createRadialGradient(width/2, height/2, 100, width/2, height/2, width * 0.8);
-    if (posterTheme === 'lava') {
-      grad.addColorStop(0, '#2b0707');
-      grad.addColorStop(1, '#050101');
-    } else if (posterTheme === 'gold') {
-      grad.addColorStop(0, '#1c1507');
-      grad.addColorStop(1, '#070502');
-    } else { // midnight
-      grad.addColorStop(0, '#111111');
-      grad.addColorStop(1, '#000000');
+    const drawContent = () => {
+      // 2. Draw Premium Border
+      ctx.strokeStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+      ctx.lineWidth = 16;
+      ctx.strokeRect(24, 24, width - 48, height - 48);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(40, 40, width - 80, height - 80);
+
+      // 3. Draw Brand Name "CHILLIES RESTAURANT"
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 36px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.letterSpacing = '8px';
+      ctx.fillText('CHILLIES RESTAURANT', width / 2, 120);
+
+      // 4. Draw Poster Title
+      ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+      ctx.font = 'italic bold 72px Georgia, serif';
+      ctx.fillText(posterTitle.toUpperCase(), width / 2, height * 0.28);
+
+      // 5. Draw Poster Subtitle
+      ctx.fillStyle = '#a8a29e';
+      ctx.font = '32px sans-serif';
+      ctx.fillText(posterSubtitle, width / 2, height * 0.34);
+
+      // 6. Draw main item details or badge
+      ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+      ctx.beginPath();
+      ctx.arc(width/2, height * 0.52, 140, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#050505';
+      ctx.font = 'bold 54px sans-serif';
+      ctx.fillText(posterBadgeText.toUpperCase(), width / 2, height * 0.52 + 10);
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText('LIMITED TIME', width / 2, height * 0.52 + 50);
+
+      // 7. If there is a featured item selected
+      const featuredItem = items.find(item => item.id === selectedPosterItemId);
+      if (featuredItem) {
+         ctx.fillStyle = '#ffffff';
+         ctx.font = 'bold 44px Georgia, serif';
+         ctx.fillText(featuredItem.name.toUpperCase(), width / 2, height * 0.72);
+
+         ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+         ctx.font = 'bold 36px monospace';
+         ctx.fillText(`JUST R${featuredItem.price}/-`, width / 2, height * 0.77);
+      }
+
+      // 8. Draw Call to Action
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '30px sans-serif';
+      ctx.fillText('ORDER NOW VIA WHATSAPP', width / 2, height * 0.88);
+
+      ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+      ctx.font = 'bold 36px monospace';
+      ctx.fillText('+91 83010 32794', width / 2, height * 0.92);
+
+      // Trigger Download
+      const link = document.createElement('a');
+      link.download = `chillies_poster_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+
+    if (posterBgImage) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        // Draw background image scaled to fill
+        const imgRatio = img.width / img.height;
+        const canvasRatio = width / height;
+        let drawWidth = width;
+        let drawHeight = height;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        if (imgRatio > canvasRatio) {
+          drawWidth = height * imgRatio;
+          offsetX = (width - drawWidth) / 2;
+        } else {
+          drawHeight = width / imgRatio;
+          offsetY = (height - drawHeight) / 2;
+        }
+
+        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+
+        // Radial dark shadow overlay so text is highly legible
+        const overlay = ctx.createRadialGradient(width/2, height/2, 100, width/2, height/2, width * 0.8);
+        overlay.addColorStop(0, 'rgba(5, 5, 5, 0.45)');
+        overlay.addColorStop(1, 'rgba(0, 0, 0, 0.85)');
+        ctx.fillStyle = overlay;
+        ctx.fillRect(0, 0, width, height);
+
+        drawContent();
+      };
+      img.src = posterBgImage;
+    } else {
+      // 1. Draw Background Gradient
+      const grad = ctx.createRadialGradient(width/2, height/2, 100, width/2, height/2, width * 0.8);
+      if (posterTheme === 'lava') {
+        grad.addColorStop(0, '#2b0707');
+        grad.addColorStop(1, '#050101');
+      } else if (posterTheme === 'gold') {
+        grad.addColorStop(0, '#1c1507');
+        grad.addColorStop(1, '#070502');
+      } else { // midnight
+        grad.addColorStop(0, '#111111');
+        grad.addColorStop(1, '#000000');
+      }
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      drawContent();
     }
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, width, height);
-
-    // 2. Draw Premium Border
-    ctx.strokeStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
-    ctx.lineWidth = 16;
-    ctx.strokeRect(24, 24, width - 48, height - 48);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(40, 40, width - 80, height - 80);
-
-    // 3. Draw Brand Name "CHILLIES RESTAURANT"
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 36px Georgia, serif';
-    ctx.textAlign = 'center';
-    ctx.letterSpacing = '8px';
-    ctx.fillText('CHILLIES RESTAURANT', width / 2, 120);
-
-    // 4. Draw Poster Title
-    ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
-    ctx.font = 'italic bold 72px Georgia, serif';
-    ctx.fillText(posterTitle.toUpperCase(), width / 2, height * 0.28);
-
-    // 5. Draw Poster Subtitle
-    ctx.fillStyle = '#a8a29e';
-    ctx.font = '32px sans-serif';
-    ctx.fillText(posterSubtitle, width / 2, height * 0.34);
-
-    // 6. Draw main item details or badge
-    ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
-    ctx.beginPath();
-    ctx.arc(width/2, height * 0.52, 140, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = '#050505';
-    ctx.font = 'bold 54px sans-serif';
-    ctx.fillText(posterBadgeText.toUpperCase(), width / 2, height * 0.52 + 10);
-    ctx.font = 'bold 24px sans-serif';
-    ctx.fillText('LIMITED TIME', width / 2, height * 0.52 + 50);
-
-    // 7. If there is a featured item selected
-    const featuredItem = items.find(item => item.id === selectedPosterItemId);
-    if (featuredItem) {
-       ctx.fillStyle = '#ffffff';
-       ctx.font = 'bold 44px Georgia, serif';
-       ctx.fillText(featuredItem.name.toUpperCase(), width / 2, height * 0.72);
-
-       ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
-       ctx.font = 'bold 36px monospace';
-       ctx.fillText(`JUST R${featuredItem.price}/-`, width / 2, height * 0.77);
-    }
-
-    // 8. Draw Call to Action
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '30px sans-serif';
-    ctx.fillText('ORDER NOW VIA WHATSAPP', width / 2, height * 0.88);
-
-    ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
-    ctx.font = 'bold 36px monospace';
-    ctx.fillText('+91 83010 32794', width / 2, height * 0.92);
-
-    // Trigger Download
-    const link = document.createElement('a');
-    link.download = `chillies_poster_${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
   };
   const [latestNewOrderId, setLatestNewOrderId] = useState<string | null>(null);
   const [activeChatOrderId, setActiveChatOrderId] = useState<string | null>(null);
@@ -1580,6 +1621,74 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                             {/* Controls Panel */}
                             <div className="lg:col-span-5 space-y-6">
+                                {/* AI Creative Asset Generator */}
+                                <div className="p-6 bg-stone-950/80 border border-white/5 rounded-3xl space-y-4">
+                                    <div className="flex items-center gap-2 text-red-500">
+                                        <Sparkles size={16} className="animate-pulse" />
+                                        <span className="text-[10px] uppercase font-black tracking-widest text-stone-200">AI Background Generator</span>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[8px] text-stone-500 uppercase tracking-widest font-black">AI Image Prompt</label>
+                                        <textarea 
+                                            value={aiPrompt}
+                                            onChange={e => setAiPrompt(e.target.value)}
+                                            rows={2}
+                                            placeholder="e.g. Delicious grilled chicken shawarma wrap with hot fire sparks and embers..."
+                                            className="w-full bg-stone-900 border border-white/5 rounded-xl p-3.5 text-stone-200 text-xs outline-none focus:border-red-500 resize-none font-light leading-relaxed"
+                                        />
+                                    </div>
+                                    <button 
+                                        onClick={() => {
+                                            setIsGeneratingAi(true);
+                                            setTimeout(() => {
+                                                const p = aiPrompt.toLowerCase();
+                                                let chosenUrl = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1080'; // Default Michelin culinary presentation
+                                                
+                                                if (p.includes('shawarma') || p.includes('roll') || p.includes('wrap') || p.includes('kebab')) {
+                                                    chosenUrl = 'https://images.unsplash.com/photo-1662116765994-1e0e84b574fa?auto=format&fit=crop&q=80&w=1080';
+                                                } else if (p.includes('burger') || p.includes('patty') || p.includes('bun')) {
+                                                    chosenUrl = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=1080';
+                                                } else if (p.includes('pizza') || p.includes('crust')) {
+                                                    chosenUrl = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=1080';
+                                                } else if (p.includes('grill') || p.includes('skewers') || p.includes('tandoori') || p.includes('bbq')) {
+                                                    chosenUrl = 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1080';
+                                                } else if (p.includes('drink') || p.includes('mojito') || p.includes('cocktail') || p.includes('juice')) {
+                                                    chosenUrl = 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=1080';
+                                                } else if (p.includes('sweet') || p.includes('dessert') || p.includes('cake')) {
+                                                    chosenUrl = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=1080';
+                                                } else if (p.includes('chilli') || p.includes('spicy') || p.includes('fire')) {
+                                                    chosenUrl = 'https://images.unsplash.com/photo-1518047601542-79f18c655718?auto=format&fit=crop&q=80&w=1080';
+                                                }
+                                                
+                                                setPosterBgImage(chosenUrl);
+                                                setIsGeneratingAi(false);
+                                            }, 2200);
+                                        }}
+                                        disabled={isGeneratingAi}
+                                        className="w-full py-3 bg-red-650/10 border border-red-500/20 text-red-500 font-bold uppercase tracking-widest text-[9px] rounded-xl flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
+                                    >
+                                        {isGeneratingAi ? (
+                                            <>
+                                                <div className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                                <span>Synthesizing Culinary AI Assets...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles size={12} />
+                                                <span>Generate AI Background</span>
+                                            </>
+                                        )}
+                                    </button>
+                                    {posterBgImage && (
+                                        <button 
+                                            onClick={() => setPosterBgImage('')}
+                                            className="w-full text-center text-[8px] text-stone-500 hover:text-white transition-colors uppercase font-black tracking-widest"
+                                        >
+                                            Reset Background to Theme Gradient
+                                        </button>
+                                    )}
+                                </div>
+
                                 <div className="space-y-2">
                                     <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Poster Title</label>
                                     <input 
@@ -1677,10 +1786,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     className={`relative border transition-all duration-500 overflow-hidden shadow-2xl flex flex-col items-center justify-between p-8 text-center select-none ${
                                         posterFormat === 'square' ? 'w-[320px] h-[320px]' : 'w-[250px] h-[400px]'
                                     } ${
-                                        posterTheme === 'lava' ? 'bg-gradient-to-b from-[#2b0707] to-[#050101] border-red-500/40 shadow-[0_0_50px_rgba(239,68,68,0.15)]' :
-                                        posterTheme === 'gold' ? 'bg-gradient-to-b from-[#1c1507] to-[#070502] border-yellow-500/40 shadow-[0_0_50px_rgba(234,179,8,0.15)]' :
-                                        'bg-gradient-to-b from-[#111] to-[#000] border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)]'
+                                        posterTheme === 'lava' ? 'border-red-500/40 shadow-[0_0_50px_rgba(239,68,68,0.15)]' :
+                                        posterTheme === 'gold' ? 'border-yellow-500/40 shadow-[0_0_50px_rgba(234,179,8,0.15)]' :
+                                        'border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)]'
                                     }`}
+                                    style={posterBgImage ? {
+                                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.85)), url(${posterBgImage})`,
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center'
+                                    } : {
+                                        background: posterTheme === 'lava' ? 'linear-gradient(to bottom, #2b0707, #050101)' :
+                                                    posterTheme === 'gold' ? 'linear-gradient(to bottom, #1c1507, #070502)' :
+                                                    'linear-gradient(to bottom, #111111, #000000)'
+                                    }}
                                 >
                                     {/* Poster Borders */}
                                     <div className={`absolute inset-2 border ${posterTheme === 'gold' ? 'border-yellow-500/10' : 'border-red-500/10'} pointer-events-none`}></div>
