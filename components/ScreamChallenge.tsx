@@ -744,68 +744,115 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
       {/* Funny & Sarcastic Terms and Conditions Modal */}
       {!acceptedTerms && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-6 overflow-y-auto">
-          <div className="bg-stone-900 border border-gold-500/20 max-w-md w-full rounded-[2.5rem] p-8 space-y-6 shadow-2xl animate-scale-up relative">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.15),transparent_60%)] pointer-events-none rounded-[2.5rem]"></div>
-            
-            <div className="text-center relative z-10 space-y-2">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl mb-2">
-                <ShieldAlert size={28} className="animate-bounce" />
+          <div className="bg-[#0b0505] border border-red-500/20 max-w-md w-full rounded-[2.5rem] p-8 space-y-6 shadow-[0_0_80px_rgba(239,68,68,0.15)] animate-scale-up relative">
+            {/* Glowing backdrop atmosphere */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.2),transparent_70%)] pointer-events-none rounded-[2.5rem]"></div>
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-red-500/10 blur-2xl rounded-full"></div>
+
+            {/* Header Shield */}
+            <div className="text-center relative z-10 space-y-2.5">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-650 to-orange-600 border border-white/10 text-stone-950 rounded-3xl mb-1.5 shadow-[0_8px_20px_rgba(239,68,68,0.25)] animate-pulse">
+                <ShieldAlert size={32} />
               </div>
-              <h2 className="text-2xl font-serif text-white">Vocal Cord Indemnification</h2>
-              <p className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Please sign your dignity away below</p>
+              <h2 className="text-2xl font-serif text-white tracking-wide">Dignity Waiver Contract</h2>
+              <p className="text-gold-500 text-[9px] uppercase tracking-[0.25em] font-black">Official Chillies Scream Challenge Agreement</p>
             </div>
 
-            <div className="relative z-10 bg-stone-950 border border-white/5 rounded-2xl p-5 max-h-[220px] overflow-y-auto space-y-4 text-xs font-light text-stone-400 scrollbar-thin">
-              <div className="space-y-1">
-                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 1: Public Embarrassment Act</h5>
-                <p className="leading-relaxed text-stone-400">By ticking below, you agree that your neighbors, housemates, and intensely confused pets are legally allowed to judge your life choices while you shout at a glowing rectangle for a discount on flatbread-wrapped meat.</p>
+            {/* Interactive Sarcastic Clauses */}
+            <div className="relative z-10 bg-stone-950/80 border border-white/5 rounded-3xl p-5 max-h-[250px] overflow-y-auto space-y-4 scrollbar-thin">
+              
+              <div className="flex gap-3 items-start border-b border-white/[0.02] pb-3">
+                <div className="w-6 h-6 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">I</div>
+                <div className="space-y-1">
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 1: Public Embarrassment Act</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">You agree that your neighbors, family members, and intensely confused pets have the legal right to question your life choices while you shout loudly at your screen for a cheap flatbread wrap.</p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 2: Spit and Saliva Hazards</h5>
-                <p className="leading-relaxed text-stone-400">Chillies Restaurant is NOT liable for any saliva droplets launched onto your screen, keyboard, or surrounding onlookers during high-intensity decibel stoking. Please wipe down your device at your own discretion.</p>
+
+              <div className="flex gap-3 items-start border-b border-white/[0.02] pb-3">
+                <div className="w-6 h-6 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">II</div>
+                <div className="space-y-1">
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 2: Spit & Screen Hazards</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">Chillies is NOT responsible for spit droplets launched onto your screen, phone, or any surrounding observers. Clean your screen at your own discretion. Keep a wipe handy.</p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 3: The Squeak and Crack Ordinance</h5>
-                <p className="leading-relaxed text-stone-400">Should your voice crack, squeak, or fail miserably during stoking, you agree to wear your brief vocal embarrassment as a badge of honor. No refunds on fractured pride.</p>
+
+              <div className="flex gap-3 items-start border-b border-white/[0.02] pb-3">
+                <div className="w-6 h-6 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">III</div>
+                <div className="space-y-1">
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 3: The Vocal Crack Ordinance</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">If your voice squeaks, cracks, or fails entirely, you agree to wear your embarrassment as a badge of honor. No refunds on fractured pride.</p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 4: Spiritual Cord Possession</h5>
-                <p className="leading-relaxed text-stone-400">You hereby surrender temporary custody of your vocal cords to the virtual Chillies Shawarma spit. They will be returned upon completion of your 5-second scream or when the spit reaches golden-crispy perfection.</p>
+
+              <div className="flex gap-3 items-start border-b border-white/[0.02] pb-3">
+                <div className="w-6 h-6 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">IV</div>
+                <div className="space-y-1">
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 4: Spit Possession Rights</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">You hereby surrender the spiritual ownership of your vocal cords to the virtual rotating Shawarma spit. They will be returned after the game, or upon the spit reaching golden-crispy perfection.</p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 5: Extreme Hunger Indemnity</h5>
-                <p className="leading-relaxed text-stone-400">We accept zero responsibility for extreme cravings, uncontrollable drooling, or immediate impulse delivery purchases triggered by the delicious look of our virtual rotating meat spit.</p>
+
+              <div className="flex gap-3 items-start">
+                <div className="w-6 h-6 bg-red-650/10 border border-red-500/20 text-red-400 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">V</div>
+                <div className="space-y-1">
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 5: Instant Hunger Traps</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">We accept zero responsibility for high-decibel stoking triggering immediate intense cravings, excessive drooling, or spontaneous ordering sprees.</p>
+                </div>
               </div>
+
             </div>
 
-            <div className="relative z-10 flex items-center gap-3 bg-stone-950 border border-white/5 rounded-2xl p-4">
-              <input 
-                type="checkbox" 
-                id="agree-terms" 
-                className="w-4 h-4 rounded border-stone-800 bg-stone-950 text-red-500 focus:ring-0 cursor-pointer accent-red-500" 
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setTimeout(() => setAcceptedTerms(true), 250);
-                  }
-                }}
-              />
-              <label htmlFor="agree-terms" className="text-[10px] text-stone-400 font-bold uppercase tracking-wider cursor-pointer">
-                I surrender my vocal cords and accept my fate
-              </label>
+            {/* Checkbox gate */}
+            <div className="relative z-10 bg-stone-950 border border-white/5 rounded-3xl p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <input 
+                  type="checkbox" 
+                  id="agree-vocal" 
+                  className="w-4 h-4 rounded border-stone-800 bg-stone-900 text-red-500 focus:ring-0 cursor-pointer accent-red-500 shrink-0" 
+                  onChange={(e) => {
+                    const spitCheck = document.getElementById('agree-spit') as HTMLInputElement;
+                    if (e.target.checked && spitCheck && spitCheck.checked) {
+                      setTimeout(() => setAcceptedTerms(true), 250);
+                    }
+                  }}
+                />
+                <label htmlFor="agree-vocal" className="text-[9px] text-stone-400 font-bold uppercase tracking-wider cursor-pointer select-none">
+                  I surrender my vocal cords and accept my fate
+                </label>
+              </div>
+
+              <div className="flex items-center gap-3 border-t border-white/[0.03] pt-3">
+                <input 
+                  type="checkbox" 
+                  id="agree-spit" 
+                  className="w-4 h-4 rounded border-stone-800 bg-stone-900 text-red-500 focus:ring-0 cursor-pointer accent-red-500 shrink-0" 
+                  onChange={(e) => {
+                    const vocalCheck = document.getElementById('agree-vocal') as HTMLInputElement;
+                    if (e.target.checked && vocalCheck && vocalCheck.checked) {
+                      setTimeout(() => setAcceptedTerms(true), 250);
+                    }
+                  }}
+                />
+                <label htmlFor="agree-spit" className="text-[9px] text-stone-400 font-bold uppercase tracking-wider cursor-pointer select-none">
+                  I promise NOT to launch saliva at my screen
+                </label>
+              </div>
             </div>
             
+            {/* Action buttons */}
             <div className="relative z-10 flex gap-4">
               <button 
                 onClick={() => navigate('/')}
-                className="w-1/3 py-4 bg-stone-950 border border-white/5 text-stone-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                className="w-1/3 py-4 bg-stone-950 border border-white/5 text-stone-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-stone-900 active:scale-95"
               >
                 Coward's Exit
               </button>
               <button 
                 disabled 
-                className="w-2/3 py-4 bg-stone-800 text-stone-600 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed border border-white/5"
+                className="w-2/3 py-4 bg-stone-900/50 text-stone-600 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed border border-white/5 flex items-center justify-center gap-2"
               >
-                Accept and Play
+                Accept & Play (Tick BOTH boxes)
               </button>
             </div>
           </div>
