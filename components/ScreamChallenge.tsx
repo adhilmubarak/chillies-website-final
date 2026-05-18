@@ -756,48 +756,46 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
               </div>
               <h2 className="text-2xl font-serif text-white tracking-wide">Dignity Waiver Contract</h2>
               <p className="text-gold-500 text-[9px] uppercase tracking-[0.25em] font-black">Official Chillies Scream Challenge Agreement</p>
-            </div>
-
-            {/* Interactive Sarcastic Clauses */}
-            <div className="relative z-10 bg-stone-950/80 border border-white/5 rounded-3xl p-5 max-h-[250px] overflow-y-auto space-y-4 scrollbar-thin">
+              {/* Interactive Sarcastic Clauses */}
+            <div className="relative z-10 bg-stone-950/80 border border-white/5 rounded-3xl p-5 max-h-[260px] overflow-y-auto space-y-4 scrollbar-thin">
               
               <div className="flex gap-3 items-start border-b border-white/[0.02] pb-3">
-                <div className="w-6 h-6 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">I</div>
+                <div className="w-6 h-6 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 font-mono">I</div>
                 <div className="space-y-1">
-                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 1: Public Embarrassment Act</h5>
-                  <p className="leading-relaxed text-xs font-light text-stone-400">You agree that your neighbors, family members, and intensely confused pets have the legal right to question your life choices while you shout loudly at your screen for a cheap flatbread wrap.</p>
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause I: The Public Spectacle Decree</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">You grant full legal immunity to any neighbor, family member, roommate, or highly judgmental house cat who walks in on you shrieking at your phone like a startled banshee at 2 AM. If they film you and you go viral, you agree we get 50% of the ad revenue.</p>
                 </div>
               </div>
 
               <div className="flex gap-3 items-start border-b border-white/[0.02] pb-3">
-                <div className="w-6 h-6 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">II</div>
+                <div className="w-6 h-6 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 font-mono">II</div>
                 <div className="space-y-1">
-                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 2: Spit & Screen Hazards</h5>
-                  <p className="leading-relaxed text-xs font-light text-stone-400">Chillies is NOT responsible for spit droplets launched onto your screen, phone, or any surrounding observers. Clean your screen at your own discretion. Keep a wipe handy.</p>
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause II: Liquid Damage Splash Zone</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">High-decibel stoking inevitably turns your smartphone screen into a water park splash zone. Chillies Restaurant accepts ZERO liability for saliva-induced screen failure or moisture damage. Clean your screen immediately, you beautiful savage.</p>
                 </div>
               </div>
 
               <div className="flex gap-3 items-start border-b border-white/[0.02] pb-3">
-                <div className="w-6 h-6 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">III</div>
+                <div className="w-6 h-6 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 font-mono">III</div>
                 <div className="space-y-1">
-                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 3: The Vocal Crack Ordinance</h5>
-                  <p className="leading-relaxed text-xs font-light text-stone-400">If your voice squeaks, cracks, or fails entirely, you agree to wear your embarrassment as a badge of honor. No refunds on fractured pride.</p>
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause III: Squeaks, Cracks & seagull mimicry</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">Should your voice crack, squeak like a deflating clown balloon, or resemble a startled seagull, you agree to wear your brief vocal embarrassment as a badge of honor. No refunds on fractured pride or dry throat mornings.</p>
                 </div>
               </div>
 
               <div className="flex gap-3 items-start border-b border-white/[0.02] pb-3">
-                <div className="w-6 h-6 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">IV</div>
+                <div className="w-6 h-6 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 font-mono">IV</div>
                 <div className="space-y-1">
-                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 4: Spit Possession Rights</h5>
-                  <p className="leading-relaxed text-xs font-light text-stone-400">You hereby surrender the spiritual ownership of your vocal cords to the virtual rotating Shawarma spit. They will be returned after the game, or upon the spit reaching golden-crispy perfection.</p>
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause IV: Temporary Soul Lease</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">By ticking below, you temporarily lease the spiritual rights of your vocal cords to our virtual rotating meat spit. Cords will be returned after the game, or once the virtual spit reaches absolute golden-crispy perfection.</p>
                 </div>
               </div>
 
               <div className="flex gap-3 items-start">
-                <div className="w-6 h-6 bg-red-650/10 border border-red-500/20 text-red-400 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">V</div>
+                <div className="w-6 h-6 bg-red-650/10 border border-red-500/20 text-red-450 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 font-mono">V</div>
                 <div className="space-y-1">
-                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 5: Instant Hunger Traps</h5>
-                  <p className="leading-relaxed text-xs font-light text-stone-400">We accept zero responsibility for high-decibel stoking triggering immediate intense cravings, excessive drooling, or spontaneous ordering sprees.</p>
+                  <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause V: Drool Pools & Hunger Traps</h5>
+                  <p className="leading-relaxed text-xs font-light text-stone-400">We accept zero responsibility for keyboard short-circuits caused by drool pools triggered by our gorgeous stoking flame graphics. Side effects of playing include extreme immediate hunger and sudden impulse purchasing.</p>
                 </div>
               </div>
 
@@ -818,7 +816,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                   }}
                 />
                 <label htmlFor="agree-vocal" className="text-[9px] text-stone-400 font-bold uppercase tracking-wider cursor-pointer select-none">
-                  I surrender my vocal cords and accept my fate
+                  I legally surrender my vocal dignity in exchange for roasted poultry
                 </label>
               </div>
 
@@ -835,9 +833,10 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                   }}
                 />
                 <label htmlFor="agree-spit" className="text-[9px] text-stone-400 font-bold uppercase tracking-wider cursor-pointer select-none">
-                  I promise NOT to launch saliva at my screen
+                  I promise NOT to shower my smartphone in high-decibel spit droplets
                 </label>
               </div>
+            </div>
             </div>
             
             {/* Action buttons */}
