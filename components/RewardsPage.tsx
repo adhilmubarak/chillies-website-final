@@ -129,7 +129,7 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                     <button 
                         type="submit"
                         disabled={phoneInput.length !== 10}
-                        className="w-full py-5 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 bg-[length:200%_auto] hover:bg-right text-[#050505] font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(212,175,55,0.2)] disabled:shadow-none"
+                        className="w-full py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 bg-[length:200%_auto] hover:bg-right text-stone-950 font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(var(--brand-500-rgb,212,175,55),0.2)] disabled:shadow-none"
                     >
                         <Search size={16} strokeWidth={2.5} /> Verify Identity
                     </button>
@@ -262,7 +262,7 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                 />
                                 <div className="flex gap-3">
                                     <button type="button" onClick={() => setIsEnrolling(false)} className="w-1/3 py-5 bg-white/5 hover:bg-white/10 text-stone-300 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all">Cancel</button>
-                                    <button type="submit" className="w-2/3 py-5 bg-gold-500 text-[#050505] font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl transition-all hover:bg-gold-400 shadow-[0_10px_30px_rgba(212,175,55,0.2)]">Mint Card</button>
+                                    <button type="submit" className="w-2/3 py-5 bg-brand-500 text-stone-950 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl transition-all hover:bg-brand-400 shadow-[0_10px_30px_rgba(var(--brand-500-rgb,212,175,55),0.2)]">Mint Card</button>
                                 </div>
                             </form>
                         ) : (
@@ -276,7 +276,7 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                                 </div>
                                 <button 
                                     onClick={() => setIsEnrolling(true)}
-                                    className="w-full py-5 bg-gradient-to-r from-stone-800 to-stone-900 border border-gold-500/30 text-gold-500 hover:text-gold-400 hover:border-gold-500/60 transition-all font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                                    className="w-full py-5 bg-gradient-to-r from-stone-800 to-stone-900 border border-brand-500/30 text-brand-500 hover:text-brand-400 hover:border-brand-500/60 transition-all font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
                                 >
                                     Initialize Account
                                 </button>

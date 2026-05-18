@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { ArrowLeft, Sparkles, Volume2, Flame, Award, Copy, Check, Play, ShieldAlert, Gift } from 'lucide-react';
 
 interface ScreamChallengeProps {}
@@ -44,13 +44,31 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
     }
   };
 
-  const handleStartSetup = (e: React.FormEvent) => {
+  const [isValidating, setIsValidating] = useState(false);
+
+  const handleStartSetup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (phone.length !== 10) {
       setErrorMsg('Please enter a valid 10-digit number');
       return;
     }
     setErrorMsg('');
+    setIsValidating(true);
+
+    try {
+      const q = query(collection(db, 'coupons'), where('phone', '==', phone));
+      const querySnapshot = await getDocs(q);
+      const alreadyPlayed = querySnapshot.docs.some(doc => doc.data().code?.startsWith('SCREAM-'));
+      if (alreadyPlayed) {
+        setErrorMsg('This WhatsApp number has already participated in the Scream Challenge! One discount per customer.');
+        setIsValidating(false);
+        return;
+      }
+    } catch (err) {
+      console.error('Error validating scream history:', err);
+    }
+
+    setIsValidating(false);
     setGameState('permission');
   };
 
@@ -284,9 +302,19 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
               
               <button 
                 type="submit" 
-                className="w-full py-5 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-[#050505] font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-[0_10px_30px_rgba(212,175,55,0.15)]"
+                disabled={isValidating}
+                className="w-full py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-[0_10px_30px_rgba(var(--brand-500-rgb,212,175,55),0.15)] disabled:opacity-50"
               >
-                <Play size={16} strokeWidth={2.5} /> Let's Play
+                {isValidating ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-stone-950 border-t-transparent rounded-full animate-spin"></span>
+                    Sizzling Profile...
+                  </>
+                ) : (
+                  <>
+                    <Play size={16} strokeWidth={2.5} /> Let's Play
+                  </>
+                )}
               </button>
             </form>
           </div>
@@ -313,7 +341,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
             )}
             <button 
               onClick={requestMicrophone}
-              className="w-full py-5 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-[#050505] font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_rgba(212,175,55,0.15)]"
+              className="w-full py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_rgba(var(--brand-500-rgb,212,175,55),0.15)]"
             >
               Grant Access
             </button>
@@ -512,7 +540,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                 <div className="flex gap-4">
                   <button 
                     onClick={copyCoupon}
-                    className="flex-1 py-5 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-[#050505] font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(212,175,55,0.15)] transition-all active:scale-[0.98]"
+                    className="flex-1 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(var(--brand-500-rgb,212,175,55),0.15)] transition-all active:scale-[0.98]"
                   >
                     {copied ? <Check size={16} /> : <Copy size={16} />}
                     {copied ? 'Copied!' : 'Copy Code'}
@@ -545,7 +573,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                 <div className="flex flex-col gap-3">
                   <button 
                     onClick={retryGame}
-                    className="w-full py-5 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-[#050505] font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl shadow-[0_10px_30px_rgba(212,175,55,0.15)]"
+                    className="w-full py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[11px] rounded-2xl shadow-[0_10px_30px_rgba(var(--brand-500-rgb,212,175,55),0.15)]"
                   >
                     Try Again
                   </button>
