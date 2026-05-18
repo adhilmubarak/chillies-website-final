@@ -19,6 +19,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
   const [generatedCoupon, setGeneratedCoupon] = useState<{ code: string; value: number; isFreeItem?: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   
   // Audio state
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -739,6 +740,77 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
           </div>
         )}
       </main>
+
+      {/* Funny & Sarcastic Terms and Conditions Modal */}
+      {!acceptedTerms && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-6 overflow-y-auto">
+          <div className="bg-stone-900 border border-gold-500/20 max-w-md w-full rounded-[2.5rem] p-8 space-y-6 shadow-2xl animate-scale-up relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.15),transparent_60%)] pointer-events-none rounded-[2.5rem]"></div>
+            
+            <div className="text-center relative z-10 space-y-2">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl mb-2">
+                <ShieldAlert size={28} className="animate-bounce" />
+              </div>
+              <h2 className="text-2xl font-serif text-white">Vocal Cord Indemnification</h2>
+              <p className="text-stone-500 text-[10px] uppercase tracking-widest font-black">Please sign your dignity away below</p>
+            </div>
+
+            <div className="relative z-10 bg-stone-950 border border-white/5 rounded-2xl p-5 max-h-[220px] overflow-y-auto space-y-4 text-xs font-light text-stone-400 scrollbar-thin">
+              <div className="space-y-1">
+                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 1: Public Embarrassment Act</h5>
+                <p className="leading-relaxed text-stone-400">By ticking below, you agree that your neighbors, housemates, and intensely confused pets are legally allowed to judge your life choices while you shout at a glowing rectangle for a discount on flatbread-wrapped meat.</p>
+              </div>
+              <div className="space-y-1">
+                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 2: Spit and Saliva Hazards</h5>
+                <p className="leading-relaxed text-stone-400">Chillies Restaurant is NOT liable for any saliva droplets launched onto your screen, keyboard, or surrounding onlookers during high-intensity decibel stoking. Please wipe down your device at your own discretion.</p>
+              </div>
+              <div className="space-y-1">
+                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 3: The Squeak and Crack Ordinance</h5>
+                <p className="leading-relaxed text-stone-400">Should your voice crack, squeak, or fail miserably during stoking, you agree to wear your brief vocal embarrassment as a badge of honor. No refunds on fractured pride.</p>
+              </div>
+              <div className="space-y-1">
+                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 4: Spiritual Cord Possession</h5>
+                <p className="leading-relaxed text-stone-400">You hereby surrender temporary custody of your vocal cords to the virtual Chillies Shawarma spit. They will be returned upon completion of your 5-second scream or when the spit reaches golden-crispy perfection.</p>
+              </div>
+              <div className="space-y-1">
+                <h5 className="font-bold text-stone-200 text-[10px] uppercase tracking-wider">Clause 5: Extreme Hunger Indemnity</h5>
+                <p className="leading-relaxed text-stone-400">We accept zero responsibility for extreme cravings, uncontrollable drooling, or immediate impulse delivery purchases triggered by the delicious look of our virtual rotating meat spit.</p>
+              </div>
+            </div>
+
+            <div className="relative z-10 flex items-center gap-3 bg-stone-950 border border-white/5 rounded-2xl p-4">
+              <input 
+                type="checkbox" 
+                id="agree-terms" 
+                className="w-4 h-4 rounded border-stone-800 bg-stone-950 text-red-500 focus:ring-0 cursor-pointer accent-red-500" 
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setTimeout(() => setAcceptedTerms(true), 250);
+                  }
+                }}
+              />
+              <label htmlFor="agree-terms" className="text-[10px] text-stone-400 font-bold uppercase tracking-wider cursor-pointer">
+                I surrender my vocal cords and accept my fate
+              </label>
+            </div>
+            
+            <div className="relative z-10 flex gap-4">
+              <button 
+                onClick={() => navigate('/')}
+                className="w-1/3 py-4 bg-stone-950 border border-white/5 text-stone-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+              >
+                Coward's Exit
+              </button>
+              <button 
+                disabled 
+                className="w-2/3 py-4 bg-stone-800 text-stone-600 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed border border-white/5"
+              >
+                Accept and Play
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer info */}
       <footer className="relative z-10 py-6 text-center text-[9px] text-stone-600 uppercase tracking-[0.2em] font-bold border-t border-white/[0.03]">
