@@ -26,6 +26,7 @@ import { Capacitor } from '@capacitor/core';
 
 const OffersPage = lazy(() => import('./components/OffersPage'));
 const RewardsPage = lazy(() => import('./components/RewardsPage'));
+const ScreamChallenge = lazy(() => import('./components/ScreamChallenge'));
 const ComplaintsPage = lazy(() => import('./components/ComplaintsPage'));
 const DeliveryPanel = lazy(() => import('./components/DeliveryPanel'));
 const KitchenPanel = lazy(() => import('./components/KitchenPanel'));
@@ -599,6 +600,7 @@ function App() {
         }} onUpdateRiderLocation={async (lat: number, lng: number) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }} deliveryUpiId={storeSettings.deliveryUpiId} />} />
         <Route path="/offers" element={<OffersPage isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} flashSaleEndTime={promoSettings.flashSaleEndTime} happyHourStartTime={promoSettings.happyHourStartTime} happyHourEndTime={promoSettings.happyHourEndTime} customOffers={customOffers} />} />
         <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} onEnrollLoyalty={async (phone: string, name: string) => { await addDoc(collection(db, 'loyalty'), { phone, customerName: name, points: 0, lastUpdated: Date.now() }); }} />} />
+        <Route path="/scream-challenge" element={<ScreamChallenge />} />
         <Route path="/complaints" element={<ComplaintsPage />} />
         <Route path="/track" element={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><p className="text-stone-500 font-mono text-xs uppercase tracking-widest animate-pulse">Initializing Tracker...</p></div>} />
         <Route path="/*" element={

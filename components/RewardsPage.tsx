@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowLeft, Search, CheckCircle, Award, Gift, Wifi } from 'lucide-react';
+import { Sparkles, ArrowLeft, Search, CheckCircle, Award, Gift, Wifi, Flame } from 'lucide-react';
 import { LoyaltyAccount } from '../types';
 
 interface RewardsPageProps {
@@ -65,6 +65,24 @@ const RewardsPage: React.FC<RewardsPageProps> = ({ loyaltyAccounts, onEnrollLoya
                 <p className="text-stone-400 text-sm md:text-base leading-relaxed max-w-sm font-light">
                     Your WhatsApp number is your key to the Elite tier. Unlock seamless rewards, VIP privileges, and automated cashback on every order.
                 </p>
+            </div>
+
+            {/* Scream Challenge Promotional Banner */}
+            <div 
+              onClick={() => navigate('/scream-challenge')}
+              className="bg-gradient-to-br from-red-950/40 to-stone-900/60 border border-red-500/20 rounded-[2rem] p-6 hover:border-gold-500/40 transition-all cursor-pointer relative overflow-hidden group shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_top_right,_rgba(239,68,68,0.1)_0%,_transparent_70%)] rounded-full group-hover:opacity-100 transition-opacity"></div>
+              <div className="space-y-1.5 max-w-[70%]">
+                <span className="inline-flex items-center gap-1.5 text-red-500 text-[9px] font-black uppercase tracking-[0.25em]">
+                  <Flame size={12} className="animate-pulse" /> Scream Challenge
+                </span>
+                <h4 className="text-stone-200 text-sm font-serif font-black tracking-wide">Scream For Spice & Save!</h4>
+                <p className="text-stone-500 text-[10px] leading-normal font-light">Scream at your mic, stoke the flame, and win up to <strong className="text-gold-400 font-bold">15% off</strong> instantly.</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform group-hover:border-gold-500/30">
+                <Flame size={20} className="text-red-500 animate-pulse" />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-5 pt-4">
