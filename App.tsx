@@ -620,21 +620,30 @@ function App() {
             
             {/* Customer Scream Challenge Live Promo Banner */}
             <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 mb-4">
+              <style>{`
+                @keyframes btn-shimmer {
+                  0% { transform: translateX(-100%) skewX(-15deg); }
+                  100% { transform: translateX(200%) skewX(-15deg); }
+                }
+                .animate-btn-shimmer {
+                  animation: btn-shimmer 3s infinite ease-in-out;
+                }
+              `}</style>
               <div 
                 onClick={() => navigate('/scream-challenge')}
-                className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-950/20 via-[#0a0a0a] to-stone-900/40 border border-red-500/20 hover:border-gold-500/40 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(239,68,68,0.05)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
+                className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-950/25 via-[#0c0c0c] to-stone-900/50 border border-red-500/20 hover:border-gold-500/50 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_40px_rgba(239,68,68,0.06)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
               >
                 {/* Glowing decorative background meshes */}
-                <div className="absolute inset-0 bg-gradient-to-r from-red-950/20 via-transparent to-gold-950/10 pointer-events-none z-0"></div>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle_at_top_right,_rgba(212,175,55,0.08)_0%,_transparent_70%)] rounded-full pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-950/30 via-transparent to-gold-950/20 pointer-events-none z-0"></div>
+                <div className="absolute top-0 right-0 w-80 h-80 bg-[radial-gradient(circle_at_top_right,_rgba(212,175,55,0.12)_0%,_transparent_70%)] rounded-full pointer-events-none"></div>
 
                 <div className="flex items-center gap-5 relative z-10 text-center md:text-left flex-col md:flex-row">
-                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-red-600 via-orange-500 to-gold-500 flex items-center justify-center shrink-0 shadow-[0_10px_20px_rgba(239,68,68,0.25)] group-hover:scale-105 transition-transform duration-500 relative">
+                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-red-600 via-orange-500 to-gold-500 flex items-center justify-center shrink-0 shadow-[0_12px_24px_rgba(239,68,68,0.3)] group-hover:scale-105 transition-transform duration-500 relative">
                     <div className="absolute inset-0 border border-white/20 rounded-3xl"></div>
                     <Flame size={28} className="text-white animate-pulse" />
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-red-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5 animate-bounce">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/25 rounded-full text-red-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5 animate-pulse">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></div> Live Game
                     </div>
                     <h3 className="text-white text-xl md:text-2xl font-serif leading-tight">
@@ -647,8 +656,13 @@ function App() {
                 </div>
 
                 <div className="shrink-0 relative z-10 w-full md:w-auto">
-                  <button className="w-full md:w-auto px-8 py-4.5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl shadow-[0_10px_25px_rgba(var(--brand-500-rgb,212,175,55),0.15)] hover:opacity-95 transition-all flex items-center justify-center gap-2">
-                    Play Now <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  <button className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(var(--brand-500-rgb,212,175,55),0.25)] hover:shadow-[0_0_35px_rgba(var(--brand-500-rgb,212,175,55),0.55)] transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] relative overflow-hidden group/btn">
+                    {/* Moving diagonal light sheen shimmer */}
+                    <div className="absolute top-0 bottom-0 left-0 w-12 bg-white/35 -translate-x-full animate-btn-shimmer blur-sm pointer-events-none z-0"></div>
+                    
+                    <span className="relative z-10 flex items-center gap-2 font-black">
+                      Play Now <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+                    </span>
                   </button>
                 </div>
               </div>

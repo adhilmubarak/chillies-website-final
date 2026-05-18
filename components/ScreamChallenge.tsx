@@ -350,49 +350,91 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
 
         {/* GAMESTATE: COUNTDOWN */}
         {gameState === 'countdown' && (
-          <div className="text-center space-y-6 animate-fade-in">
-            <span className="text-[10px] text-stone-500 font-black uppercase tracking-[0.3em] block">Prepare Your Voice</span>
-            <div className="w-40 h-40 rounded-full border border-white/5 flex items-center justify-center mx-auto relative bg-white/[0.01]">
-              <span className="text-7xl font-serif text-gold-400 font-black animate-[scale-up_1s_infinite]">{countdown}</span>
-              <div className="absolute inset-0 border-2 border-gold-500/30 rounded-full animate-ping"></div>
+          <div className="text-center space-y-8 animate-fade-in relative py-6">
+            <div className="absolute inset-0 bg-gradient-to-b from-orange-500/5 to-transparent blur-3xl rounded-full pointer-events-none"></div>
+            <span className="text-[10px] text-orange-500 font-black uppercase tracking-[0.35em] block animate-pulse">Prepare Your Lungs</span>
+            <div className="w-48 h-48 rounded-full border border-white/[0.03] flex items-center justify-center mx-auto relative bg-[#0a0a0a]/80 shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+              {/* Pulsing rings */}
+              <div className="absolute inset-2 border border-dashed border-gold-500/20 rounded-full animate-spin [animation-duration:10s]"></div>
+              <div className="absolute inset-0 border-2 border-orange-500/30 rounded-full animate-ping [animation-duration:1.5s]"></div>
+              
+              <span className="text-8xl font-serif text-transparent bg-clip-text bg-gradient-to-b from-white via-gold-300 to-gold-500 font-black animate-[scale-up_1s_infinite] filter drop-shadow-[0_4px_12px_rgba(212,175,55,0.3)]">
+                {countdown}
+              </span>
             </div>
-            <p className="text-stone-400 text-xs uppercase tracking-widest font-bold animate-pulse mt-4">Deep breath in...</p>
+            <p className="text-stone-400 text-[10px] uppercase tracking-[0.25em] font-black animate-pulse mt-4">Deep breath in... prepare to roar!</p>
           </div>
         )}
 
         {/* GAMESTATE: SCREAMING */}
         {gameState === 'screaming' && (
-          <div className="text-center space-y-8 animate-fade-in">
+          <div className="text-center space-y-8 animate-fade-in relative">
+            <style>{`
+              @keyframes float-spark {
+                0% { transform: translateY(0) scale(1); opacity: 0; }
+                30% { opacity: 0.8; }
+                100% { transform: translateY(-180px) scale(0); opacity: 0; }
+              }
+              .animate-float-spark {
+                animation: float-spark linear infinite;
+              }
+            `}</style>
+
             <div className="flex justify-between items-center px-4">
               <span className="text-red-500 font-black uppercase tracking-widest text-xs flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></div> SCREAM NOW!
               </span>
-              <span className="text-stone-400 font-mono text-sm uppercase tracking-widest">Time: <strong className="text-white font-black">{timeLeft}s</strong></span>
+              <span className="text-stone-400 font-mono text-xs uppercase tracking-[0.2em] font-black">Time: <strong className="text-white font-black">{timeLeft}s</strong></span>
             </div>
 
-            {/* Giant Dynamic Stokes Flame */}
-            <div className="h-64 flex items-center justify-center relative">
+            {/* Giant Dynamic Stokes Flame / Shawarma Grid */}
+            <div className="h-72 flex items-center justify-center relative">
+              {/* Floating Searing Spark Particles */}
+              {currentDb > 25 && (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
+                  {[...Array(10)].map((_, i) => {
+                    const left = 20 + Math.random() * 60; // 20% to 80% width
+                    const size = 3 + Math.random() * 5; // 3px to 8px
+                    const delay = Math.random() * 1.5;
+                    const duration = 1 + Math.random() * 1.2;
+                    return (
+                      <div 
+                        key={i}
+                        style={{
+                          left: `${left}%`,
+                          width: `${size}px`,
+                          height: `${size}px`,
+                          animationDelay: `${delay}s`,
+                          animationDuration: `${duration}s`,
+                        }}
+                        className="absolute bottom-10 bg-gradient-to-r from-orange-400 to-gold-500 rounded-full animate-float-spark opacity-85"
+                      />
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Outer Decibel Ring */}
-              <div className="absolute w-56 h-56 rounded-full border border-white/5 flex items-center justify-center bg-stone-900/10">
+              <div className="absolute w-60 h-60 rounded-full border border-white/5 flex items-center justify-center bg-stone-900/10">
                 {/* SVG dynamic visualizer */}
                 <svg className="w-full h-full transform -rotate-90">
                   <circle
-                    cx="112"
-                    cy="112"
-                    r="98"
+                    cx="120"
+                    cy="120"
+                    r="104"
                     className="stroke-[#050505]"
                     strokeWidth="10"
                     fill="transparent"
                   />
                   <circle
-                    cx="112"
-                    cy="112"
-                    r="98"
-                    className="stroke-gold-500 transition-all duration-100 ease-out"
+                    cx="120"
+                    cy="120"
+                    r="104"
+                    className="stroke-brand-500 transition-all duration-100 ease-out"
                     strokeWidth="10"
                     fill="transparent"
-                    strokeDasharray={2 * Math.PI * 98}
-                    strokeDashoffset={2 * Math.PI * 98 * (1 - currentDb / 100)}
+                    strokeDasharray={2 * Math.PI * 104}
+                    strokeDashoffset={2 * Math.PI * 104 * (1 - currentDb / 100)}
                     strokeLinecap="round"
                   />
                 </svg>
@@ -402,10 +444,10 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
               <div className={`transition-all duration-75 flex flex-col items-center justify-center z-10 ${currentDb >= 85 ? 'animate-bounce' : ''}`}>
                 <div className="relative flex items-center justify-center">
                   <svg 
-                    className="w-32 h-44 transition-all duration-100 drop-shadow-[0_0_25px_rgba(212,175,55,0.2)]" 
+                    className="w-36 h-48 transition-all duration-100 drop-shadow-[0_0_35px_rgba(var(--brand-500-rgb,212,175,55),0.25)]" 
                     viewBox="0 0 100 150" 
                     style={{ 
-                      transform: `scale(${1 + currentDb / 250})`, 
+                      transform: `scale(${1 + currentDb / 200})`, 
                       filter: currentDb > 70 ? 'url(#sizzleFilter)' : '' 
                     }}
                   >
@@ -413,9 +455,9 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                       {/* Sizzle turbulence heat waves filter */}
                       <filter id="sizzleFilter">
                         <feTurbulence type="fractalNoise" baseFrequency="0.05 0.95" numOctaves="1" result="noise" />
-                        <feDisplacementMap in="SourceGraphic" in2="noise" scale={currentDb / 12} xChannelSelector="R" yChannelSelector="G" />
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale={currentDb / 10} xChannelSelector="R" yChannelSelector="G" />
                       </filter>
-
+ 
                       {/* Roasted Shawarma meat base gradient */}
                       <linearGradient id="roastedMeatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#78350f" />
@@ -448,7 +490,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                     <path 
                       d="M 32 30 C 32 30, 50 18, 68 30 C 72 50, 78 95, 62 120 C 58 125, 42 125, 38 120 C 22 95, 28 50, 32 30 Z" 
                       fill="url(#roastedMeatGrad)"
-                      opacity={currentDb > 0 ? Math.min(currentDb / 30, 1) : 0}
+                      opacity={currentDb > 0 ? Math.min(currentDb / 25, 1) : 0}
                       className="transition-opacity duration-300"
                     />
 
@@ -462,36 +504,62 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                     <path 
                       d="M 32 30 C 32 30, 50 18, 68 30 C 72 50, 78 95, 62 120 C 58 125, 42 125, 38 120 C 22 95, 28 50, 32 30 Z" 
                       fill="url(#sizzlingGlowGrad)"
-                      opacity={Math.min(currentDb / 100, 0.9)} 
+                      opacity={Math.min(currentDb / 90, 0.95)} 
                       className="transition-opacity duration-75 mix-blend-screen"
                     />
                   </svg>
                   
                   {/* Glowing background heat blur */}
-                  {currentDb > 25 && (
+                  {currentDb > 20 && (
                     <div 
-                      className="absolute w-32 h-44 bg-gradient-to-t from-red-600 via-orange-500 to-gold-500 rounded-full blur-3xl opacity-30 z-[-1] transition-all duration-75"
-                      style={{ transform: `scale(${currentDb / 40})` }}
+                      className="absolute w-36 h-48 bg-gradient-to-t from-red-600 via-orange-500 to-gold-500 rounded-full blur-3xl opacity-30 z-[-1] transition-all duration-75"
+                      style={{ transform: `scale(${currentDb / 30})` }}
                     />
                   )}
-                </div>
-                
-                <div className="mt-6 font-mono text-3xl font-black text-white tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center gap-2">
-                  <span>{currentDb}</span>
-                  <span className="text-xs text-stone-500 uppercase tracking-widest font-bold">dB Sizzle</span>
                 </div>
               </div>
             </div>
 
+            {/* Dynamic Sound Wave Equalizer Bars */}
+            <div className="flex items-end justify-center gap-1.5 h-12 mt-6">
+              {[...Array(9)].map((_, i) => {
+                const centerFactor = 1 - Math.abs(i - 4) / 5;
+                const height = Math.max(8, Math.round(currentDb * centerFactor * (0.5 + Math.random() * 0.5)));
+                return (
+                  <div 
+                    key={i} 
+                    style={{ height: `${height}%` }}
+                    className="w-1.5 rounded-full bg-gradient-to-t from-red-600 via-orange-500 to-gold-500 transition-all duration-75 ease-out shadow-[0_0_10px_rgba(239,68,68,0.15)]"
+                  />
+                );
+              })}
+            </div>
+
+            {/* Decibel Display & Funny Spicy Comments */}
+            <div className="space-y-1.5 text-center mt-4">
+              <div className="font-mono text-3xl font-black text-white tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center gap-2">
+                <span>{currentDb}</span>
+                <span className="text-stone-500 uppercase tracking-widest font-black text-[10px]">dB Sizzle</span>
+              </div>
+              <p className="text-[10px] text-gold-400 font-black uppercase tracking-[0.15em] min-h-[1.5rem] transition-all animate-pulse">
+                {currentDb === 0 && "Ready... Steady... Inhale!"}
+                {currentDb > 0 && currentDb < 30 && "Whispering to the Shawarma won't sizzle it! LOUDER! 📣"}
+                {currentDb >= 30 && currentDb < 55 && "Warm breeze... Turn up the volume! 🌶️"}
+                {currentDb >= 55 && currentDb < 75 && "Getting spicy! Keep screaming! 🔥"}
+                {currentDb >= 75 && currentDb < 85 && "Sizzling hot! Louder for maximum grill! 🥩"}
+                {currentDb >= 85 && "GOLDEN CRISPY UNLOCKED! YOUR LUNGS ARE FIERY! 🏆🔥"}
+              </p>
+            </div>
+
             {/* Max Decibel Record Bar */}
-            <div className="space-y-2">
+            <div className="space-y-2 pt-4">
               <div className="flex justify-between text-[10px] text-stone-500 font-bold uppercase tracking-widest px-2">
                 <span>Peak Sizzle reached</span>
                 <span>{maxDb} dB</span>
               </div>
               <div className="w-full h-3 bg-[#050505] rounded-full overflow-hidden border border-white/5 shadow-inner">
                 <div 
-                  className="h-full bg-gradient-to-r from-gold-500 to-orange-500 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-brand-600 to-orange-500 rounded-full transition-all duration-300"
                   style={{ width: `${maxDb}%` }}
                 ></div>
               </div>
@@ -510,13 +578,13 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                   </div>
                   <h2 className="text-3xl font-serif text-white">Sizzling Golden Roast!</h2>
                   <p className="text-stone-400 text-xs leading-relaxed max-w-xs mx-auto font-light">
-                    You roasted the Shawarma to a peak intensity of <strong className="text-white font-bold">{maxDb} dB</strong> (average: {averageDb} dB). Unlocked <strong className="text-gold-400 font-bold">{generatedCoupon.value}% OFF</strong> coupon!
+                    You roasted the Shawarma to a peak intensity of <strong className="text-white font-bold">{maxDb} dB</strong> (average: {averageDb} dB). Unlocked <strong className="text-amber-400 font-bold">{generatedCoupon.value}% OFF</strong> coupon!
                   </p>
                 </div>
 
                 {/* Highly aesthetic Golden Coupon Ticket Card */}
-                <div className="relative w-full bg-[#050505] border border-white/10 p-8 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05),0_0_40px_rgba(212,175,55,0.08)] group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_top_right,_rgba(212,175,55,0.15)_0%,_transparent_70%)] rounded-full"></div>
+                <div className="relative w-full bg-[#050505] border border-white/10 p-8 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05),0_0_40px_rgba(var(--brand-500-rgb,212,175,55),0.08)] group">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_top_right,_rgba(var(--brand-500-rgb,212,175,55),0.15)_0%,_transparent_70%)] rounded-full"></div>
                   
                   {/* Left & Right Ticket Cuts */}
                   <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#030303] rounded-full border border-white/10 z-10"></div>
@@ -525,13 +593,13 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                   <div className="space-y-6 relative z-10">
                     <div>
                       <span className="text-[10px] text-stone-500 font-black uppercase tracking-[0.35em] block mb-1">Coupon Issued</span>
-                      <div className="font-mono text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold-200 via-gold-400 to-gold-600 tracking-[0.1em] drop-shadow-md">
+                      <div className="font-mono text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 tracking-[0.1em] drop-shadow-md">
                         {generatedCoupon.code}
                       </div>
                     </div>
                     
                     <div className="border-t border-dashed border-white/10 pt-4 flex justify-between items-center text-xs">
-                      <span className="text-stone-400 font-light flex items-center gap-1.5"><Gift size={12} className="text-gold-500" /> {generatedCoupon.value}% Savings</span>
+                      <span className="text-stone-400 font-light flex items-center gap-1.5"><Gift size={12} className="text-amber-500" /> {generatedCoupon.value}% Savings</span>
                       <span className="text-stone-500 uppercase tracking-widest text-[9px] font-bold">Expires: 24h</span>
                     </div>
                   </div>
@@ -562,7 +630,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                 <div className="space-y-3">
                   <h2 className="text-3xl font-serif text-white">Cold Spit...</h2>
                   <p className="text-stone-400 text-xs leading-relaxed max-w-xs mx-auto font-light">
-                    You reached a peak volume of <strong className="text-white font-bold">{maxDb} dB</strong>. We require at least <strong className="text-gold-400 font-bold">50 dB</strong> of pure screaming power to sizzle the Shawarma!
+                    You reached a peak volume of <strong className="text-white font-bold">{maxDb} dB</strong>. We require at least <strong className="text-amber-400 font-bold">50 dB</strong> of pure screaming power to sizzle the Shawarma!
                   </p>
                 </div>
 
