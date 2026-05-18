@@ -336,6 +336,14 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const q = query(collection(db, 'coupons'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setCoupons(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Coupon)));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const settingsRef = doc(db, 'settings', 'general');
     const unsubscribe = onSnapshot(settingsRef, (docSnap) => {
         if (docSnap.exists()) {
