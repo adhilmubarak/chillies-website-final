@@ -552,6 +552,16 @@ function App() {
             onUpdateItem={async (item) => { if (item.id) await updateDoc(doc(db, 'menuItems', item.id), item as any); }}
             onDeleteItem={async (id) => { await deleteDoc(doc(db, 'menuItems', id)); }}
             onAddCategory={async (name) => { await addDoc(collection(db, 'categories'), { name, isUnavailable: false, startTime: '00:00', endTime: '23:59' }); }}
+            onUpdateCategory={async (c) => {
+              if (c.id) {
+                await updateDoc(doc(db, 'categories', c.id), {
+                  name: c.name,
+                  startTime: c.startTime || '00:00',
+                  endTime: c.endTime || '23:59',
+                  isUnavailable: !!c.isUnavailable
+                });
+              }
+            }}
             onDeleteCategory={async (id) => { await deleteDoc(doc(db, 'categories', id)); }}
             onUpdateOrderStatus={async (id, s, pm, fid) => {
               if (fid) await updateDoc(doc(db, 'orders', fid), { status: s });
