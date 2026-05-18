@@ -283,7 +283,7 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
               </div>
               <h1 className="text-4xl md:text-5xl font-serif text-white leading-tight">
                 Scream For <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-500 to-gold-600 italic font-medium pr-4">Shawarma!</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 italic font-black pr-4">Shawarma!</span>
               </h1>
               <p className="text-stone-400 text-sm leading-relaxed max-w-xs mx-auto font-light">
                 How hot can you handle? Scream at your screen to roast the virtual Chillies Shawarma spit and unlock up to <strong className="text-gold-400 font-bold">15% off</strong> instantly!
