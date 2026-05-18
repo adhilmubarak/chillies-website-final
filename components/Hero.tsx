@@ -1,8 +1,10 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, Flame } from 'lucide-react';
 
 const Hero: React.FC = () => {
+  const navigate = useNavigate();
   const scrollToMenu = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' });
@@ -19,16 +21,22 @@ const Hero: React.FC = () => {
       </div>
 
       <div className="relative z-10 text-center max-w-4xl mx-auto flex flex-col items-center">
-        {/* The Crown Jewel Icon */}
-        <div className="mb-12 relative group animate-fade-in-up">
-            <div className="absolute inset-0 bg-gold-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
-            <div className="relative w-24 h-24 sm:w-32 sm:h-32 bg-stone-900 border border-gold-500/30 rounded-[2.5rem] flex items-center justify-center text-gold-500 shadow-2xl rotate-12 group-hover:rotate-0 transition-transform duration-700">
-                <Flame size={64} fill="currentColor" className="drop-shadow-[0_0_15px_rgba(212,175,55,0.6)] animate-bounce-slow" />
-            </div>
-            <div className="absolute -top-4 -right-4 w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center text-stone-950 shadow-lg animate-bounce">
-                <div className="w-1 h-1 bg-white rounded-full"></div>
-            </div>
-        </div>
+        {/* Criss-Cross Gold Border Red Text Game Ribbon */}
+        <button
+          onClick={() => navigate('/scream-challenge')}
+          className="relative h-16 w-80 mb-8 flex items-center justify-center scale-90 sm:scale-100 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+        >
+          {/* Crossed Ribbon Left */}
+          <div className="absolute rotate-[-6deg] bg-stone-950 border border-gold-500 px-6 py-2 shadow-[0_0_20px_rgba(212,175,55,0.15)] flex items-center gap-1.5 group-hover:border-red-500 transition-colors">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            <span className="text-red-500 font-black tracking-widest text-[9px] uppercase">SCREAM CHALLENGE</span>
+          </div>
+          {/* Crossed Ribbon Right */}
+          <div className="absolute rotate-[6deg] bg-stone-950 border border-gold-500 px-6 py-2 shadow-[0_0_20px_rgba(212,175,55,0.15)] flex items-center gap-1.5 group-hover:border-red-500 transition-colors">
+            <Flame size={12} className="text-red-500 animate-pulse" />
+            <span className="text-red-500 font-black tracking-widest text-[9px] uppercase">FREE SHAWARMA!</span>
+          </div>
+        </button>
 
         <h1 className="animate-fade-in-up [animation-delay:200ms] text-4xl sm:text-6xl md:text-8xl font-serif text-white leading-[1.1] mb-8 tracking-tight">
           Crafting <span className="text-gold-500 italic block sm:inline">Excellence</span> <br className="hidden sm:block" />
