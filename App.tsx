@@ -514,7 +514,7 @@ function App() {
 
   return (
     <React.Suspense fallback={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>}>
-      {(!isAdminOpen && location.pathname !== '/rewards') && (
+      {(!isAdminOpen && location.pathname !== '/rewards' && location.pathname !== '/feedback') && (
         <>
           <Navbar 
             currentTime={currentTime}
@@ -566,6 +566,7 @@ function App() {
             onDeleteCoupon={async (id) => { await deleteDoc(doc(db, 'coupons', id)); }}
             onUpdateStoreSettings={async (s) => { await setDoc(doc(db, 'settings', 'general'), s); }}
             onUpdatePromos={async (p) => { await updateDoc(doc(db, 'settings', 'general'), p); }}
+            onAddOrder={handleAddOrder}
             foodRatings={foodRatings}
             customOffers={customOffers}
             complaints={complaints}
@@ -609,6 +610,7 @@ function App() {
         <Route path="/offers" element={<OffersPage isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} flashSaleEndTime={promoSettings.flashSaleEndTime} happyHourStartTime={promoSettings.happyHourStartTime} happyHourEndTime={promoSettings.happyHourEndTime} customOffers={customOffers} />} />
         <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} onEnrollLoyalty={async (phone: string, name: string) => { await addDoc(collection(db, 'loyalty'), { phone, customerName: name, points: 0, lastUpdated: Date.now() }); }} />} />
         <Route path="/scream-challenge" element={<ScreamChallenge />} />
+        <Route path="/feedback" element={<FeedbackModal />} />
         <Route path="/complaints" element={<ComplaintsPage />} />
         <Route path="/track" element={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><p className="text-stone-500 font-mono text-xs uppercase tracking-widest animate-pulse">Initializing Tracker...</p></div>} />
         <Route path="/*" element={
