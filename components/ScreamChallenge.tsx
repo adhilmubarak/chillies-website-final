@@ -294,16 +294,16 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
             <div className="bg-[#0a0a0a]/90 border border-white/[0.05] rounded-3xl p-5 space-y-3.5 text-left shadow-2xl">
               <div className="text-[10px] text-stone-500 font-black uppercase tracking-widest text-center border-b border-white/[0.03] pb-2.5">Volume Reward Tiers</div>
               <div className="flex justify-between items-center text-xs">
-                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-gold-600"></div> Mild Roast (50+ dB)</span>
+                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-gold-600"></div> Mild Roast (59-69 dB)</span>
                 <span className="text-gold-400 font-bold font-mono">5% OFF</span>
               </div>
               <div className="flex justify-between items-center text-xs">
-                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div> Hot Sizzle (70+ dB)</span>
+                <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div> Hot Sizzle (70-84 dB)</span>
                 <span className="text-orange-400 font-bold font-mono">10% OFF</span>
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-stone-300 flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></div> Golden Crispy (85+ dB)</span>
-                <span className="text-red-500 font-black font-mono">15% OFF</span>
+                <span className="text-red-500 font-black font-mono">FREE SHAWARMA ROLL!</span>
               </div>
             </div>
 
@@ -339,6 +339,27 @@ export default React.forwardRef<unknown, ScreamChallengeProps>((props, ref) => {
                 )}
               </button>
             </form>
+
+            {/* Instruction Card: How to Claim Your Gift */}
+            <div className="bg-[#050505] border border-white/5 rounded-3xl p-5 text-left space-y-4 shadow-inner">
+              <div className="flex items-center gap-2 text-gold-400 font-bold uppercase tracking-widest text-[9px] border-b border-white/[0.03] pb-2">
+                <Gift size={12} className="text-red-500" /> How to Claim Your Gift
+              </div>
+              <ul className="space-y-3 text-stone-400 text-xs font-light">
+                <li className="flex gap-2.5">
+                  <span className="w-4 h-4 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center text-[9px] font-black text-gold-500 shrink-0 mt-0.5 font-mono">1</span>
+                  <span><strong>Scream & Win:</strong> Hit the stoke levels! Screaming louder awards higher tiers, up to a **Free Shawarma Roll** at 85+ dB.</span>
+                </li>
+                <li className="flex gap-2.5">
+                  <span className="w-4 h-4 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center text-[9px] font-black text-gold-500 shrink-0 mt-0.5 font-mono">2</span>
+                  <span><strong>Copy Your Code:</strong> The system immediately issues a secure custom code. Simply click **Copy Code** or **Copy Claim Pass**.</span>
+                </li>
+                <li className="flex gap-2.5">
+                  <span className="w-4 h-4 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center text-[9px] font-black text-gold-500 shrink-0 mt-0.5 font-mono">3</span>
+                  <span><strong>Checkout to Redeem:</strong> Go to your cart, add a **Shawarma Roll** (for the free gift), enter the code, and click **Apply**!</span>
+                </li>
+              </ul>
+            </div>
           </div>
         )}
 
