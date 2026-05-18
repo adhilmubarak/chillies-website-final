@@ -657,7 +657,7 @@ function App() {
                       <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></div> Live Game
                     </div>
                     <h3 className="text-white text-xl md:text-2xl font-serif leading-tight">
-                      Scream For <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500 italic font-medium">Shawarma!</span>
+                      Scream For <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 italic font-black">Shawarma!</span>
                     </h3>
                     <p className="text-stone-400 text-xs mt-1.5 max-w-md font-light leading-relaxed">
                       Scream at your screen to roast the virtual Chillies Shawarma spit and unlock up to <strong className="text-gold-400 font-bold">15% off</strong> your order instantly!
