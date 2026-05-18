@@ -768,7 +768,6 @@ const Footer = ({ onOpenAdmin, onOpenTC }: any) => (
     <h2 className="font-serif text-2xl text-white mb-2">Chillies Restaurant</h2>
     <p className="text-stone-500 text-xs uppercase tracking-widest mb-8">Premium Dining Experience</p>
     <div className="flex justify-center gap-8 mb-8 text-[10px] uppercase tracking-widest font-bold text-stone-500">
-      <button onClick={onOpenAdmin} className="hover:text-brand-500 transition-colors">Admin Login</button>
       <button onClick={onOpenTC} className="hover:text-brand-500 transition-colors">Terms & Conditions</button>
     </div>
     <p className="text-stone-700 text-[10px]">&copy; 2026 Chillies Restaurant. All rights reserved.</p>

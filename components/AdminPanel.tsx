@@ -248,6 +248,106 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const [isRinging, setIsRinging] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
+
+  // Marketing Poster Generator States
+  const [posterTitle, setPosterTitle] = useState('Spicy Shawarma Deal');
+  const [posterSubtitle, setPosterSubtitle] = useState('Freshly Grilled & Roasted Daily');
+  const [posterBadgeText, setPosterBadgeText] = useState('15% OFF');
+  const [posterTheme, setPosterTheme] = useState<'lava' | 'gold' | 'midnight'>('lava');
+  const [posterFormat, setPosterFormat] = useState<'square' | 'story'>('square');
+  const [selectedPosterItemId, setSelectedPosterItemId] = useState<string>('');
+
+  const handleDownloadPoster = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const isSquare = posterFormat === 'square';
+    const width = 1080;
+    const height = isSquare ? 1080 : 1920;
+    canvas.width = width;
+    canvas.height = height;
+
+    // 1. Draw Background Gradient
+    const grad = ctx.createRadialGradient(width/2, height/2, 100, width/2, height/2, width * 0.8);
+    if (posterTheme === 'lava') {
+      grad.addColorStop(0, '#2b0707');
+      grad.addColorStop(1, '#050101');
+    } else if (posterTheme === 'gold') {
+      grad.addColorStop(0, '#1c1507');
+      grad.addColorStop(1, '#070502');
+    } else { // midnight
+      grad.addColorStop(0, '#111111');
+      grad.addColorStop(1, '#000000');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+
+    // 2. Draw Premium Border
+    ctx.strokeStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+    ctx.lineWidth = 16;
+    ctx.strokeRect(24, 24, width - 48, height - 48);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(40, 40, width - 80, height - 80);
+
+    // 3. Draw Brand Name "CHILLIES RESTAURANT"
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 36px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '8px';
+    ctx.fillText('CHILLIES RESTAURANT', width / 2, 120);
+
+    // 4. Draw Poster Title
+    ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+    ctx.font = 'italic bold 72px Georgia, serif';
+    ctx.fillText(posterTitle.toUpperCase(), width / 2, height * 0.28);
+
+    // 5. Draw Poster Subtitle
+    ctx.fillStyle = '#a8a29e';
+    ctx.font = '32px sans-serif';
+    ctx.fillText(posterSubtitle, width / 2, height * 0.34);
+
+    // 6. Draw main item details or badge
+    ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+    ctx.beginPath();
+    ctx.arc(width/2, height * 0.52, 140, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#050505';
+    ctx.font = 'bold 54px sans-serif';
+    ctx.fillText(posterBadgeText.toUpperCase(), width / 2, height * 0.52 + 10);
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillText('LIMITED TIME', width / 2, height * 0.52 + 50);
+
+    // 7. If there is a featured item selected
+    const featuredItem = items.find(item => item.id === selectedPosterItemId);
+    if (featuredItem) {
+       ctx.fillStyle = '#ffffff';
+       ctx.font = 'bold 44px Georgia, serif';
+       ctx.fillText(featuredItem.name.toUpperCase(), width / 2, height * 0.72);
+
+       ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+       ctx.font = 'bold 36px monospace';
+       ctx.fillText(`JUST R${featuredItem.price}/-`, width / 2, height * 0.77);
+    }
+
+    // 8. Draw Call to Action
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '30px sans-serif';
+    ctx.fillText('ORDER NOW VIA WHATSAPP', width / 2, height * 0.88);
+
+    ctx.fillStyle = posterTheme === 'gold' ? '#d4af37' : '#ef4444';
+    ctx.font = 'bold 36px monospace';
+    ctx.fillText('+91 83010 32794', width / 2, height * 0.92);
+
+    // Trigger Download
+    const link = document.createElement('a');
+    link.download = `chillies_poster_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
   const [latestNewOrderId, setLatestNewOrderId] = useState<string | null>(null);
   const [activeChatOrderId, setActiveChatOrderId] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState('');
@@ -1464,6 +1564,170 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* Professional Marketing Poster & Banner Generator */}
+                    <div className="bg-stone-900/80 border border-white/5 rounded-[3rem] p-10 mt-12 shadow-2xl space-y-10">
+                        <div className="flex items-center gap-4 border-b border-white/[0.03] pb-6">
+                            <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 border border-red-500/20"><ImageIcon size={24} /></div>
+                            <div>
+                                <h4 className="text-2xl font-serif text-white">Marketing Poster Studio</h4>
+                                <p className="text-stone-500 text-xs uppercase tracking-widest font-black mt-1">Design & Export High-Res Social Graphics</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                            {/* Controls Panel */}
+                            <div className="lg:col-span-5 space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Poster Title</label>
+                                    <input 
+                                        type="text" 
+                                        value={posterTitle} 
+                                        onChange={e => setPosterTitle(e.target.value)} 
+                                        className="w-full bg-stone-950 border border-white/5 rounded-2xl p-4 text-white text-xs outline-none focus:border-red-500" 
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Subtitle / Pitch</label>
+                                    <input 
+                                        type="text" 
+                                        value={posterSubtitle} 
+                                        onChange={e => setPosterSubtitle(e.target.value)} 
+                                        className="w-full bg-stone-950 border border-white/5 rounded-2xl p-4 text-white text-xs outline-none focus:border-red-500" 
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Offer / Badge Text</label>
+                                        <input 
+                                            type="text" 
+                                            value={posterBadgeText} 
+                                            onChange={e => setPosterBadgeText(e.target.value)} 
+                                            className="w-full bg-stone-950 border border-white/5 rounded-2xl p-4 text-white text-xs outline-none focus:border-red-500" 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Featured Item</label>
+                                        <select 
+                                            value={selectedPosterItemId} 
+                                            onChange={e => setSelectedPosterItemId(e.target.value)} 
+                                            className="w-full bg-stone-950 border border-white/5 rounded-2xl p-4 text-white text-xs outline-none focus:border-red-500"
+                                        >
+                                            <option value="">-- No Featured Item --</option>
+                                            {items.map(item => (
+                                                <option key={item.id} value={item.id}>{item.name} (₹{item.price})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Theme Palette</label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {[
+                                                { id: 'lava', label: 'Lava Red' },
+                                                { id: 'gold', label: 'Gold Dust' },
+                                                { id: 'midnight', label: 'Charcoal' }
+                                            ].map(t => (
+                                                <button 
+                                                    key={t.id} 
+                                                    onClick={() => setPosterTheme(t.id as any)} 
+                                                    className={`py-3.5 rounded-xl border text-[9px] font-black uppercase transition-all ${posterTheme === t.id ? 'border-red-500 bg-red-500/10 text-white' : 'border-white/5 bg-stone-950 text-stone-500 hover:text-white'}`}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Aspect Ratio</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                { id: 'square', label: 'Square 1:1' },
+                                                { id: 'story', label: 'Story 9:16' }
+                                            ].map(f => (
+                                                <button 
+                                                    key={f.id} 
+                                                    onClick={() => setPosterFormat(f.id as any)} 
+                                                    className={`py-3.5 rounded-xl border text-[9px] font-black uppercase transition-all ${posterFormat === f.id ? 'border-red-500 bg-red-500/10 text-white' : 'border-white/5 bg-stone-950 text-stone-500 hover:text-white'}`}
+                                                >
+                                                    {f.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={handleDownloadPoster} 
+                                    className="w-full py-5 bg-gradient-to-r from-red-650 via-orange-500 to-red-650 text-stone-950 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-3 hover:opacity-90 shadow-xl transition-all active:scale-95 mt-4"
+                                >
+                                    <Download size={16} strokeWidth={2.5} /> Export High-Res PNG
+                                </button>
+                            </div>
+
+                            {/* Live Interactive Canvas Mock Preview */}
+                            <div className="lg:col-span-7 flex flex-col items-center justify-center bg-stone-950 border border-white/5 rounded-[2.5rem] p-6 relative overflow-hidden shadow-inner min-h-[450px]">
+                                <div className="absolute inset-0 bg-[#0c0505]/40 blur-3xl pointer-events-none"></div>
+                                <div className="text-[9px] text-stone-600 uppercase font-black tracking-[0.3em] mb-4 relative z-10">Live Design Preview</div>
+                                
+                                {/* Poster Body container */}
+                                <div 
+                                    className={`relative border transition-all duration-500 overflow-hidden shadow-2xl flex flex-col items-center justify-between p-8 text-center select-none ${
+                                        posterFormat === 'square' ? 'w-[320px] h-[320px]' : 'w-[250px] h-[400px]'
+                                    } ${
+                                        posterTheme === 'lava' ? 'bg-gradient-to-b from-[#2b0707] to-[#050101] border-red-500/40 shadow-[0_0_50px_rgba(239,68,68,0.15)]' :
+                                        posterTheme === 'gold' ? 'bg-gradient-to-b from-[#1c1507] to-[#070502] border-yellow-500/40 shadow-[0_0_50px_rgba(234,179,8,0.15)]' :
+                                        'bg-gradient-to-b from-[#111] to-[#000] border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)]'
+                                    }`}
+                                >
+                                    {/* Poster Borders */}
+                                    <div className={`absolute inset-2 border ${posterTheme === 'gold' ? 'border-yellow-500/10' : 'border-red-500/10'} pointer-events-none`}></div>
+                                    
+                                    {/* Header */}
+                                    <div className="relative z-10 space-y-1">
+                                        <div className="text-[7px] text-white tracking-[0.2em] font-serif font-black uppercase opacity-90">CHILLIES RESTAURANT</div>
+                                        <div className="w-8 h-[1px] bg-white/20 mx-auto"></div>
+                                    </div>
+
+                                    {/* Title & Subtitle */}
+                                    <div className="relative z-10 space-y-1.5 px-4 my-auto">
+                                        <h4 className={`font-serif leading-none tracking-wide font-black transition-all ${
+                                            posterFormat === 'square' ? 'text-xl' : 'text-lg'
+                                        } ${
+                                            posterTheme === 'gold' ? 'text-yellow-400' : 'text-red-500'
+                                        }`}>{posterTitle || 'OFFER TITLE'}</h4>
+                                        <p className="text-[8px] text-stone-400 font-light leading-relaxed line-clamp-2">{posterSubtitle || 'A culinary masterpiece'}</p>
+                                    </div>
+
+                                    {/* Featured Item Preview */}
+                                    {items.find(item => item.id === selectedPosterItemId) ? (
+                                        <div className="relative z-10 py-1 px-4 bg-white/[0.02] border border-white/[0.05] rounded-xl flex items-center justify-center gap-3 w-5/6 mx-auto mb-2">
+                                            <div className="text-left">
+                                                <div className="text-[7px] text-stone-400 uppercase font-black leading-tight line-clamp-1">{items.find(item => item.id === selectedPosterItemId)?.name}</div>
+                                                <div className="text-[8px] text-white font-mono font-black">Just ₹{items.find(item => item.id === selectedPosterItemId)?.price}/-</div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        /* Default Badge shape */
+                                        <div className={`relative z-10 flex flex-col items-center justify-center rounded-full w-20 h-20 shadow-xl ${
+                                            posterTheme === 'gold' ? 'bg-yellow-500 text-stone-950' : 'bg-red-500 text-white'
+                                        }`}>
+                                            <span className="text-[10px] font-black tracking-tighter uppercase font-mono leading-none">{posterBadgeText || 'DEAL'}</span>
+                                            <span className="text-[5px] font-black uppercase tracking-widest mt-1 opacity-70">LIMIT TIME</span>
+                                        </div>
+                                    )}
+
+                                    {/* Footer / CTA */}
+                                    <div className="relative z-10 space-y-1">
+                                        <div className="text-[6px] text-stone-400 tracking-wider font-light uppercase">ORDER NOW VIA WHATSAPP</div>
+                                        <div className={`text-[8px] font-mono font-black ${
+                                            posterTheme === 'gold' ? 'text-yellow-400' : 'text-red-500'
+                                        }`}>+91 83010 32794</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
