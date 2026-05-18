@@ -12,12 +12,64 @@ const Hero: React.FC = () => {
 
   return (
     <section id="home" className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden px-4 bg-stone-950">
-      {/* Premium Abstract Background */}
-      <div className="absolute inset-0 z-0">
+      {/* Self-contained styling for rising sparks and particle physics */}
+      <style>{`
+        @keyframes float-ember {
+          0% {
+            transform: translateY(105vh) translateX(0) scale(0.9) rotate(0deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.9;
+          }
+          90% {
+            opacity: 0.9;
+          }
+          100% {
+            transform: translateY(-15vh) translateX(120px) scale(0.3) rotate(360deg);
+            opacity: 0;
+          }
+        }
+        .ember-particle {
+          position: absolute;
+          bottom: -50px;
+          background: radial-gradient(circle, #f97316 0%, #ef4444 65%, transparent 100%);
+          border-radius: 50%;
+          pointer-events: none;
+          mix-blend-mode: screen;
+          animation: float-ember linear infinite;
+        }
+      `}</style>
+
+      {/* Premium Abstract Background with dynamic embers */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,_#d4af3715,_transparent_70%)]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_#d4af3705,_transparent_40%)]"></div>
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold-500/5 blur-[120px] rounded-full animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gold-500/5 blur-[120px] rounded-full animate-pulse [animation-delay:1s]"></div>
+        
+        {/* Ambient rising embers */}
+        {Array.from({ length: 20 }).map((_, i) => {
+          const size = Math.random() * 5 + 3; // size 3px to 8px
+          const left = Math.random() * 100; // location across width
+          const duration = Math.random() * 12 + 10; // slow drift 10s to 22s
+          const delay = Math.random() * -20; // negative delay so they spawn fully distributed immediately
+          return (
+            <div
+              key={i}
+              className="ember-particle"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                left: `${left}%`,
+                animationDuration: `${duration}s`,
+                animationDelay: `${delay}s`,
+                filter: `blur(${Math.random() * 1.5}px)`,
+                boxShadow: '0 0 10px #f97316',
+              }}
+            />
+          );
+        })}
       </div>
 
       <div className="relative z-10 text-center max-w-4xl mx-auto flex flex-col items-center">
