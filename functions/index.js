@@ -1,18 +1,9 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
-const nodemailer = require("nodemailer");
 
 admin.initializeApp();
 
-// Configure the email transporter
-// RECOMMENDATION: Replace these with your actual credentials
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'chilliesrestaurant52@gmail.com', 
-        pass: 'erei wdxz vvln eeio'    
-    }
-});
+
 
 /**
  * Helper to send multicast messages in chunks of 500 (FCM limit)
@@ -114,35 +105,7 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
     const result = await sendMulticastBatched(adminTokens, payload);
     console.log(`Order notification: ${result.successCount} sent, ${result.failureCount} failed.`);
 
-    // Send Email Alert
-    try {
-        const mailOptions = {
-            from: '"CHILLIES ORDERS" <chilliesrestaurant52@gmail.com>', 
-            to: 'chilliesrestaurant52@gmail.com', 
-            subject: `🔥 NEW ORDER: ${newOrder.id} - ₹${newOrder.total}`,
-            html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-                    <h2 style="color: #d4af37; text-align: center;">New Order Received!</h2>
-                    <p><strong>Order ID:</strong> ${newOrder.id}</p>
-                    <p><strong>Customer:</strong> ${newOrder.customerName}</p>
-                    <p><strong>Phone:</strong> ${newOrder.phone || 'N/A'}</p>
-                    <p><strong>Type:</strong> ${newOrder.type}</p>
-                    <p><strong>Total:</strong> ₹${newOrder.total}</p>
-                    <hr/>
-                    <h3>Items:</h3>
-                    <ul>
-                        ${newOrder.items.map(item => `<li>${item.quantity}x ${item.name}</li>`).join('')}
-                    </ul>
-                    <hr/>
-                    <p style="font-size: 12px; color: #888;">This is an automated alert from your restaurant dashboard.</p>
-                </div>
-            `
-        };
-        await transporter.sendMail(mailOptions);
-        console.log("Order email alert sent successfully.");
-    } catch (error) {
-        console.error("Failed to send order email:", error);
-    }
+
 });
   
 exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}", async (event) => {
