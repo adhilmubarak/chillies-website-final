@@ -100,14 +100,7 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
             }
         },
         webpush: {
-            fcmOptions: { link: "/admin" },
-            notification: {
-                title: title,
-                body: bodyText,
-                icon: "/pwa-192x192.png",
-                requireInteraction: true,
-                vibrate: [500, 1000, 500, 1000]
-            }
+            fcmOptions: { link: "/admin" }
         }
     };
 
@@ -246,12 +239,7 @@ exports.sendGlobalBroadcast = onDocumentCreated("broadcasts/{broadcastId}", asyn
             }
         },
         webpush: {
-            notification: {
-                title: title,
-                body: bodyText,
-                icon: "/pwa-192x192.png",
-                badge: "/pwa-192x192.png"
-            }
+            fcmOptions: { link: "/" }
         }
     };
 
