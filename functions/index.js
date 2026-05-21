@@ -79,6 +79,10 @@ exports.sendOrderNotification = onDocumentCreated("orders/{orderId}", async (eve
     const bodyText = `Order #${newOrder.id} received from ${newOrder.customerName}.`;
 
     const payload = {
+        notification: {
+            title: title,
+            body: bodyText
+        },
         data: {
             title: title,
             body: bodyText,
@@ -151,6 +155,10 @@ exports.sendComplaintNotification = onDocumentCreated("complaints/{complaintId}"
     const bodyText = `From ${newComplaint.customerName}: ${newComplaint.description.substring(0, 100)}...`;
 
     const payload = {
+        notification: {
+            title: title,
+            body: bodyText
+        },
         data: {
             title: title,
             body: bodyText,
@@ -182,6 +190,10 @@ exports.testAdminNotification = onDocumentCreated("test_notifications/{testId}",
     const bodyText = testData.body || "This is a test of the background notification system.";
 
     const payload = {
+        notification: {
+            title: title,
+            body: bodyText
+        },
         data: {
             title: title,
             body: bodyText,
@@ -220,6 +232,10 @@ exports.sendGlobalBroadcast = onDocumentCreated("broadcasts/{broadcastId}", asyn
     const bodyText = broadcastData.body || "A new update is available. Check the app for details.";
 
     const payload = {
+        notification: {
+            title: title,
+            body: bodyText
+        },
         data: {
             title: title,
             body: bodyText,
