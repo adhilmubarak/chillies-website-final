@@ -114,22 +114,10 @@ const SignagePage: React.FC<SignagePageProps> = ({
 
   const currentShowcaseItem = showcaseItems[showcaseIndex];
 
-  // 5. Active Order Prep Queue
-  const queueOrders = useMemo(() => {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    return orders
-      .filter(o => o.createdAt && o.createdAt >= todayStart.getTime())
-      .filter(o => ['pending', 'preparing', 'ready'].includes(o.status));
-  }, [orders]);
-
-  const preparingOrders = useMemo(() => {
-    return queueOrders.filter(o => ['pending', 'preparing'].includes(o.status));
-  }, [queueOrders]);
-
-  const readyOrders = useMemo(() => {
-    return queueOrders.filter(o => o.status === 'ready');
-  }, [queueOrders]);
+  // 5. Duplicated menu items list for infinite pricing board marquee
+  const scrollingMenuItems = useMemo(() => {
+    return [...menuItems, ...menuItems];
+  }, [menuItems]);
 
   return (
     <div className="min-h-screen bg-[#030303] text-stone-200 font-sans p-6 overflow-hidden flex flex-col justify-between select-none relative w-full h-screen">
@@ -170,6 +158,23 @@ const SignagePage: React.FC<SignagePageProps> = ({
         }
         .anim-blink-gold {
           animation: blinkGold 2s infinite ease-in-out;
+        }
+        @keyframes scrollMenu {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+        .anim-scroll-menu {
+          animation: scrollMenu 45s linear infinite;
+        }
+        .anim-scroll-menu:hover {
+          animation-play-state: paused;
+        }
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-none {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}} />
 
@@ -343,71 +348,54 @@ const SignagePage: React.FC<SignagePageProps> = ({
             )}
           </div>
 
-          {/* BOTTOM HALF: Live Order Prep Queue */}
+          {/* BOTTOM HALF: Premium Price Board */}
           <div className="h-[45%] bg-[#080808]/80 border border-white/[0.03] p-5 rounded-[2rem] flex flex-col overflow-hidden relative justify-between">
             <div className="flex justify-between items-center border-b border-white/[0.04] pb-2 shrink-0 mb-3">
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-ping"></span>
-                <span className="text-[10px] tracking-[0.25em] font-serif text-stone-100 uppercase font-black">Live Order Status</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse"></span>
+                <span className="text-[10px] tracking-[0.25em] font-serif text-stone-100 uppercase font-black">Pricing Directory</span>
               </div>
-              <span className="text-[7.5px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-full font-mono text-stone-500">
-                {queueOrders.length} Active
+              <span className="text-[7.5px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-full font-mono text-stone-500 uppercase tracking-widest">
+                Classic Menu
               </span>
             </div>
 
-            {/* Split Queue Dashboard */}
-            <div className="grid grid-cols-2 gap-4 flex-1 overflow-hidden min-h-0 mb-1">
-              
-              {/* Column 1: Preparing */}
-              <div className="flex flex-col min-h-0 text-left">
-                <h4 className="text-[8.5px] font-black uppercase tracking-[0.2em] text-stone-500 mb-2 border-l border-amber-500/50 pl-2 shrink-0 flex items-center gap-1">
-                  <span className="w-1 h-1 rounded-full bg-amber-500"></span> Preparing
-                </h4>
-                <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-1.5 scrollbar-hide">
-                  {preparingOrders.length > 0 ? (
-                    preparingOrders.map(o => (
-                      <div 
-                        key={o.id}
-                        className="bg-amber-500/5 border border-amber-500/10 rounded-lg p-2 flex items-center justify-between animate-pulse"
-                      >
-                        <span className="font-mono text-[9px] font-black text-amber-500 tracking-widest">#{o.id.slice(-4)}</span>
-                        <span className="text-[6.5px] uppercase tracking-widest text-stone-600 font-mono">{o.type}</span>
+            {/* Scrolling Price Board Container */}
+            <div className="flex-1 overflow-hidden relative w-full pr-1 scrollbar-none">
+              <div className="anim-scroll-menu flex flex-col gap-2.5">
+                {scrollingMenuItems.map((item, idx) => {
+                  const finalPrice = getItemPrice(item);
+                  const hasDiscount = finalPrice < item.price;
+                  return (
+                    <div 
+                      key={`${item.id}-${idx}`}
+                      className="flex justify-between items-center text-[10px] py-1 border-b border-white/[0.02]"
+                    >
+                      <div className="flex items-center gap-2 truncate max-w-[70%] text-left">
+                        {item.isVegetarian ? (
+                          <span className="inline-flex w-2.5 h-2.5 border border-emerald-600/40 items-center justify-center rounded-sm text-[5.5px] text-emerald-500 font-bold shrink-0">🟢</span>
+                        ) : (
+                          <span className="inline-flex w-2.5 h-2.5 border border-rose-600/40 items-center justify-center rounded-sm text-[5.5px] text-rose-500 font-bold shrink-0">🔴</span>
+                        )}
+                        <span className="font-serif text-stone-300 font-bold tracking-wide truncate">{item.name}</span>
+                        {item.isSpicy && <span className="text-[8px] shrink-0 text-red-500">🔥</span>}
                       </div>
-                    ))
-                  ) : (
-                    <div className="my-auto py-4 text-center">
-                      <p className="text-stone-700 text-[8px] uppercase tracking-widest font-mono">Queue Clear</p>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Column 2: Ready */}
-              <div className="flex flex-col min-h-0 text-left">
-                <h4 className="text-[8.5px] font-black uppercase tracking-[0.2em] text-gold-400 mb-2 border-l border-gold-500 pl-2 shrink-0 flex items-center gap-1">
-                  <span className="w-1 h-1 rounded-full bg-gold-400"></span> Ready
-                </h4>
-                <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-1.5 scrollbar-hide">
-                  {readyOrders.length > 0 ? (
-                    readyOrders.map(o => (
-                      <div 
-                        key={o.id}
-                        className="bg-gold-500/10 border border-gold-500/30 rounded-lg p-2 flex items-center justify-between anim-blink-gold"
-                      >
-                        <span className="font-mono text-[10px] font-black text-gold-400 tracking-widest">#{o.id.slice(-4)}</span>
-                        <div className="flex items-center gap-1 shrink-0">
-                          <CheckCircle2 size={10} className="text-gold-400" />
-                        </div>
+                      {/* Dotted menu leader spacer */}
+                      <div className="flex-1 border-b border-dashed border-white/[0.06] mx-2 self-end mb-1"></div>
+
+                      <div className="text-right shrink-0 flex items-center gap-1.5">
+                        {hasDiscount && (
+                          <span className="text-[8px] line-through text-stone-600 font-mono">₹{item.price}</span>
+                        )}
+                        <span className="font-mono text-[10px] font-black text-gold-400">
+                          ₹{finalPrice}
+                        </span>
                       </div>
-                    ))
-                  ) : (
-                    <div className="my-auto py-4 text-center">
-                      <p className="text-stone-700 text-[8px] uppercase tracking-widest font-mono">No Orders Ready</p>
                     </div>
-                  )}
-                </div>
+                  );
+                })}
               </div>
-
             </div>
           </div>
         </section>
