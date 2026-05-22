@@ -87,43 +87,10 @@ const SignagePage: React.FC<SignagePageProps> = ({
   // Current category name to render
   const currentCategoryName = activeCategories[activeSlideIndex] || '';
 
-  // 3b. Category-specific items & active category slideshow images
+  // 3b. Category-specific items list
   const currentCategoryItems = useMemo(() => {
     return (menuItems || []).filter(item => item && item.category === currentCategoryName);
   }, [menuItems, currentCategoryName]);
-
-  const currentCategoryImages = useMemo(() => {
-    return currentCategoryItems
-      .filter(item => item && item.image)
-      .map(item => ({
-        imageUrl: item.image,
-        itemName: item.name,
-        itemPrice: getItemPrice(item),
-        itemId: item.id
-      }));
-  }, [currentCategoryItems]);
-
-  const [categoryImageIndex, setCategoryImageIndex] = useState(0);
-  const [categoryImageFade, setCategoryImageFade] = useState(true);
-
-  // Reset the active slideshow index when category changes
-  useEffect(() => {
-    setCategoryImageIndex(0);
-    setCategoryImageFade(true);
-  }, [currentCategoryName]);
-
-  // Rotator Timer for Category Item Images (3 seconds)
-  useEffect(() => {
-    if (currentCategoryImages.length <= 1) return;
-    const timer = setInterval(() => {
-      setCategoryImageFade(false);
-      setTimeout(() => {
-        setCategoryImageIndex(prev => (prev + 1) % currentCategoryImages.length);
-        setCategoryImageFade(true);
-      }, 300); // 300ms fade transition
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [currentCategoryImages]);
 
   // 4. Chef's Choice visual showcase carousel (6 seconds)
   const showcaseItems = useMemo(() => {
@@ -266,115 +233,71 @@ const SignagePage: React.FC<SignagePageProps> = ({
                   </span>
                 </div>
 
-                {/* Main Split Layout for Category Content */}
-                <div className="flex-1 flex gap-5 min-h-0 w-full">
-                  {/* Category Image Slideshow (Left Column - 38% width) */}
-                  {currentCategoryImages.length > 0 && (
-                    <div className="w-[38%] rounded-2xl overflow-hidden border border-white/[0.04] bg-[#0b0b0b] relative flex flex-col justify-end shadow-[0_10px_30px_rgba(0,0,0,0.8)] min-h-0 shrink-0">
-                      {/* Image Frame with Zoom Effect */}
-                      <div className={`absolute inset-0 z-0 transition-opacity duration-300 ${categoryImageFade ? 'opacity-100' : 'opacity-0'}`}>
-                        {currentCategoryImages[categoryImageIndex] && (
-                          <img
-                            src={currentCategoryImages[categoryImageIndex].imageUrl}
-                            alt={currentCategoryImages[categoryImageIndex].itemName}
-                            className="w-full h-full object-cover anim-kenburns"
-                          />
-                        )}
-                        {/* Dark Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-                      </div>
+                {/* Menu items grid - Auto layouts all items in the category cleanly */}
+                <div className="grid grid-cols-2 gap-4 flex-1 overflow-y-auto scrollbar-none pr-1 align-content-start">
+                  {currentCategoryItems.map(item => {
+                    const finalPrice = getItemPrice(item);
+                    const hasDiscount = finalPrice < (item.price || 0);
 
-                      {/* Top Label */}
-                      <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-gradient-to-r from-[#ffb732] to-[#f39c12] text-stone-950 font-black uppercase text-[6.5px] tracking-widest rounded flex items-center gap-1 shadow-md z-20">
-                        <Sparkles size={8} /> Category Special
-                      </span>
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-[#0b0b0b] border border-white/[0.03] p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-[#ffb732]/30 transition-colors h-fit min-h-[95px]"
+                      >
+                        {/* Elegant premium left border accent */}
+                        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-[#ffb732]/90 via-[#ffb732]/30 to-transparent"></div>
 
-                      {/* Info Overlay Panel */}
-                      <div className={`relative z-20 m-3 p-3 bg-black/55 backdrop-blur-md border border-white/5 rounded-xl text-left transition-opacity duration-300 ${categoryImageFade ? 'opacity-100' : 'opacity-0'}`}>
-                        <span className="text-[6.5px] uppercase tracking-widest text-[#ffb732] font-mono font-bold block mb-1">
-                          Fresh Culinary Selection
-                        </span>
-                        <h3 className="font-serif text-[13px] font-black text-white tracking-wide truncate mb-1.5">
-                          {currentCategoryImages[categoryImageIndex]?.itemName}
-                        </h3>
-                        
-                        <div className="bg-gradient-to-r from-[#141414] to-[#0d0d0d] border border-white/[0.08] px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.6)] w-fit">
-                          <span className="font-mono text-[8px] font-bold text-[#ffb732]/70">₹</span>
-                          <span className="w-[1px] h-2.5 bg-white/10"></span>
-                          <span className="font-mono text-xs font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-[#ffe39d] to-[#ffb732] drop-shadow-[0_2px_8px_rgba(255,183,50,0.4)]">
-                            {currentCategoryImages[categoryImageIndex]?.itemPrice}
-                          </span>
+                        {/* Ambient glow sweep */}
+                        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
+                          <div className="absolute top-0 left-[-150%] w-full h-full bg-gradient-to-r from-transparent via-[#ffb732]/[0.025] to-transparent anim-sweep"></div>
                         </div>
-                      </div>
-                    </div>
-                  )}
 
-                  {/* Menu Items Grid (Right Column - 62% width or 100% fallback) */}
-                  <div className={`min-h-0 overflow-y-auto scrollbar-none pr-1 align-content-start grid gap-3 flex-1 ${currentCategoryImages.length > 0 ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                    {currentCategoryItems.map(item => {
-                      const finalPrice = getItemPrice(item);
-                      const hasDiscount = finalPrice < (item.price || 0);
-
-                      return (
-                        <div
-                          key={item.id}
-                          className="bg-[#0b0b0b] border border-white/[0.03] p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-[#ffb732]/30 transition-colors h-fit min-h-[95px]"
-                        >
-                          {/* Elegant premium left border accent */}
-                          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-[#ffb732]/90 via-[#ffb732]/30 to-transparent"></div>
-
-                          {/* Ambient glow sweep */}
-                          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
-                            <div className="absolute top-0 left-[-150%] w-full h-full bg-gradient-to-r from-transparent via-[#ffb732]/[0.025] to-transparent anim-sweep"></div>
+                        <div className="relative z-10 flex gap-3.5 pl-1.5">
+                          {item.image && (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-14 h-14 object-cover rounded-xl border border-white/5 shrink-0"
+                            />
+                          )}
+                          <div className="text-left flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="font-serif text-sm md:text-[14px] font-black tracking-wide leading-tight bg-gradient-to-r from-white via-[#ffe29c] to-[#ffb732] bg-clip-text text-transparent truncate flex-1">{item.name}</h4>
+                              {item.isChefChoice && <Sparkles size={10} className="text-[#ffb732] animate-pulse shrink-0" />}
+                              {item.isSpicy && <Flame size={10} className="text-red-500 shrink-0" />}
+                            </div>
+                            <p className="text-stone-500 text-[9px] mt-1 leading-normal font-light line-clamp-2">
+                              {item.description}
+                            </p>
                           </div>
+                        </div>
 
-                          <div className="relative z-10 flex gap-3.5 pl-1.5">
-                            {item.image && (
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-14 h-14 object-cover rounded-xl border border-white/5 shrink-0"
-                              />
+                        {/* Pricing Row */}
+                        <div className="relative z-10 flex justify-between items-center mt-2.5 pt-2 border-t border-white/[0.02] pl-1.5">
+                          <div className="flex items-center gap-2">
+                            {item.isVegetarian ? (
+                              <span className="inline-flex border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded text-[6.5px] font-bold tracking-wider uppercase shrink-0">VEG</span>
+                            ) : (
+                              <span className="inline-flex border border-rose-500/25 bg-rose-500/10 text-rose-400 px-1.5 py-0.5 rounded text-[6.5px] font-bold tracking-wider uppercase shrink-0">NON-VEG</span>
                             )}
-                            <div className="text-left flex-1 min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <h4 className="font-serif text-sm md:text-[14px] font-black tracking-wide leading-tight bg-gradient-to-r from-white via-[#ffe29c] to-[#ffb732] bg-clip-text text-transparent truncate flex-1">{item.name}</h4>
-                                {item.isChefChoice && <Sparkles size={10} className="text-[#ffb732] animate-pulse shrink-0" />}
-                                {item.isSpicy && <Flame size={10} className="text-red-500 shrink-0" />}
-                              </div>
-                              <p className="text-stone-500 text-[9px] mt-1 leading-normal font-light line-clamp-2">
-                                {item.description}
-                              </p>
-                            </div>
+                            <span className="text-[7.5px] uppercase tracking-widest text-stone-500 font-mono">Elite Selection</span>
                           </div>
 
-                          {/* Pricing Row */}
-                          <div className="relative z-10 flex justify-between items-center mt-2.5 pt-2 border-t border-white/[0.02] pl-1.5">
-                            <div className="flex items-center gap-2">
-                              {item.isVegetarian ? (
-                                <span className="inline-flex border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded text-[6.5px] font-bold tracking-wider uppercase shrink-0">VEG</span>
-                              ) : (
-                                <span className="inline-flex border border-rose-500/25 bg-rose-500/10 text-rose-400 px-1.5 py-0.5 rounded text-[6.5px] font-bold tracking-wider uppercase shrink-0">NON-VEG</span>
-                              )}
-                              <span className="text-[7.5px] uppercase tracking-widest text-stone-500 font-mono">Elite Selection</span>
-                            </div>
-
-                            <div className="text-right flex items-center gap-2">
-                              {hasDiscount && (
-                                <span className="text-[9px] line-through text-stone-600 font-mono">₹{item.price}</span>
-                              )}
-                              <div className="bg-gradient-to-r from-[#141414] to-[#0d0d0d] border border-white/[0.06] group-hover:border-[#ffb732]/30 px-3.5 py-1 rounded-full flex items-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 shrink-0 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffb732]/5 to-transparent -translate-x-[100%] anim-sweep pointer-events-none"></div>
-                                <span className="font-mono text-[9px] font-bold text-[#ffb732]/70">₹</span>
-                                <span className="w-[1px] h-3 bg-white/10"></span>
-                                <span className="font-mono text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-[#ffe39d] to-[#ffb732] drop-shadow-[0_2px_8px_rgba(255,183,50,0.4)]">{finalPrice}</span>
-                              </div>
+                          <div className="text-right flex items-center gap-2">
+                            {hasDiscount && (
+                              <span className="text-[9px] line-through text-stone-600 font-mono">₹{item.price}</span>
+                            )}
+                            <div className="bg-gradient-to-r from-[#141414] to-[#0d0d0d] border border-white/[0.06] group-hover:border-[#ffb732]/30 px-3.5 py-1 rounded-full flex items-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 shrink-0 relative overflow-hidden">
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffb732]/5 to-transparent -translate-x-[100%] anim-sweep pointer-events-none"></div>
+                              <span className="font-mono text-[9px] font-bold text-[#ffb732]/70">₹</span>
+                              <span className="w-[1px] h-3 bg-white/10"></span>
+                              <span className="font-mono text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-[#ffe39d] to-[#ffb732] drop-shadow-[0_2px_8px_rgba(255,183,50,0.4)]">{finalPrice}</span>
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
