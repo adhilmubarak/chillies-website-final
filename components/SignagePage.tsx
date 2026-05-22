@@ -60,17 +60,11 @@ const SignagePage: React.FC<SignagePageProps> = ({
     return item.price;
   };
 
-  // 3. Category grouping for rotation slide lists (Groups of 2 categories per slide)
-  const categoryPairs = useMemo(() => {
-    const activeCats = dbCategories
+  // 3. Category rotation list (1 category per slide to display all items)
+  const activeCategories = useMemo(() => {
+    return dbCategories
       .filter(c => !c.isUnavailable)
       .map(c => c.name);
-    
-    const pairs: string[][] = [];
-    for (let i = 0; i < activeCats.length; i += 2) {
-      pairs.push(activeCats.slice(i, i + 2));
-    }
-    return pairs;
   }, [dbCategories]);
 
   // Rotator Timer for Category Pages (12 seconds)
@@ -78,19 +72,19 @@ const SignagePage: React.FC<SignagePageProps> = ({
   const [slideFade, setSlideFade] = useState(true);
 
   useEffect(() => {
-    if (categoryPairs.length <= 1) return;
+    if (activeCategories.length <= 1) return;
     const timer = setInterval(() => {
       setSlideFade(false);
       setTimeout(() => {
-        setActiveSlideIndex(prev => (prev + 1) % categoryPairs.length);
+        setActiveSlideIndex(prev => (prev + 1) % activeCategories.length);
         setSlideFade(true);
       }, 500); // 500ms fade transition
     }, 12000);
     return () => clearInterval(timer);
-  }, [categoryPairs]);
+  }, [activeCategories]);
 
-  // Current pair of categories to render
-  const currentCategories = categoryPairs[activeSlideIndex] || [];
+  // Current category name to render
+  const currentCategoryName = activeCategories[activeSlideIndex] || '';
 
   // 4. Chef's Choice visual showcase carousel (6 seconds)
   const showcaseItems = useMemo(() => {
@@ -222,30 +216,28 @@ const SignagePage: React.FC<SignagePageProps> = ({
         {/* LEFT 2/3 COLUMN: Category menu items rotation grid */}
         <section className="col-span-8 flex flex-col justify-between overflow-hidden min-h-0 bg-[#080808]/40 border border-white/[0.02] p-5 rounded-[2rem]">
           <div className={`flex flex-col gap-6 flex-1 transition-opacity duration-500 min-h-0 ${slideFade ? 'opacity-100' : 'opacity-0'}`}>
-            {currentCategories.map(catName => {
-              const catItems = menuItems.filter(item => item.category === catName).slice(0, 4); // Show max 4 items per category for visual space
-              if (catItems.length === 0) return null;
+            {currentCategoryName && (
+              <div className="flex-1 flex flex-col min-h-0">
+                {/* Category Header */}
+                <div className="flex justify-between items-center mb-3.5 border-b border-white/[0.04] pb-1.5 shrink-0">
+                  <span className="text-xs tracking-[0.3em] font-serif text-gold-400 uppercase font-black">{currentCategoryName}</span>
+                  <span className="text-[7.5px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-full font-mono text-stone-500 uppercase tracking-widest">
+                    Category {activeSlideIndex + 1} of {activeCategories.length}
+                  </span>
+                </div>
 
-              return (
-                <div key={catName} className="flex-1 flex flex-col min-h-0">
-                  {/* Category Header */}
-                  <div className="flex justify-between items-center mb-3.5 border-b border-white/[0.04] pb-1.5 shrink-0">
-                    <span className="text-xs tracking-[0.3em] font-serif text-gold-400 uppercase font-black">{catName}</span>
-                    <span className="text-[7.5px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-full font-mono text-stone-500 uppercase tracking-widest">
-                      Slide {activeSlideIndex + 1} of {categoryPairs.length}
-                    </span>
-                  </div>
-
-                  {/* Menu items row/grid */}
-                  <div className="grid grid-cols-2 gap-4 flex-1 overflow-hidden min-h-0">
-                    {catItems.map(item => {
+                {/* Menu items grid - Auto layouts all items in the category cleanly */}
+                <div className="grid grid-cols-2 gap-4 flex-1 overflow-y-auto scrollbar-none pr-1 align-content-start">
+                  {menuItems
+                    .filter(item => item.category === currentCategoryName)
+                    .map(item => {
                       const finalPrice = getItemPrice(item);
                       const hasDiscount = finalPrice < item.price;
 
                       return (
                         <div
                           key={item.id}
-                          className="bg-[#0b0b0b] border border-white/[0.03] p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-gold-500/20 transition-colors"
+                          className="bg-[#0b0b0b] border border-white/[0.03] p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-gold-500/20 transition-colors h-fit min-h-[95px]"
                         >
                           {/* Ambient glow sweep */}
                           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
@@ -257,7 +249,7 @@ const SignagePage: React.FC<SignagePageProps> = ({
                               <img
                                 src={item.image}
                                 alt={item.name}
-                                className="w-16 h-16 object-cover rounded-xl border border-white/5 shrink-0"
+                                className="w-14 h-14 object-cover rounded-xl border border-white/5 shrink-0"
                               />
                             )}
                             <div className="text-left flex-1 min-w-0">
@@ -276,9 +268,9 @@ const SignagePage: React.FC<SignagePageProps> = ({
                           <div className="relative z-10 flex justify-between items-baseline mt-2 pt-2 border-t border-white/[0.02]">
                             <div className="flex items-center gap-1">
                               {item.isVegetarian ? (
-                                <span className="inline-flex w-3 h-3 border border-emerald-600 items-center justify-center rounded-sm text-[6px] text-emerald-500 font-bold shrink-0">🟢</span>
+                                <span className="inline-flex w-3 h-3 border border-emerald-600/25 items-center justify-center rounded-sm text-[6px] text-emerald-500 font-bold shrink-0">🟢</span>
                               ) : (
-                                <span className="inline-flex w-3 h-3 border border-rose-600 items-center justify-center rounded-sm text-[6px] text-rose-500 font-bold shrink-0">🔴</span>
+                                <span className="inline-flex w-3 h-3 border border-rose-600/25 items-center justify-center rounded-sm text-[6px] text-rose-500 font-bold shrink-0">🔴</span>
                               )}
                               <span className="text-[7.5px] uppercase tracking-widest text-stone-500 font-mono">Elite Selection</span>
                             </div>
@@ -293,10 +285,9 @@ const SignagePage: React.FC<SignagePageProps> = ({
                         </div>
                       );
                     })}
-                  </div>
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
         </section>
 
