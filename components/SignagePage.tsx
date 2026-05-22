@@ -92,27 +92,40 @@ const SignagePage: React.FC<SignagePageProps> = ({
     return (menuItems || []).filter(item => item && item.category === currentCategoryName);
   }, [menuItems, currentCategoryName]);
 
-  // 4. Chef's Choice visual showcase carousel (6 seconds)
-  const showcaseItems = useMemo(() => {
-    return (menuItems || []).filter(item => item && item.isChefChoice);
-  }, [menuItems]);
+  // 4. Dynamic Showcase Items list: Items from the current category that have images.
+  // Fallback: Global Chef's Choice items with images if the current category has no image items.
+  const activeShowcaseItems = useMemo(() => {
+    const categoryWithImages = (menuItems || []).filter(
+      item => item && item.category === currentCategoryName && item.image
+    );
+    if (categoryWithImages.length > 0) {
+      return categoryWithImages;
+    }
+    return (menuItems || []).filter(item => item && item.isChefChoice && item.image);
+  }, [menuItems, currentCategoryName]);
 
   const [showcaseIndex, setShowcaseIndex] = useState(0);
   const [showcaseFade, setShowcaseFade] = useState(true);
 
+  // Reset showcase index when category showcase list changes
   useEffect(() => {
-    if (showcaseItems.length <= 1) return;
+    setShowcaseIndex(0);
+    setShowcaseFade(true);
+  }, [activeShowcaseItems]);
+
+  useEffect(() => {
+    if (activeShowcaseItems.length <= 1) return;
     const timer = setInterval(() => {
       setShowcaseFade(false);
       setTimeout(() => {
-        setShowcaseIndex(prev => (prev + 1) % showcaseItems.length);
+        setShowcaseIndex(prev => (prev + 1) % activeShowcaseItems.length);
         setShowcaseFade(true);
       }, 400);
-    }, 6000);
+    }, 3500); // Rotate every 3.5 seconds to show category images beautifully
     return () => clearInterval(timer);
-  }, [showcaseItems]);
+  }, [activeShowcaseItems]);
 
-  const currentShowcaseItem = showcaseItems[showcaseIndex];
+  const currentShowcaseItem = activeShowcaseItems[showcaseIndex];
 
   // 5. Duplicated menu items list for infinite pricing board marquee
   const scrollingMenuItems = useMemo(() => {
@@ -253,20 +266,13 @@ const SignagePage: React.FC<SignagePageProps> = ({
                         </div>
 
                         <div className="relative z-10 flex gap-3.5 pl-1.5">
-                          {item.image && (
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-14 h-14 object-cover rounded-xl border border-white/5 shrink-0"
-                            />
-                          )}
                           <div className="text-left flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
                               <h4 className="font-serif text-sm md:text-[14px] font-black tracking-wide leading-tight bg-gradient-to-r from-white via-[#ffe29c] to-[#ffb732] bg-clip-text text-transparent truncate flex-1">{item.name}</h4>
                               {item.isChefChoice && <Sparkles size={10} className="text-[#ffb732] animate-pulse shrink-0" />}
                               {item.isSpicy && <Flame size={10} className="text-red-500 shrink-0" />}
                             </div>
-                            <p className="text-stone-500 text-[9px] mt-1 leading-normal font-light line-clamp-2">
+                            <p className="text-stone-500 text-[9.5px] mt-1 leading-normal font-light line-clamp-3">
                               {item.description}
                             </p>
                           </div>
@@ -304,15 +310,32 @@ const SignagePage: React.FC<SignagePageProps> = ({
           </div>
         </section>
 
-        {/* RIGHT 1/3 COLUMN: Chef showcase and QR code ordering */}
+        {/* RIGHT 1/3 COLUMN: Interactive Visual Masterpiece Showcase and QR code ordering */}
         <section className="col-span-4 flex flex-col justify-between overflow-hidden h-full min-h-0">
           
-          {/* Full-Height Chef Showcase slides & QR Code */}
-          <div className="flex-1 h-full bg-[#080808]/80 border border-white/[0.03] p-6 rounded-[2rem] flex flex-col justify-between overflow-hidden relative min-h-0">
-            {currentShowcaseItem ? (
-              <div className={`flex flex-col justify-between flex-1 transition-opacity duration-400 min-h-0 ${showcaseFade ? 'opacity-100' : 'opacity-0'}`}>
+          {/* Full-Height Showcase slides & QR Code */}
+          {currentShowcaseItem ? (
+            <div 
+              className={`flex-1 h-full p-6 rounded-[2rem] flex flex-col justify-between overflow-hidden relative min-h-0 transition-all duration-500 ${
+                currentShowcaseItem.isChefChoice 
+                  ? 'bg-gradient-to-b from-[#120e06] to-[#050402] border border-[#ffb732]/35 shadow-[0_0_40px_rgba(255,183,50,0.15)]' 
+                  : 'bg-[#080808]/80 border border-white/[0.03]'
+              }`}
+            >
+              {/* Extra premium atmospheric glow when active Chef's Choice Masterpiece is shown */}
+              {currentShowcaseItem.isChefChoice && (
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                  <div className="absolute top-[-30%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle,_rgba(255,183,50,0.06)_0%,_transparent_75%)] rounded-full animate-pulse"></div>
+                </div>
+              )}
+
+              <div className={`relative z-10 flex flex-col justify-between flex-1 transition-opacity duration-400 min-h-0 ${showcaseFade ? 'opacity-100' : 'opacity-0'}`}>
                 {/* Visual Image container with Ken burns zoom */}
-                <div className="relative w-full flex-1 rounded-2xl overflow-hidden border border-white/5 shadow-inner min-h-0 mb-5">
+                <div className={`relative w-full flex-1 rounded-2xl overflow-hidden shadow-inner min-h-0 mb-5 ${
+                  currentShowcaseItem.isChefChoice 
+                    ? 'border border-[#ffb732]/40 shadow-[0_8px_30px_rgba(255,183,50,0.2)]' 
+                    : 'border border-white/5'
+                }`}>
                   <img
                     src={currentShowcaseItem.image}
                     alt={currentShowcaseItem.name}
@@ -320,21 +343,46 @@ const SignagePage: React.FC<SignagePageProps> = ({
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
                   
-                  {/* Floating Chef Choice Badge */}
-                  <span className="absolute top-3 left-3 px-3 py-1 bg-gold-500 text-stone-950 font-black uppercase text-[7.5px] tracking-widest rounded-lg flex items-center gap-1 shadow-md">
-                    <Sparkles size={9} /> Chef's Masterpiece
-                  </span>
+                  {/* Floating Gold/Star Tint for Masterpieces */}
+                  {currentShowcaseItem.isChefChoice && (
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,183,50,0.06)_0%,_transparent_70%)] pointer-events-none"></div>
+                  )}
+
+                  {/* Floating Premium Badges */}
+                  {currentShowcaseItem.isChefChoice ? (
+                    <span className="absolute top-3 left-3 px-3 py-1.5 bg-gradient-to-r from-[#ffe29c] via-[#ffb732] to-[#d4af37] text-stone-950 font-black uppercase text-[8px] tracking-[0.2em] rounded-lg flex items-center gap-1.5 shadow-[0_4px_15px_rgba(255,183,50,0.4)] z-20 animate-bounce">
+                      <Award size={10} className="animate-spin shrink-0" style={{ animationDuration: '6s' }} /> Chef's Masterpiece
+                    </span>
+                  ) : (
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-black/70 backdrop-blur-md text-[#ffe29c] border border-white/10 font-bold uppercase text-[7px] tracking-widest rounded-lg flex items-center gap-1 shadow-md z-20">
+                      <Sparkles size={8} className="text-[#ffb732]" /> Culinary Showcase
+                    </span>
+                  )}
                 </div>
 
                 {/* Info and scan to order wrapper */}
                 <div className="flex items-center justify-between gap-4 shrink-0">
                   <div className="text-left flex-1 min-w-0">
-                    <span className="text-[7.5px] uppercase tracking-widest text-[#ffb732] font-mono font-bold block mb-1">Featured Delicacy</span>
-                    <h3 className="font-serif text-sm md:text-base font-black bg-gradient-to-r from-white via-[#ffe29c] to-[#ffb732] bg-clip-text text-transparent tracking-wide truncate">{currentShowcaseItem.name}</h3>
-                    <p className="text-stone-500 text-[9.5px] leading-relaxed font-light mt-1 line-clamp-2">{currentShowcaseItem.description}</p>
+                    <span className={`text-[7.5px] uppercase tracking-widest font-mono font-bold block mb-1 ${
+                      currentShowcaseItem.isChefChoice ? 'text-[#ffb732] animate-pulse' : 'text-stone-500'
+                    }`}>
+                      {currentShowcaseItem.isChefChoice ? '⭐ SIGNATURE CULINARY ART ⭐' : 'FEATURED SELECTION'}
+                    </span>
+                    <h3 className={`font-serif text-sm md:text-base font-black tracking-wide truncate ${
+                      currentShowcaseItem.isChefChoice 
+                        ? 'bg-gradient-to-r from-white via-[#ffe39d] to-[#ffb732] bg-clip-text text-transparent text-base md:text-[17px]' 
+                        : 'text-stone-100'
+                    }`}>
+                      {currentShowcaseItem.isChefChoice ? `👑 ${currentShowcaseItem.name}` : currentShowcaseItem.name}
+                    </h3>
+                    <p className={`text-[9.5px] leading-relaxed font-light mt-1 line-clamp-2 ${
+                      currentShowcaseItem.isChefChoice ? 'text-stone-300' : 'text-stone-500'
+                    }`}>{currentShowcaseItem.description}</p>
                     
                     <div className="mt-2.5 flex items-center gap-2">
-                      <div className="bg-gradient-to-r from-[#141414] to-[#0d0d0d] border border-white/[0.06] px-3.5 py-1 rounded-full flex items-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 shrink-0 relative overflow-hidden">
+                      <div className={`bg-gradient-to-r from-[#141414] to-[#0d0d0d] px-3.5 py-1 rounded-full flex items-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 shrink-0 relative overflow-hidden ${
+                        currentShowcaseItem.isChefChoice ? 'border border-[#ffb732]/40 shadow-[0_4px_20px_rgba(255,183,50,0.2)]' : 'border border-white/[0.06]'
+                      }`}>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffb732]/5 to-transparent -translate-x-[100%] anim-sweep pointer-events-none"></div>
                         <span className="font-mono text-[9px] font-bold text-[#ffb732]/70">₹</span>
                         <span className="w-[1px] h-3 bg-white/10"></span>
@@ -346,7 +394,9 @@ const SignagePage: React.FC<SignagePageProps> = ({
                   </div>
 
                   {/* QR Card */}
-                  <div className="flex flex-col items-center shrink-0 bg-white p-1.5 rounded-xl shadow-lg border border-[#ffb732]/30">
+                  <div className={`flex flex-col items-center shrink-0 bg-white p-1.5 rounded-xl shadow-lg transition-all duration-300 ${
+                    currentShowcaseItem.isChefChoice ? 'border-2 border-[#ffb732]' : 'border border-[#ffb732]/30'
+                  }`}>
                     <img 
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(window?.location?.origin || '')}&bgcolor=ffffff&color=000000&margin=0`} 
                       alt="Order Scan" 
@@ -356,12 +406,12 @@ const SignagePage: React.FC<SignagePageProps> = ({
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="flex items-center justify-center flex-1">
-                <p className="text-stone-500 font-mono text-[9px] uppercase tracking-widest">Showcase Empty</p>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex-1 h-full bg-[#080808]/80 border border-white/[0.03] p-6 rounded-[2rem] flex items-center justify-center min-h-0">
+              <p className="text-stone-500 font-mono text-[9px] uppercase tracking-widest">Showcase Empty</p>
+            </div>
+          )}
         </section>
       </main>
 
