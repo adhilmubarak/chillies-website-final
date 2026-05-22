@@ -239,14 +239,17 @@ const SignagePage: React.FC<SignagePageProps> = ({
                       return (
                         <div
                           key={item.id}
-                          className="bg-[#0b0b0b] border border-white/[0.03] p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-gold-500/20 transition-colors h-fit min-h-[95px]"
+                          className="bg-[#0b0b0b] border border-white/[0.03] p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-[#ffb732]/30 transition-colors h-fit min-h-[95px]"
                         >
+                          {/* Elegant premium left border accent */}
+                          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-[#ffb732]/90 via-[#ffb732]/30 to-transparent"></div>
+
                           {/* Ambient glow sweep */}
                           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
-                            <div className="absolute top-0 left-[-150%] w-full h-full bg-gradient-to-r from-transparent via-gold-400/[0.015] to-transparent anim-sweep"></div>
+                            <div className="absolute top-0 left-[-150%] w-full h-full bg-gradient-to-r from-transparent via-[#ffb732]/[0.025] to-transparent anim-sweep"></div>
                           </div>
 
-                          <div className="relative z-10 flex gap-3.5">
+                          <div className="relative z-10 flex gap-3.5 pl-1.5">
                             {item.image && (
                               <img
                                 src={item.image}
@@ -256,8 +259,8 @@ const SignagePage: React.FC<SignagePageProps> = ({
                             )}
                             <div className="text-left flex-1 min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <h4 className="text-stone-100 text-xs font-bold font-serif tracking-wide truncate">{item.name}</h4>
-                                {item.isChefChoice && <Sparkles size={10} className="text-gold-400 animate-pulse shrink-0" />}
+                                <h4 className="font-serif text-sm md:text-[14px] font-black tracking-wide leading-tight bg-gradient-to-r from-white via-[#ffe29c] to-[#ffb732] bg-clip-text text-transparent truncate flex-1">{item.name}</h4>
+                                {item.isChefChoice && <Sparkles size={10} className="text-[#ffb732] animate-pulse shrink-0" />}
                                 {item.isSpicy && <Flame size={10} className="text-red-500 shrink-0" />}
                               </div>
                               <p className="text-stone-500 text-[9px] mt-1 leading-normal font-light line-clamp-2">
@@ -267,21 +270,26 @@ const SignagePage: React.FC<SignagePageProps> = ({
                           </div>
 
                           {/* Pricing Row */}
-                          <div className="relative z-10 flex justify-between items-baseline mt-2 pt-2 border-t border-white/[0.02]">
-                            <div className="flex items-center gap-1">
+                          <div className="relative z-10 flex justify-between items-center mt-2.5 pt-2 border-t border-white/[0.02] pl-1.5">
+                            <div className="flex items-center gap-2">
                               {item.isVegetarian ? (
-                                <span className="inline-flex w-3 h-3 border border-emerald-600/25 items-center justify-center rounded-sm text-[6px] text-emerald-500 font-bold shrink-0">🟢</span>
+                                <span className="inline-flex border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded text-[6.5px] font-bold tracking-wider uppercase shrink-0">VEG</span>
                               ) : (
-                                <span className="inline-flex w-3 h-3 border border-rose-600/25 items-center justify-center rounded-sm text-[6px] text-rose-500 font-bold shrink-0">🔴</span>
+                                <span className="inline-flex border border-rose-500/25 bg-rose-500/10 text-rose-400 px-1.5 py-0.5 rounded text-[6.5px] font-bold tracking-wider uppercase shrink-0">NON-VEG</span>
                               )}
                               <span className="text-[7.5px] uppercase tracking-widest text-stone-500 font-mono">Elite Selection</span>
                             </div>
 
-                            <div className="text-right">
+                            <div className="text-right flex items-center gap-2">
                               {hasDiscount && (
-                                <span className="text-[10px] line-through text-stone-500 mr-2 font-mono">₹{item.price}</span>
+                                <span className="text-[9px] line-through text-stone-600 font-mono">₹{item.price}</span>
                               )}
-                              <span className="font-mono text-sm md:text-base font-black text-gold-400 drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]">₹{finalPrice}</span>
+                              <div className="bg-gradient-to-r from-[#141414] to-[#0d0d0d] border border-white/[0.06] group-hover:border-[#ffb732]/30 px-3.5 py-1 rounded-full flex items-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 shrink-0 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffb732]/5 to-transparent -translate-x-[100%] anim-sweep pointer-events-none"></div>
+                                <span className="font-mono text-[9px] font-bold text-[#ffb732]/70">₹</span>
+                                <span className="w-[1px] h-3 bg-white/10"></span>
+                                <span className="font-mono text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-[#ffe39d] to-[#ffb732] drop-shadow-[0_2px_8px_rgba(255,183,50,0.4)]">{finalPrice}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -318,14 +326,24 @@ const SignagePage: React.FC<SignagePageProps> = ({
                 {/* Info and scan to order wrapper */}
                 <div className="flex items-center justify-between gap-4 shrink-0">
                   <div className="text-left flex-1 min-w-0">
-                    <span className="text-[7.5px] uppercase tracking-widest text-gold-500 font-mono font-bold block mb-1">Featured Delicacy</span>
-                    <h3 className="font-serif text-sm font-black text-stone-100 tracking-wide truncate">{currentShowcaseItem.name}</h3>
-                    <p className="text-stone-500 text-[9px] leading-relaxed font-light mt-0.5 line-clamp-2">{currentShowcaseItem.description}</p>
-                    <span className="inline-block mt-2 font-mono text-sm font-black text-gold-400">₹{getItemPrice(currentShowcaseItem)}</span>
+                    <span className="text-[7.5px] uppercase tracking-widest text-[#ffb732] font-mono font-bold block mb-1">Featured Delicacy</span>
+                    <h3 className="font-serif text-sm md:text-base font-black bg-gradient-to-r from-white via-[#ffe29c] to-[#ffb732] bg-clip-text text-transparent tracking-wide truncate">{currentShowcaseItem.name}</h3>
+                    <p className="text-stone-500 text-[9.5px] leading-relaxed font-light mt-1 line-clamp-2">{currentShowcaseItem.description}</p>
+                    
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <div className="bg-gradient-to-r from-[#141414] to-[#0d0d0d] border border-white/[0.06] px-3.5 py-1 rounded-full flex items-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 shrink-0 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffb732]/5 to-transparent -translate-x-[100%] anim-sweep pointer-events-none"></div>
+                        <span className="font-mono text-[9px] font-bold text-[#ffb732]/70">₹</span>
+                        <span className="w-[1px] h-3 bg-white/10"></span>
+                        <span className="font-mono text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-[#ffe39d] to-[#ffb732] drop-shadow-[0_2px_8px_rgba(255,183,50,0.4)]">
+                          {getItemPrice(currentShowcaseItem)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* QR Card */}
-                  <div className="flex flex-col items-center shrink-0 bg-white p-1.5 rounded-xl shadow-lg border border-gold-500/30">
+                  <div className="flex flex-col items-center shrink-0 bg-white p-1.5 rounded-xl shadow-lg border border-[#ffb732]/30">
                     <img 
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(window?.location?.origin || '')}&bgcolor=ffffff&color=000000&margin=0`} 
                       alt="Order Scan" 
