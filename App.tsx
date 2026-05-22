@@ -31,6 +31,7 @@ const ComplaintsPage = lazy(() => import('./components/ComplaintsPage'));
 const DeliveryPanel = lazy(() => import('./components/DeliveryPanel'));
 const KitchenPanel = lazy(() => import('./components/KitchenPanel'));
 const ARViewerModal = lazy(() => import('./components/ARViewerModal'));
+const SignagePage = lazy(() => import('./components/SignagePage'));
 import { App as CapApp } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { registerPlugin } from '@capacitor/core';
@@ -185,13 +186,13 @@ function App() {
   const [suggestion, setSuggestion] = useState<MenuItem | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const [isAdminOpen, setIsAdminOpen] = useState(location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery') || Capacitor.isNativePlatform());
+  const [isAdminOpen, setIsAdminOpen] = useState(location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery') || location.pathname.startsWith('/signage') || Capacitor.isNativePlatform());
   const [isLoading, setIsLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const [arItem, setArItem] = useState<MenuItem | null>(null);
 
   useEffect(() => {
-    const isSpecialPath = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery');
+    const isSpecialPath = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/delivery') || location.pathname.startsWith('/signage');
     setIsAdminOpen(isSpecialPath || Capacitor.isNativePlatform());
   }, [location.pathname]);
 
@@ -623,6 +624,16 @@ function App() {
         <Route path="/feedback" element={<FeedbackModal />} />
         <Route path="/complaints" element={<ComplaintsPage />} />
         <Route path="/track" element={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><p className="text-stone-500 font-mono text-xs uppercase tracking-widest animate-pulse">Initializing Tracker...</p></div>} />
+        <Route path="/signage" element={
+          <SignagePage 
+            menuItems={menuItems} 
+            dbCategories={dbCategories} 
+            orders={orders}
+            storeSettings={storeSettings}
+            promoSettings={promoSettings}
+            currentTime={currentTime}
+          />
+        } />
         <Route path="/*" element={
           <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
             <Hero />
