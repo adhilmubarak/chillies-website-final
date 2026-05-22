@@ -241,6 +241,266 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
     }
   };
 
+  const renderKitchenVisual = (status: Order['status'], type: Order['type']) => {
+    let content = null;
+
+    switch (status) {
+      case 'pending':
+        content = (
+          <div className="flex flex-col items-center py-6 text-center">
+            {/* Animated Receipt Printer Container */}
+            <div className="relative w-36 h-28 flex flex-col items-center justify-end bg-stone-900/60 rounded-2xl border border-white/5 shadow-inner overflow-hidden p-2">
+              {/* Receipt Slot */}
+              <div className="absolute top-4 w-24 h-1.5 bg-stone-950 rounded-full border-t border-white/10 shadow-inner"></div>
+              {/* Receipt Paper */}
+              <div className="w-18 bg-white text-stone-950 px-2 py-3 rounded-b shadow-md flex flex-col gap-1 items-center animate-print-receipt relative z-10 select-none">
+                <div className="w-12 h-1 bg-stone-300 rounded"></div>
+                <div className="w-8 h-1 bg-stone-300 rounded"></div>
+                <div className="w-10 h-1 bg-stone-300 rounded"></div>
+                <Clock size={12} className="text-gold-500 mt-1 animate-spin" style={{ animationDuration: '6s' }} />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/0 via-gold-500/5 to-gold-500/10 pointer-events-none animate-scan"></div>
+            </div>
+            
+            <h4 className="text-white font-serif text-base mt-4 font-semibold tracking-wide">Ticket Received</h4>
+            <p className="text-stone-400 text-xs px-6 mt-1.5 leading-relaxed max-w-xs">
+              Your order is in queue. The kitchen staff is preparing to stamp and start cooking.
+            </p>
+          </div>
+        );
+        break;
+
+      case 'preparing':
+        content = (
+          <div className="flex flex-col items-center py-6 text-center">
+            <div className="relative w-44 h-28 flex items-center justify-center">
+              {/* Stove Flames */}
+              <div className="absolute bottom-2 flex gap-1 justify-center items-end z-0">
+                <div className="w-3 h-8 bg-orange-500 rounded-full animate-flicker-1 origin-bottom"></div>
+                <div className="w-4 h-10 bg-yellow-500 rounded-full animate-flicker-2 origin-bottom"></div>
+                <div className="w-3 h-8 bg-red-600 rounded-full animate-flicker-1 origin-bottom"></div>
+                <div className="w-4 h-9 bg-orange-500 rounded-full animate-flicker-2 origin-bottom"></div>
+              </div>
+
+              {/* Wok/Pan cooking */}
+              <div className="relative w-28 h-16 bg-stone-950 rounded-b-3xl border-x border-b border-stone-800 shadow-2xl flex items-center justify-center animate-wok-toss z-10">
+                {/* Wok Handle */}
+                <div className="absolute -left-6 top-1 w-6 h-2 bg-stone-800 rounded-l-full origin-right rotate-12"></div>
+                <div className="absolute -right-6 top-1 w-6 h-2 bg-stone-800 rounded-r-full origin-left -rotate-12"></div>
+                {/* Food contents */}
+                <div className="absolute top-1 flex gap-1">
+                  <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                </div>
+              </div>
+
+              {/* Cutting Board / Knife */}
+              <div className="absolute -left-10 top-0 w-16 h-12 flex flex-col items-center justify-end z-20">
+                <div className="w-14 h-2 bg-amber-800 rounded shadow-md"></div>
+                {/* Knife */}
+                <div className="absolute -top-3 w-10 h-6 border-b-2 border-stone-400 border-r-2 rounded-br animate-chop origin-bottom-right">
+                  <div className="w-4 h-1 bg-stone-700 absolute -left-4 top-4 rounded-l"></div>
+                </div>
+              </div>
+
+              {/* Floating Steam */}
+              <div className="absolute top-2 w-full flex justify-center gap-4 pointer-events-none z-20">
+                <div className="w-2 h-6 bg-white/20 rounded-full blur-xs animate-steam-1"></div>
+                <div className="w-3 h-8 bg-white/20 rounded-full blur-xs animate-steam-2"></div>
+                <div className="w-2 h-6 bg-white/20 rounded-full blur-xs animate-steam-3"></div>
+              </div>
+            </div>
+
+            <h4 className="text-white font-serif text-base mt-4 font-semibold tracking-wide flex items-center gap-1.5 justify-center">
+              Sizzling in the Kitchen <Flame size={16} className="text-orange-500 animate-pulse" />
+            </h4>
+            <p className="text-stone-400 text-xs px-6 mt-1.5 leading-relaxed max-w-xs">
+              Our culinary chefs are pan-searing and plating your gourmet recipe to absolute perfection!
+            </p>
+          </div>
+        );
+        break;
+
+      case 'ready':
+        content = (
+          <div className="flex flex-col items-center py-6 text-center">
+            <div className="relative w-40 h-28 flex items-center justify-center">
+              {/* Cloche glowing aura */}
+              <div className="absolute w-28 h-28 rounded-full bg-gold-500/10 blur-xl animate-aura-pulse"></div>
+
+              {/* Cloche / Plate Cover */}
+              <div className="relative w-28 h-20 flex flex-col items-center justify-end z-10">
+                {/* Platter Plate */}
+                <div className="w-32 h-2.5 bg-stone-750 border border-white/10 rounded-full shadow-lg z-0"></div>
+                
+                {/* Dome Cloche */}
+                <div className="absolute bottom-2.5 w-24 h-14 bg-gradient-to-b from-amber-400/90 to-amber-600/95 rounded-t-full shadow-[0_8px_20px_rgba(212,175,55,0.3)] flex flex-col items-center justify-start border-t border-white/20 animate-cloche-lift origin-bottom">
+                  {/* Cloche Knob */}
+                  <div className="w-4 h-4 bg-amber-500 border border-white/20 rounded-full -mt-2 shadow"></div>
+                </div>
+
+                {/* Steam Particles */}
+                <div className="absolute top-2 w-full flex justify-center gap-3 pointer-events-none z-20">
+                  <div className="w-2 h-5 bg-gold-500/30 rounded-full blur-xs animate-steam-1"></div>
+                  <div className="w-2 h-5 bg-gold-500/30 rounded-full blur-xs animate-steam-2"></div>
+                </div>
+              </div>
+            </div>
+
+            <h4 className="text-white font-serif text-base mt-4 font-semibold tracking-wide">
+              {type === 'delivery' ? 'Waiting for Courier' : 'Plated & Ready for Pickup!'}
+            </h4>
+            <p className="text-stone-400 text-xs px-6 mt-1.5 leading-relaxed max-w-xs">
+              {type === 'delivery' 
+                ? 'Your order is hot-packed and waiting at the counter for our delivery rider.' 
+                : 'Your fresh gourmet package is waiting at our service counter. Come grab it!'}
+            </p>
+          </div>
+        );
+        break;
+
+      case 'out_for_delivery':
+        content = (
+          <div className="flex flex-col items-center py-6 text-center">
+            {/* Animated Road & Scooter */}
+            <div className="relative w-64 h-28 flex flex-col justify-end items-center overflow-hidden bg-stone-950/40 rounded-2xl border border-white/5 shadow-inner p-2">
+              {/* Horizontally scrolling speed lines representing high speed */}
+              <div className="absolute bottom-6 w-full h-10 pointer-events-none z-0">
+                <div className="absolute top-2 left-0 w-8 h-0.5 bg-purple-500/30 rounded animate-speed-lines-1"></div>
+                <div className="absolute top-5 left-0 w-12 h-0.5 bg-purple-500/30 rounded animate-speed-lines-2"></div>
+                <div className="absolute top-8 left-0 w-10 h-0.5 bg-purple-500/30 rounded animate-speed-lines-3"></div>
+              </div>
+
+              {/* Delivery Rider Scooter */}
+              <div className="relative z-10 flex flex-col items-center animate-drive">
+                <Bike className="text-purple-500 drop-shadow-[0_0_12px_rgba(168,85,247,0.5)]" size={48} />
+                {/* Small dust particles behind the scooter */}
+                <div className="absolute bottom-1 -left-4 flex gap-1">
+                  <div className="w-1.5 h-1.5 bg-stone-600 rounded-full animate-ping"></div>
+                  <div className="w-1 h-1 bg-stone-700 rounded-full animate-ping" style={{ animationDelay: '0.1s' }}></div>
+                </div>
+              </div>
+
+              {/* Road Line */}
+              <div className="w-full h-1 bg-stone-800 rounded-full mt-2 relative z-10">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent"></div>
+              </div>
+            </div>
+
+            <h4 className="text-white font-serif text-base mt-4 font-semibold tracking-wide flex items-center gap-1.5 justify-center">
+              Out for Delivery <Bike size={16} className="text-purple-500 animate-bounce" />
+            </h4>
+            <p className="text-stone-400 text-xs px-6 mt-1.5 leading-relaxed max-w-xs">
+              Our high-speed delivery courier is racing across the streets straight to your doorstep!
+            </p>
+          </div>
+        );
+        break;
+
+      case 'delivered':
+        content = (
+          <div className="flex flex-col items-center py-6 text-center">
+            <div className="relative w-40 h-28 flex items-center justify-center">
+              {/* Confetti Explosion */}
+              <div className="absolute w-20 h-20 rounded-full bg-green-500/10 blur-xl animate-aura-pulse"></div>
+
+              {/* Floating Confetti dots */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full absolute top-6 left-6 animate-ping" style={{ '--tw-x': '-20px', '--tw-y': '-20px' } as React.CSSProperties}></div>
+                <div className="w-2 h-2 bg-red-400 rounded-full absolute top-4 right-10 animate-ping" style={{ '--tw-x': '20px', '--tw-y': '-15px', animationDelay: '0.3s' } as React.CSSProperties}></div>
+                <div className="w-2.5 h-2.5 bg-blue-400 rounded-full absolute bottom-8 left-8 animate-ping" style={{ '--tw-x': '-15px', '--tw-y': '20px', animationDelay: '0.6s' } as React.CSSProperties}></div>
+                <div className="w-2.5 h-2.5 bg-green-400 rounded-full absolute bottom-6 right-8 animate-ping" style={{ '--tw-x': '15px', '--tw-y': '15px', animationDelay: '0.9s' } as React.CSSProperties}></div>
+              </div>
+
+              {/* Celebrating Check Circle */}
+              <div className="w-18 h-18 bg-green-500 rounded-full flex items-center justify-center text-stone-950 shadow-[0_0_25px_rgba(34,197,94,0.4)] scale-110 border-4 border-stone-900 z-10">
+                <CheckCircle size={36} className="text-stone-950" />
+              </div>
+            </div>
+
+            <h4 className="text-white font-serif text-base mt-4 font-semibold tracking-wide">Enjoy Your Meal!</h4>
+            <p className="text-stone-400 text-xs px-6 mt-1.5 leading-relaxed max-w-xs">
+              Order successfully received! Savor the fresh flavors of Chillies. Thank you for dining with us!
+            </p>
+          </div>
+        );
+        break;
+
+      default:
+        content = null;
+    }
+
+    if (!content) return null;
+
+    return (
+      <div className="mb-6 bg-stone-950/60 border border-white/5 rounded-2xl shadow-xl p-4 relative z-10 overflow-hidden">
+        {/* Style tag injected locally inside component */}
+        <style>{`
+          @keyframes printReceipt {
+            0% { height: 0; opacity: 0; transform: translateY(-10px); }
+            100% { height: 50px; opacity: 1; transform: translateY(0); }
+          }
+          @keyframes scan {
+            0%, 100% { transform: translateY(-3px) scale(1); }
+            50% { transform: translateY(3px) scale(1.04); }
+          }
+          @keyframes flicker {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2) translateY(-2px); opacity: 1; filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.7)); }
+          }
+          @keyframes wokToss {
+            0%, 100% { transform: rotate(-5deg) translateY(0); }
+            50% { transform: rotate(5deg) translateY(-8px); }
+          }
+          @keyframes steamRise {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            30% { opacity: 0.6; }
+            100% { transform: translateY(-24px) scale(1.3); opacity: 0; }
+          }
+          @keyframes chop {
+            0%, 100% { transform: rotate(0deg) translateY(0); }
+            50% { transform: rotate(-28deg) translateY(-6px) translateX(-2px); }
+          }
+          @keyframes clocheLift {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-14px) rotate(-10deg); }
+          }
+          @keyframes drive {
+            0%, 100% { transform: translateY(0) scaleX(1); }
+            50% { transform: translateY(-3px) scaleX(1.02); }
+          }
+          @keyframes speedLines {
+            0% { transform: translateX(120%); opacity: 0; }
+            30% { opacity: 0.4; }
+            70% { opacity: 0.4; }
+            100% { transform: translateX(-120%); opacity: 0; }
+          }
+          @keyframes auraPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.05); opacity: 0.5; }
+          }
+          .animate-print-receipt { animation: printReceipt 1.2s ease-out forwards; }
+          .animate-scan { animation: scan 2s ease-in-out infinite; }
+          .animate-flicker-1 { animation: flicker 0.6s infinite alternate ease-in-out; }
+          .animate-flicker-2 { animation: flicker 0.9s infinite alternate ease-in-out 0.2s; }
+          .animate-wok-toss { animation: wokToss 1.2s infinite ease-in-out; }
+          .animate-chop { animation: chop 0.5s infinite ease-in-out; }
+          .animate-cloche-lift { animation: clocheLift 1.8s infinite ease-in-out; }
+          .animate-drive { animation: drive 0.4s infinite ease-in-out; }
+          .animate-speed-lines-1 { animation: speedLines 1.5s infinite linear; }
+          .animate-speed-lines-2 { animation: speedLines 1.5s infinite linear 0.5s; }
+          .animate-speed-lines-3 { animation: speedLines 1.5s infinite linear 1s; }
+          .animate-aura-pulse { animation: auraPulse 2.5s infinite ease-in-out; }
+          .animate-steam-1 { animation: steamRise 1.8s infinite linear; }
+          .animate-steam-2 { animation: steamRise 1.8s infinite linear 0.6s; }
+          .animate-steam-3 { animation: steamRise 1.8s infinite linear 1.2s; }
+        `}</style>
+        {content}
+      </div>
+    );
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -371,14 +631,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                         )}
                     </div>
                     
-                    {/* Map temporarily disabled for stability during fix */}
-                    {foundOrder.status === 'out_for_delivery' && foundOrder.type === 'delivery' && (
-                        <div className="mb-6 p-8 bg-stone-950 border border-purple-500/20 rounded-2xl text-center">
-                            <Bike className="mx-auto text-purple-500 mb-4 animate-bounce" size={48} />
-                            <h4 className="text-white font-bold text-sm uppercase tracking-widest">Rider is on the way!</h4>
-                            <p className="text-stone-500 text-[10px] mt-2">Live tracking will resume shortly.</p>
-                        </div>
-                    )}
+                    {renderKitchenVisual(foundOrder.status, foundOrder.type)}
                     
                     <div className="mb-6 flex justify-center">
                         <a 
