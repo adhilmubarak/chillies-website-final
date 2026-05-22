@@ -12,12 +12,12 @@ interface SignagePageProps {
 }
 
 const SignagePage: React.FC<SignagePageProps> = ({
-  menuItems,
-  dbCategories,
-  orders,
-  storeSettings,
-  promoSettings,
-  currentTime: appTime
+  menuItems = [],
+  dbCategories = [],
+  orders = [],
+  storeSettings = {},
+  promoSettings = {},
+  currentTime: appTime = new Date()
 }) => {
   // 1. Digital Clock with ticking state
   const [time, setTime] = useState(new Date());
@@ -32,11 +32,11 @@ const SignagePage: React.FC<SignagePageProps> = ({
 
   // 2. Filter Active Promo settings in real-time
   const isFlashSaleActive = useMemo(() => {
-    if (!promoSettings.isFlashSaleActive) return false;
+    if (!promoSettings?.isFlashSaleActive) return false;
     const todayStr = time.toISOString().split('T')[0];
     if (promoSettings.flashSaleDate && todayStr !== promoSettings.flashSaleDate) return false;
-    const [startH, startM] = promoSettings.flashSaleStartTime.split(':').map(Number);
-    const [endH, endM] = promoSettings.flashSaleEndTime.split(':').map(Number);
+    const [startH, startM] = (promoSettings.flashSaleStartTime || '18:00').split(':').map(Number);
+    const [endH, endM] = (promoSettings.flashSaleEndTime || '21:00').split(':').map(Number);
     const startMin = startH * 60 + startM;
     const endMin = endH * 60 + endM;
     const currMin = time.getHours() * 60 + time.getMinutes();
@@ -44,9 +44,9 @@ const SignagePage: React.FC<SignagePageProps> = ({
   }, [promoSettings, time]);
 
   const isHappyHourActive = useMemo(() => {
-    if (!promoSettings.isHappyHourActive) return false;
-    const [startH, startM] = promoSettings.happyHourStartTime.split(':').map(Number);
-    const [endH, endM] = promoSettings.happyHourEndTime.split(':').map(Number);
+    if (!promoSettings?.isHappyHourActive) return false;
+    const [startH, startM] = (promoSettings.happyHourStartTime || '16:00').split(':').map(Number);
+    const [endH, endM] = (promoSettings.happyHourEndTime || '18:00').split(':').map(Number);
     const startMin = startH * 60 + startM;
     const endMin = endH * 60 + endM;
     const currMin = time.getHours() * 60 + time.getMinutes();
@@ -55,15 +55,16 @@ const SignagePage: React.FC<SignagePageProps> = ({
 
   // Price calculation helper
   const getItemPrice = (item: MenuItem) => {
+    if (!item) return 0;
     if (isFlashSaleActive && item.isFlashSale && item.flashSalePrice) return item.flashSalePrice;
     if (isHappyHourActive && item.isHappyHour && item.happyHourPrice) return item.happyHourPrice;
-    return item.price;
+    return item.price || 0;
   };
 
   // 3. Category rotation list (1 category per slide to display all items)
   const activeCategories = useMemo(() => {
-    return dbCategories
-      .filter(c => !c.isUnavailable)
+    return (dbCategories || [])
+      .filter(c => c && !c.isUnavailable)
       .map(c => c.name);
   }, [dbCategories]);
 
@@ -88,7 +89,7 @@ const SignagePage: React.FC<SignagePageProps> = ({
 
   // 4. Chef's Choice visual showcase carousel (6 seconds)
   const showcaseItems = useMemo(() => {
-    return menuItems.filter(item => item.isChefChoice);
+    return (menuItems || []).filter(item => item && item.isChefChoice);
   }, [menuItems]);
 
   const [showcaseIndex, setShowcaseIndex] = useState(0);
@@ -110,7 +111,8 @@ const SignagePage: React.FC<SignagePageProps> = ({
 
   // 5. Duplicated menu items list for infinite pricing board marquee
   const scrollingMenuItems = useMemo(() => {
-    return [...menuItems, ...menuItems];
+    const items = menuItems || [];
+    return [...items, ...items];
   }, [menuItems]);
 
   return (
@@ -192,7 +194,7 @@ const SignagePage: React.FC<SignagePageProps> = ({
         </div>
 
         {/* Live Announcement Marquee */}
-        {storeSettings.isAnnouncementActive && storeSettings.announcement && (
+        {storeSettings?.isAnnouncementActive && storeSettings?.announcement && (
           <div className="flex-1 max-w-[40%] bg-stone-950/80 border border-white/5 rounded-full py-1.5 px-6 overflow-hidden relative hidden md:block">
             <div className="anim-marquee whitespace-nowrap text-[9px] uppercase tracking-widest text-gold-400 font-black">
               📢 {storeSettings.announcement} &bull; MINT ORDERING ACTIVE &bull; REGISTER ONLINE FOR AUTO CASHBACK
@@ -228,11 +230,11 @@ const SignagePage: React.FC<SignagePageProps> = ({
 
                 {/* Menu items grid - Auto layouts all items in the category cleanly */}
                 <div className="grid grid-cols-2 gap-4 flex-1 overflow-y-auto scrollbar-none pr-1 align-content-start">
-                  {menuItems
-                    .filter(item => item.category === currentCategoryName)
+                  {(menuItems || [])
+                    .filter(item => item && item.category === currentCategoryName)
                     .map(item => {
                       const finalPrice = getItemPrice(item);
-                      const hasDiscount = finalPrice < item.price;
+                      const hasDiscount = finalPrice < (item.price || 0);
 
                       return (
                         <div
@@ -354,9 +356,10 @@ const SignagePage: React.FC<SignagePageProps> = ({
             {/* Scrolling Price Board Container */}
             <div className="flex-1 overflow-hidden relative w-full pr-1 scrollbar-none">
               <div className="anim-scroll-menu flex flex-col gap-2.5">
-                {scrollingMenuItems.map((item, idx) => {
+                {(scrollingMenuItems || []).map((item, idx) => {
+                  if (!item) return null;
                   const finalPrice = getItemPrice(item);
-                  const hasDiscount = finalPrice < item.price;
+                  const hasDiscount = finalPrice < (item.price || 0);
                   return (
                     <div 
                       key={`${item.id}-${idx}`}
