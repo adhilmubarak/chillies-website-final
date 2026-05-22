@@ -1170,9 +1170,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         )}
                                     </div>
                                     <div className="grid grid-cols-4 gap-2 w-full sm:flex sm:w-auto">
-                                        <button onClick={() => copyOrderBrief(order)} title="Copy Info" className="p-3 bg-stone-950 text-stone-400 hover:text-white rounded-2xl border border-stone-800 transition-all flex justify-center items-center">
-                                            {copiedId === order.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
-                                        </button>
                                         <button onClick={() => printThermalBill(order)} title="Print" className="p-3 bg-stone-950 text-stone-600 hover:text-brand-500 rounded-2xl border border-stone-800 transition-all flex justify-center items-center">
                                             <Printer size={18} />
                                         </button>
