@@ -68,21 +68,14 @@ const SignagePage: React.FC<SignagePageProps> = ({
       .map(c => c.name);
   }, [dbCategories]);
 
-  // Rotator Timer for Category Pages (12 seconds)
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  // Rotator states for synchronized Category and Image Showcase displays.
+  // Using atomic state object to prevent category and image-index state out-of-sync glitches during transition.
+  const [rotationState, setRotationState] = useState({ categoryIndex: 0, imageIndex: 0 });
   const [slideFade, setSlideFade] = useState(true);
+  const [showcaseFade, setShowcaseFade] = useState(true);
 
-  useEffect(() => {
-    if (activeCategories.length <= 1) return;
-    const timer = setInterval(() => {
-      setSlideFade(false);
-      setTimeout(() => {
-        setActiveSlideIndex(prev => (prev + 1) % activeCategories.length);
-        setSlideFade(true);
-      }, 500); // 500ms fade transition
-    }, 12000);
-    return () => clearInterval(timer);
-  }, [activeCategories]);
+  const activeSlideIndex = rotationState.categoryIndex;
+  const showcaseIndex = rotationState.imageIndex;
 
   // Current category name to render
   const currentCategoryName = activeCategories[activeSlideIndex] || '';
@@ -92,40 +85,94 @@ const SignagePage: React.FC<SignagePageProps> = ({
     return (menuItems || []).filter(item => item && item.category === currentCategoryName);
   }, [menuItems, currentCategoryName]);
 
+  // Images within the currently active category
+  const currentCategoryImages = useMemo(() => {
+    return currentCategoryItems.filter(item => item && item.image);
+  }, [currentCategoryItems]);
+
   // 4. Dynamic Showcase Items list: Items from the current category that have images.
   // Fallback: Global Chef's Choice items with images if the current category has no image items.
   const activeShowcaseItems = useMemo(() => {
-    const categoryWithImages = (menuItems || []).filter(
-      item => item && item.category === currentCategoryName && item.image
-    );
-    if (categoryWithImages.length > 0) {
-      return categoryWithImages;
+    if (currentCategoryImages.length > 0) {
+      return currentCategoryImages;
     }
     return (menuItems || []).filter(item => item && item.isChefChoice && item.image);
-  }, [menuItems, currentCategoryName]);
-
-  const [showcaseIndex, setShowcaseIndex] = useState(0);
-  const [showcaseFade, setShowcaseFade] = useState(true);
-
-  // Reset showcase index when category showcase list changes
-  useEffect(() => {
-    setShowcaseIndex(0);
-    setShowcaseFade(true);
-  }, [activeShowcaseItems]);
-
-  useEffect(() => {
-    if (activeShowcaseItems.length <= 1) return;
-    const timer = setInterval(() => {
-      setShowcaseFade(false);
-      setTimeout(() => {
-        setShowcaseIndex(prev => (prev + 1) % activeShowcaseItems.length);
-        setShowcaseFade(true);
-      }, 400);
-    }, 3500); // Rotate every 3.5 seconds to show category images beautifully
-    return () => clearInterval(timer);
-  }, [activeShowcaseItems]);
+  }, [menuItems, currentCategoryImages]);
 
   const currentShowcaseItem = activeShowcaseItems[showcaseIndex];
+
+  // Number of images to show for the current category sequence.
+  // Falls back to Chef's Choice items if no images exist in the category.
+  const totalImagesToShow = useMemo(() => {
+    if (currentCategoryImages.length > 0) {
+      return currentCategoryImages.length;
+    }
+    return Math.max(1, activeShowcaseItems.length);
+  }, [currentCategoryImages, activeShowcaseItems]);
+
+  const isAtLastImage = showcaseIndex >= totalImagesToShow - 1;
+
+  // Reset indices if active categories list changes and index becomes out of bounds
+  useEffect(() => {
+    setRotationState(prev => {
+      if (prev.categoryIndex >= activeCategories.length) {
+        return { categoryIndex: 0, imageIndex: 0 };
+      }
+      return prev;
+    });
+  }, [activeCategories.length]);
+
+  // Unified synchronized Timer: Changes category only after EVERY image of the category has been shown!
+  // Cycles every image for exactly 4000ms with smooth fade-in and fade-out animations.
+  useEffect(() => {
+    if (activeCategories.length <= 1) return;
+
+    let timer: NodeJS.Timeout;
+    let fadeTimer: NodeJS.Timeout;
+
+    if (isAtLastImage) {
+      // Last image of category:
+      // Total duration = 4000ms.
+      // At 3500ms, trigger fade-out of both menu card container (left) and showcase image (right)
+      timer = setTimeout(() => {
+        setSlideFade(false);
+        setShowcaseFade(false);
+
+        // At 4000ms (500ms later), transition category and reset image index atomically
+        fadeTimer = setTimeout(() => {
+          setRotationState(prev => ({
+            categoryIndex: (prev.categoryIndex + 1) % activeCategories.length,
+            imageIndex: 0
+          }));
+          setSlideFade(true);
+          setShowcaseFade(true);
+        }, 500);
+
+      }, 3500);
+    } else {
+      // Normal image transition within the same category:
+      // Total duration = 4000ms.
+      // At 3600ms, trigger fade-out of showcase image
+      timer = setTimeout(() => {
+        setShowcaseFade(false);
+
+        // At 4000ms (400ms later), increment image index
+        fadeTimer = setTimeout(() => {
+          setRotationState(prev => ({
+            ...prev,
+            imageIndex: prev.imageIndex + 1
+          }));
+          setShowcaseFade(true);
+        }, 400);
+
+      }, 3600);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(fadeTimer);
+    };
+  }, [activeCategories.length, isAtLastImage, rotationState]);
 
   // 5. Duplicated menu items list for infinite pricing board marquee
   const scrollingMenuItems = useMemo(() => {
