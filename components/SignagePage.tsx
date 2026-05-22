@@ -87,6 +87,44 @@ const SignagePage: React.FC<SignagePageProps> = ({
   // Current category name to render
   const currentCategoryName = activeCategories[activeSlideIndex] || '';
 
+  // 3b. Category-specific items & active category slideshow images
+  const currentCategoryItems = useMemo(() => {
+    return (menuItems || []).filter(item => item && item.category === currentCategoryName);
+  }, [menuItems, currentCategoryName]);
+
+  const currentCategoryImages = useMemo(() => {
+    return currentCategoryItems
+      .filter(item => item && item.image)
+      .map(item => ({
+        imageUrl: item.image,
+        itemName: item.name,
+        itemPrice: getItemPrice(item),
+        itemId: item.id
+      }));
+  }, [currentCategoryItems]);
+
+  const [categoryImageIndex, setCategoryImageIndex] = useState(0);
+  const [categoryImageFade, setCategoryImageFade] = useState(true);
+
+  // Reset the active slideshow index when category changes
+  useEffect(() => {
+    setCategoryImageIndex(0);
+    setCategoryImageFade(true);
+  }, [currentCategoryName]);
+
+  // Rotator Timer for Category Item Images (3 seconds)
+  useEffect(() => {
+    if (currentCategoryImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setCategoryImageFade(false);
+      setTimeout(() => {
+        setCategoryImageIndex(prev => (prev + 1) % currentCategoryImages.length);
+        setCategoryImageFade(true);
+      }, 300); // 300ms fade transition
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [currentCategoryImages]);
+
   // 4. Chef's Choice visual showcase carousel (6 seconds)
   const showcaseItems = useMemo(() => {
     return (menuItems || []).filter(item => item && item.isChefChoice);
@@ -228,11 +266,52 @@ const SignagePage: React.FC<SignagePageProps> = ({
                   </span>
                 </div>
 
-                {/* Menu items grid - Auto layouts all items in the category cleanly */}
-                <div className="grid grid-cols-2 gap-4 flex-1 overflow-y-auto scrollbar-none pr-1 align-content-start">
-                  {(menuItems || [])
-                    .filter(item => item && item.category === currentCategoryName)
-                    .map(item => {
+                {/* Main Split Layout for Category Content */}
+                <div className="flex-1 flex gap-5 min-h-0 w-full">
+                  {/* Category Image Slideshow (Left Column - 38% width) */}
+                  {currentCategoryImages.length > 0 && (
+                    <div className="w-[38%] rounded-2xl overflow-hidden border border-white/[0.04] bg-[#0b0b0b] relative flex flex-col justify-end shadow-[0_10px_30px_rgba(0,0,0,0.8)] min-h-0 shrink-0">
+                      {/* Image Frame with Zoom Effect */}
+                      <div className={`absolute inset-0 z-0 transition-opacity duration-300 ${categoryImageFade ? 'opacity-100' : 'opacity-0'}`}>
+                        {currentCategoryImages[categoryImageIndex] && (
+                          <img
+                            src={currentCategoryImages[categoryImageIndex].imageUrl}
+                            alt={currentCategoryImages[categoryImageIndex].itemName}
+                            className="w-full h-full object-cover anim-kenburns"
+                          />
+                        )}
+                        {/* Dark Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                      </div>
+
+                      {/* Top Label */}
+                      <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-gradient-to-r from-[#ffb732] to-[#f39c12] text-stone-950 font-black uppercase text-[6.5px] tracking-widest rounded flex items-center gap-1 shadow-md z-20">
+                        <Sparkles size={8} /> Category Special
+                      </span>
+
+                      {/* Info Overlay Panel */}
+                      <div className={`relative z-20 m-3 p-3 bg-black/55 backdrop-blur-md border border-white/5 rounded-xl text-left transition-opacity duration-300 ${categoryImageFade ? 'opacity-100' : 'opacity-0'}`}>
+                        <span className="text-[6.5px] uppercase tracking-widest text-[#ffb732] font-mono font-bold block mb-1">
+                          Fresh Culinary Selection
+                        </span>
+                        <h3 className="font-serif text-[13px] font-black text-white tracking-wide truncate mb-1.5">
+                          {currentCategoryImages[categoryImageIndex]?.itemName}
+                        </h3>
+                        
+                        <div className="bg-gradient-to-r from-[#141414] to-[#0d0d0d] border border-white/[0.08] px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.6)] w-fit">
+                          <span className="font-mono text-[8px] font-bold text-[#ffb732]/70">₹</span>
+                          <span className="w-[1px] h-2.5 bg-white/10"></span>
+                          <span className="font-mono text-xs font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-[#ffe39d] to-[#ffb732] drop-shadow-[0_2px_8px_rgba(255,183,50,0.4)]">
+                            {currentCategoryImages[categoryImageIndex]?.itemPrice}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Menu Items Grid (Right Column - 62% width or 100% fallback) */}
+                  <div className={`min-h-0 overflow-y-auto scrollbar-none pr-1 align-content-start grid gap-3 flex-1 ${currentCategoryImages.length > 0 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                    {currentCategoryItems.map(item => {
                       const finalPrice = getItemPrice(item);
                       const hasDiscount = finalPrice < (item.price || 0);
 
@@ -295,6 +374,7 @@ const SignagePage: React.FC<SignagePageProps> = ({
                         </div>
                       );
                     })}
+                  </div>
                 </div>
               </div>
             )}
