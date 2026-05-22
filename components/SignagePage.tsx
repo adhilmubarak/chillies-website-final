@@ -279,9 +279,9 @@ const SignagePage: React.FC<SignagePageProps> = ({
 
                             <div className="text-right">
                               {hasDiscount && (
-                                <span className="text-[9px] line-through text-stone-600 mr-1.5 font-mono">₹{item.price}</span>
+                                <span className="text-[10px] line-through text-stone-500 mr-2 font-mono">₹{item.price}</span>
                               )}
-                              <span className="font-mono text-xs font-black text-gold-400">₹{finalPrice}</span>
+                              <span className="font-mono text-sm md:text-base font-black text-gold-400 drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]">₹{finalPrice}</span>
                             </div>
                           </div>
                         </div>
@@ -293,15 +293,15 @@ const SignagePage: React.FC<SignagePageProps> = ({
           </div>
         </section>
 
-        {/* RIGHT 1/3 COLUMN: Chef showcase and KOT queue */}
-        <section className="col-span-4 flex flex-col justify-between overflow-hidden min-h-0 gap-6">
+        {/* RIGHT 1/3 COLUMN: Chef showcase and QR code ordering */}
+        <section className="col-span-4 flex flex-col justify-between overflow-hidden h-full min-h-0">
           
-          {/* TOP HALF: Large Chef Showcase slides & QR Code */}
-          <div className="flex-1 min-h-[50%] bg-[#080808]/80 border border-white/[0.03] p-5 rounded-[2rem] flex flex-col justify-between overflow-hidden relative">
+          {/* Full-Height Chef Showcase slides & QR Code */}
+          <div className="flex-1 h-full bg-[#080808]/80 border border-white/[0.03] p-6 rounded-[2rem] flex flex-col justify-between overflow-hidden relative min-h-0">
             {currentShowcaseItem ? (
-              <div className={`flex flex-col justify-between flex-1 transition-opacity duration-400 ${showcaseFade ? 'opacity-100' : 'opacity-0'}`}>
+              <div className={`flex flex-col justify-between flex-1 transition-opacity duration-400 min-h-0 ${showcaseFade ? 'opacity-100' : 'opacity-0'}`}>
                 {/* Visual Image container with Ken burns zoom */}
-                <div className="relative w-full aspect-[1.8/1] rounded-2xl overflow-hidden border border-white/5 shadow-inner">
+                <div className="relative w-full flex-1 rounded-2xl overflow-hidden border border-white/5 shadow-inner min-h-0 mb-5">
                   <img
                     src={currentShowcaseItem.image}
                     alt={currentShowcaseItem.name}
@@ -316,17 +316,18 @@ const SignagePage: React.FC<SignagePageProps> = ({
                 </div>
 
                 {/* Info and scan to order wrapper */}
-                <div className="flex items-center justify-between gap-4 mt-4">
+                <div className="flex items-center justify-between gap-4 shrink-0">
                   <div className="text-left flex-1 min-w-0">
+                    <span className="text-[7.5px] uppercase tracking-widest text-gold-500 font-mono font-bold block mb-1">Featured Delicacy</span>
                     <h3 className="font-serif text-sm font-black text-stone-100 tracking-wide truncate">{currentShowcaseItem.name}</h3>
                     <p className="text-stone-500 text-[9px] leading-relaxed font-light mt-0.5 line-clamp-2">{currentShowcaseItem.description}</p>
-                    <span className="inline-block mt-2 font-mono text-xs font-black text-gold-400">₹{getItemPrice(currentShowcaseItem)}</span>
+                    <span className="inline-block mt-2 font-mono text-sm font-black text-gold-400">₹{getItemPrice(currentShowcaseItem)}</span>
                   </div>
 
                   {/* QR Card */}
                   <div className="flex flex-col items-center shrink-0 bg-white p-1.5 rounded-xl shadow-lg border border-gold-500/30">
                     <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(window.location.origin)}&bgcolor=ffffff&color=000000&margin=0`} 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(window?.location?.origin || '')}&bgcolor=ffffff&color=000000&margin=0`} 
                       alt="Order Scan" 
                       className="w-12 h-12 rounded"
                     />
@@ -339,58 +340,6 @@ const SignagePage: React.FC<SignagePageProps> = ({
                 <p className="text-stone-500 font-mono text-[9px] uppercase tracking-widest">Showcase Empty</p>
               </div>
             )}
-          </div>
-
-          {/* BOTTOM HALF: Premium Price Board */}
-          <div className="h-[45%] bg-[#080808]/80 border border-white/[0.03] p-5 rounded-[2rem] flex flex-col overflow-hidden relative justify-between">
-            <div className="flex justify-between items-center border-b border-white/[0.04] pb-2 shrink-0 mb-3">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse"></span>
-                <span className="text-[10px] tracking-[0.25em] font-serif text-stone-100 uppercase font-black">Pricing Directory</span>
-              </div>
-              <span className="text-[7.5px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-full font-mono text-stone-500 uppercase tracking-widest">
-                Classic Menu
-              </span>
-            </div>
-
-            {/* Scrolling Price Board Container */}
-            <div className="flex-1 overflow-hidden relative w-full pr-1 scrollbar-none">
-              <div className="anim-scroll-menu flex flex-col gap-2.5">
-                {(scrollingMenuItems || []).map((item, idx) => {
-                  if (!item) return null;
-                  const finalPrice = getItemPrice(item);
-                  const hasDiscount = finalPrice < (item.price || 0);
-                  return (
-                    <div 
-                      key={`${item.id}-${idx}`}
-                      className="flex justify-between items-center text-[10px] py-1 border-b border-white/[0.02]"
-                    >
-                      <div className="flex items-center gap-2 truncate max-w-[70%] text-left">
-                        {item.isVegetarian ? (
-                          <span className="inline-flex w-2.5 h-2.5 border border-emerald-600/40 items-center justify-center rounded-sm text-[5.5px] text-emerald-500 font-bold shrink-0">🟢</span>
-                        ) : (
-                          <span className="inline-flex w-2.5 h-2.5 border border-rose-600/40 items-center justify-center rounded-sm text-[5.5px] text-rose-500 font-bold shrink-0">🔴</span>
-                        )}
-                        <span className="font-serif text-stone-300 font-bold tracking-wide truncate">{item.name}</span>
-                        {item.isSpicy && <span className="text-[8px] shrink-0 text-red-500">🔥</span>}
-                      </div>
-
-                      {/* Dotted menu leader spacer */}
-                      <div className="flex-1 border-b border-dashed border-white/[0.06] mx-2 self-end mb-1"></div>
-
-                      <div className="text-right shrink-0 flex items-center gap-1.5">
-                        {hasDiscount && (
-                          <span className="text-[8px] line-through text-stone-600 font-mono">₹{item.price}</span>
-                        )}
-                        <span className="font-mono text-[10px] font-black text-gold-400">
-                          ₹{finalPrice}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         </section>
       </main>
