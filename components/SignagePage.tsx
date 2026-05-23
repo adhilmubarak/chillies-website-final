@@ -461,36 +461,6 @@ const SignagePage: React.FC<SignagePageProps> = ({
           )}
         </section>
       </main>
-
-      {/* 3. SIGNAGE FOOTER */}
-      <footer className="relative z-10 w-full bg-[#0a0a0a]/90 backdrop-blur-md border border-white/[0.03] p-3.5 rounded-[1.5rem] flex items-center justify-between text-left shadow-[inset_0_1px_1px_rgba(255,255,255,0.03)] gap-6">
-        <div>
-          <span className="text-[7.5px] text-stone-500 uppercase tracking-widest font-mono block">Chillies Kitchen</span>
-          <span className="text-[9px] font-serif font-black text-stone-300 uppercase tracking-wider block">Fresh &middot; Culinary &middot; Craftsmanship</span>
-        </div>
-
-        {/* Live Promo Banner Marquee */}
-        <div className="flex-1 max-w-[50%] bg-stone-950/80 border border-white/5 rounded-xl py-1 px-4 text-center overflow-hidden">
-          {isFlashSaleActive ? (
-            <span className="text-[8.5px] uppercase tracking-[0.2em] text-red-500 font-black animate-pulse">
-              🔥 LIVE FLASH SALE ACTIVE: UP TO 30% OFF PREMIUM SELECTIONS!
-            </span>
-          ) : isHappyHourActive ? (
-            <span className="text-[8.5px] uppercase tracking-[0.2em] text-gold-400 font-black animate-pulse">
-              🎉 HAPPY HOUR MODE ACTIVE: SPECIFIED PRICES LOADED ON SCREEN!
-            </span>
-          ) : (
-            <span className="text-[8px] uppercase tracking-widest text-stone-500 font-mono">
-              Scan QR Code on the board to order instantly on WhatsApp &bull; Save up to 10% auto-cashback!
-            </span>
-          )}
-        </div>
-
-        <div className="text-right">
-          <span className="text-[7.5px] text-stone-500 uppercase tracking-widest font-mono block">Order Help Desk</span>
-          <span className="text-[9px] font-mono font-black text-gold-400 tracking-wider block">+91 98765 43210</span>
-        </div>
-      </footer>
     </div>
   );
 };
