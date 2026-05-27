@@ -1,140 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#0c0c0c" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>CHILLIES RESTAURANT | Fresh & Vibrant</title>
-    <meta name="description" content="Order fresh, vibrant, and authentic food from Chillies in Alappuzha. Enjoy fast delivery, curbside pickup, and exclusive chef's choices. Taste the difference today!" />
-    <meta name="keywords" content="restaurant, fresh food, delivery, takeaway, shawarma, fast food, alappuzha restaurant, fast delivery, local restaurant, best food, good food, customers choice" />
-    <link rel="canonical" href="https://www.chilliesrestaurant.in/admin.html" />
-    <link rel="manifest" href="/admin-manifest.json" />
-    <!-- Open Graph / Social -->
-    <meta property="og:type" content="restaurant.restaurant" />
-    <meta property="og:title" content="CHILLIES RESTAURANT | Fresh & Vibrant" />
-    <meta property="og:description" content="Order fresh, vibrant, and authentic food from Chillies in Alappuzha. Enjoy fast delivery, curbside pickup, and exclusive chef's choices. Taste the difference today!" />
-    <meta property="og:url" content="https://www.chilliesrestaurant.in/" />
-    <meta property="og:site_name" content="Chillies Restaurant" />
-    <meta property="og:image" content="https://www.chilliesrestaurant.in/pwa-512x512.png" />
-    <meta property="og:locale" content="en_IN" />
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CHILLIES RESTAURANT | Fresh & Vibrant" />
-    <meta name="twitter:description" content="Order fresh, vibrant, and authentic food from Chillies in Alappuzha. Taste the difference today!" />
-    <meta name="twitter:image" content="https://www.chilliesrestaurant.in/pwa-512x512.png" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://firestore.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                50: 'var(--brand-50)',
-                100: 'var(--brand-100)',
-                200: 'var(--brand-200)',
-                300: 'var(--brand-300)',
-                400: 'var(--brand-400)',
-                500: 'var(--brand-500)',
-                600: 'var(--brand-600)',
-                700: 'var(--brand-700)',
-                800: 'var(--brand-800)',
-                900: 'var(--brand-900)',
-              },
-              gold: {
-                500: 'var(--brand-500)',
-                400: 'var(--brand-400)',
-              },
-              stone: {
-                800: 'var(--stone-800)',
-                850: 'var(--stone-850)',
-                900: 'var(--stone-900)',
-                950: 'var(--stone-950)',
-              }
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0c0c0c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>CHILLIES RESTAURANT | Fresh & Vibrant</title>
+  <meta name="description"
+    content="Order fresh, vibrant, and authentic food from Chillies in Alappuzha. Enjoy fast delivery, curbside pickup, and exclusive chef's choices. Taste the difference today!" />
+  <meta name="keywords"
+    content="restaurant, fresh food, delivery, takeaway, shawarma, fast food, alappuzha restaurant, fast delivery, local restaurant, best food, good food, customers choice, train orders, train food delivery, train food delivery alappuzha, train food delivery alleppey" />
+  <link rel="canonical" href="https://www.chilliesrestaurant.in/admin.html" />
+  <link rel="manifest" href="/admin-manifest.json" />
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="restaurant.restaurant" />
+  <meta property="og:title" content="CHILLIES RESTAURANT | Fresh & Vibrant" />
+  <meta property="og:description"
+    content="Order fresh, vibrant, and authentic food from Chillies in Alappuzha. Enjoy fast delivery, curbside pickup, and exclusive chef's choices. Taste the difference today!" />
+  <meta property="og:url" content="https://www.chilliesrestaurant.in/" />
+  <meta property="og:site_name" content="Chillies Restaurant" />
+  <meta property="og:image" content="https://www.chilliesrestaurant.in/pwa-512x512.png" />
+  <meta property="og:locale" content="en_IN" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="CHILLIES RESTAURANT | Fresh & Vibrant" />
+  <meta name="twitter:description"
+    content="Order fresh, vibrant, and authentic food from Chillies in Alappuzha. Taste the difference today!" />
+  <meta name="twitter:image" content="https://www.chilliesrestaurant.in/pwa-512x512.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="preload" as="image"
+    href="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: 'var(--brand-50)',
+              100: 'var(--brand-100)',
+              200: 'var(--brand-200)',
+              300: 'var(--brand-300)',
+              400: 'var(--brand-400)',
+              500: 'var(--brand-500)',
+              600: 'var(--brand-600)',
+              700: 'var(--brand-700)',
+              800: 'var(--brand-800)',
+              900: 'var(--brand-900)',
             },
-            fontFamily: {
-              serif: ['"Outfit"', 'sans-serif'],
-              sans: ['"Inter"', 'sans-serif'],
+            gold: {
+              500: 'var(--brand-500)',
+              400: 'var(--brand-400)',
             },
-            animation: {
-              'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'fade-in': 'fadeIn 1s ease-out forwards',
-              'bounce-slow': 'bounce 2s infinite',
-              'marquee': 'marquee 12s linear infinite',
-              'marquee-fast': 'marquee 8s linear infinite',
-              'shimmer': 'shimmer 2s infinite linear',
-              'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite',
+            stone: {
+              800: 'var(--stone-800)',
+              850: 'var(--stone-850)',
+              900: 'var(--stone-900)',
+              950: 'var(--stone-950)',
+            }
+          },
+          fontFamily: {
+            serif: ['"Outfit"', 'sans-serif'],
+            sans: ['"Inter"', 'sans-serif'],
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'fade-in': 'fadeIn 1s ease-out forwards',
+            'bounce-slow': 'bounce 2s infinite',
+            'marquee': 'marquee 12s linear infinite',
+            'marquee-fast': 'marquee 8s linear infinite',
+            'shimmer': 'shimmer 2s infinite linear',
+            'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
             },
-            keyframes: {
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              marquee: {
-                '0%': { transform: 'translateX(0%)' },
-                '100%': { transform: 'translateX(-50%)' },
-              },
-              shimmer: {
-                '0%': { transform: 'translateX(-100%)' },
-                '100%': { transform: 'translateX(100%)' },
-              },
-              shake: {
-                '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
-                '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
-                '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
-                '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
-              }
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            marquee: {
+              '0%': { transform: 'translateX(0%)' },
+              '100%': { transform: 'translateX(-50%)' },
+            },
+            shimmer: {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(100%)' },
+            },
+            shake: {
+              '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+              '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+              '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+              '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
             }
           }
         }
       }
-    </script>
-    <style>
-      :root {
-        /* Default Classic Gold Theme */
-        --brand-50: #fdfbf4; --brand-100: #fbf5e5; --brand-200: #f5eccd; --brand-300: #eddcad; --brand-400: #e4ca8d; --brand-500: #d4af37; --brand-600: #b8972e; --brand-700: #9e8023; --brand-800: #856a1b; --brand-900: #695311;
-        --stone-800: #292524; --stone-850: #1f1f1e; --stone-900: #1c1917; --stone-950: #0c0c0c;
-      }
+    }
+  </script>
+  <style>
+    :root {
+      /* Default Classic Gold Theme */
+      --brand-50: #fdfbf4;
+      --brand-100: #fbf5e5;
+      --brand-200: #f5eccd;
+      --brand-300: #eddcad;
+      --brand-400: #e4ca8d;
+      --brand-500: #d4af37;
+      --brand-600: #b8972e;
+      --brand-700: #9e8023;
+      --brand-800: #856a1b;
+      --brand-900: #695311;
+      --stone-800: #292524;
+      --stone-850: #1f1f1e;
+      --stone-900: #1c1917;
+      --stone-950: #0c0c0c;
+    }
 
-      .theme-professional {
-        /* Emerald & Slate Professional Theme */
-        --brand-50: #f0fdf4; --brand-100: #dcfce7; --brand-200: #bbf7d0; --brand-300: #86efac; --brand-400: #4ade80; --brand-500: #10b981; --brand-600: #059669; --brand-700: #047857; --brand-800: #065f46; --brand-900: #064e3b;
-        --stone-800: #1e293b; --stone-850: #0f172a; --stone-900: #0f172a; --stone-950: #020617;
-      }
+    .theme-professional {
+      /* Emerald & Slate Professional Theme */
+      --brand-50: #f0fdf4;
+      --brand-100: #dcfce7;
+      --brand-200: #bbf7d0;
+      --brand-300: #86efac;
+      --brand-400: #4ade80;
+      --brand-500: #10b981;
+      --brand-600: #059669;
+      --brand-700: #047857;
+      --brand-800: #065f46;
+      --brand-900: #064e3b;
+      --stone-800: #1e293b;
+      --stone-850: #0f172a;
+      --stone-900: #0f172a;
+      --stone-950: #020617;
+    }
 
-      body {
-        background-color: var(--stone-950);
-        color: #f3f4f6;
-        scroll-behavior: smooth;
-        overflow-x: hidden;
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-      }
-      .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-      }
-      ::selection {
-        background-color: #d4af37;
-        color: #0c0c0c;
-      }
-      .shimmer-bg {
-        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.08), transparent);
-        background-size: 200% 100%;
-      }
-    </style>
+    body {
+      background-color: var(--stone-950);
+      color: #f3f4f6;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    ::selection {
+      background-color: #d4af37;
+      color: #0c0c0c;
+    }
+
+    .shimmer-bg {
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.08), transparent);
+      background-size: 200% 100%;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -153,7 +189,7 @@
 }
 </script>
 
-<script type="application/ld+json">
+  <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Restaurant",
@@ -184,10 +220,12 @@
   "menu": "https://www.chilliesrestaurant.in/#menu"
 }
 </script>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
