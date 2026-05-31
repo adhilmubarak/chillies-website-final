@@ -5,7 +5,6 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MenuItemCard from './components/MenuItemCard';
 import CartSidebar from './components/CartSidebar';
-import TrainDeliveryBanner from './components/TrainDeliveryBanner';
 
 const OrderTrackerModal = lazy(() => import('./components/OrderTrackerModal'));
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
@@ -639,8 +638,6 @@ function App() {
           <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
             <Hero />
             <StoreStatusAlert isStoreOpen={isStoreOpen} startTime={storeSettings.startTime} endTime={storeSettings.endTime} />
-            
-            <TrainDeliveryBanner />
             
             {/* Customer Scream Challenge Live Promo Banner */}
             <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 mb-4">
