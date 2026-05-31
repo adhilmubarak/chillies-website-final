@@ -741,6 +741,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  const handleDeleteAllMatches = async () => {
+    if (confirm("WARNING: Are you sure you want to delete ALL matches? This action cannot be undone!")) {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'worldcup_matches'));
+        const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+        alert("All matches deleted successfully.");
+      } catch (err) {
+        console.error("Error deleting all matches:", err);
+        alert("Failed to delete all matches.");
+      }
+    }
+  };
+
   const handleDrawLuckyWinner = async (match: any) => {
     if (!match.winner) {
       alert("Please declare a match winner first!");
@@ -2770,6 +2784,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 className="bg-stone-900 hover:bg-stone-800 border border-stone-850 text-gold-500 hover:text-gold-450 font-black px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2"
                             >
                                 <RefreshCw size={14} className={isSyncingMatches ? 'animate-spin' : ''} /> {isSyncingMatches ? 'Syncing...' : 'Sync Matches from API'}
+                            </button>
+                            <button 
+                                onClick={handleDeleteAllMatches}
+                                className="bg-red-500/10 hover:bg-red-500 border border-red-500/20 text-red-500 hover:text-white font-black px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                            >
+                                <Trash2 size={14} /> Delete All Matches
                             </button>
                             <button 
                                 onClick={openNewMatchModal}
