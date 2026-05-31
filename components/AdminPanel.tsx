@@ -4,7 +4,7 @@ import {
   Settings, LayoutDashboard, Search, Trophy,
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight, TrendingUp, BarChart3,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone, RefreshCw
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount, Complaint } from '../types';
 import { printThermalBill, printKOT, printNetworkKOT, discoverNetworkPrinters } from '../App';
@@ -226,6 +226,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [viewingVotersMatch, setViewingVotersMatch] = useState<any | null>(null);
   const [votersList, setVotersList] = useState<any[]>([]);
   const [isLoadingVoters, setIsLoadingVoters] = useState(false);
+  const [isSyncingMatches, setIsSyncingMatches] = useState(false);
 
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
@@ -803,6 +804,74 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       alert("Failed to load voters list.");
     } finally {
       setIsLoadingVoters(false);
+    }
+  };
+
+  const handleSyncMatchesFromAPI = async () => {
+    setIsSyncingMatches(true);
+    try {
+      let response = await fetch('https://raw.githubusercontent.com/openfootball/world-cup.json/master/2022/worldcup.json');
+      if (!response.ok) {
+        response = await fetch('https://raw.githubusercontent.com/openfootball/world-cup.json/master/2018/worldcup.json');
+      }
+      const data = await response.json();
+      
+      const getTeamFlag = (teamName: string): string => {
+        const flags: Record<string, string> = {
+          'Russia': '🇷🇺', 'Saudi Arabia': '🇸🇦', 'Egypt': '🇪🇬', 'Uruguay': '🇺🇾',
+          'Portugal': '🇵🇹', 'Spain': '🇪🇸', 'Morocco': '🇲🇦', 'Iran': '🇮🇷',
+          'France': '🇫🇷', 'Australia': '🇦🇺', 'Peru': '🇵🇪', 'Denmark': '🇩🇰',
+          'Argentina': '🇦🇷', 'Iceland': '🇮🇸', 'Croatia': '🇭🇷', 'Nigeria': '🇳🇬',
+          'Brazil': '🇧🇷', 'Switzerland': '🇨🇭', 'Costa Rica': '🇨🇷', 'Serbia': '🇷🇸',
+          'Germany': '🇩🇪', 'Mexico': '🇲🇽', 'Sweden': '🇸🇪', 'South Korea': '🇰🇷',
+          'Belgium': '🇧🇪', 'Panama': '🇵🇦', 'Tunisia': '🇹🇳', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+          'Poland': '🇵🇱', 'Senegal': '🇸🇳', 'Colombia': '🇨🇴', 'Japan': '🇯🇵',
+          'Qatar': '🇶🇦', 'Ecuador': '🇪🇨', 'Netherlands': '🇳🇱', 'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+          'USA': '🇺🇸', 'United States': '🇺🇸', 'Canada': '🇨🇦', 'Ghana': '🇬🇭', 'Cameroon': '🇨🇲'
+        };
+        return flags[teamName] || '🏳️';
+      };
+
+      let addedCount = 0;
+      for (const round of data.rounds || []) {
+        for (const m of round.matches || []) {
+          const date = m.date;
+          const time = m.time || '18:00';
+          const teamA = m.team1.name;
+          const teamB = m.team2.name;
+          
+          const exists = worldCupMatches.some(ex => 
+            ex.teamA === teamA && 
+            ex.teamB === teamB && 
+            ex.matchDate === date
+          );
+          
+          if (!exists) {
+            await addDoc(collection(db, 'worldcup_matches'), {
+              teamA,
+              teamB,
+              teamAFlag: getTeamFlag(teamA),
+              teamBFlag: getTeamFlag(teamB),
+              matchDate: date,
+              matchTime: time,
+              status: 'upcoming',
+              winner: null,
+              votesTeamA: 0,
+              votesTeamB: 0,
+              votesDraw: 0,
+              createdAt: Date.now()
+            });
+            addedCount++;
+          }
+        }
+      }
+      
+      alert(`Synchronized successfully! Imported ${addedCount} new match fixtures.`);
+    } catch (err) {
+      console.error("Error syncing matches:", err);
+      alert("Failed to sync matches from football API.");
+    } finally {
+      setIsSyncingMatches(false);
     }
   };
 
@@ -2676,12 +2745,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             <h3 className="text-2xl font-serif text-white">FIFA World Cup Predictions</h3>
                             <p className="text-stone-500 text-xs mt-1">Add, edit matches, set statuses, and declare winners to tally votes.</p>
                         </div>
-                        <button 
-                            onClick={openNewMatchModal}
-                            className="bg-gold-500 hover:bg-gold-400 text-stone-950 font-black px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2"
-                        >
-                            <Plus size={14} className="stroke-[3]" /> Add Match
-                        </button>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={handleSyncMatchesFromAPI}
+                                disabled={isSyncingMatches}
+                                className="bg-stone-900 hover:bg-stone-800 border border-stone-850 text-gold-500 hover:text-gold-450 font-black px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                            >
+                                <RefreshCw size={14} className={isSyncingMatches ? 'animate-spin' : ''} /> {isSyncingMatches ? 'Syncing...' : 'Sync Matches from API'}
+                            </button>
+                            <button 
+                                onClick={openNewMatchModal}
+                                className="bg-gold-500 hover:bg-gold-400 text-stone-950 font-black px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                            >
+                                <Plus size={14} className="stroke-[3]" /> Add Match
+                            </button>
+                        </div>
                     </div>
 
                     {isMatchFormOpen && (
