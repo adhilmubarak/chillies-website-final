@@ -810,7 +810,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleSyncMatchesFromAPI = async () => {
     setIsSyncingMatches(true);
     try {
-      let response = await fetch('https://raw.githubusercontent.com/openfootball/world-cup.json/master/2022/worldcup.json');
+      let response = await fetch('https://raw.githubusercontent.com/openfootball/world-cup.json/master/2026/worldcup.json');
+      if (!response.ok) {
+        response = await fetch('https://raw.githubusercontent.com/openfootball/world-cup.json/master/2022/worldcup.json');
+      }
       if (!response.ok) {
         response = await fetch('https://raw.githubusercontent.com/openfootball/world-cup.json/master/2018/worldcup.json');
       }
@@ -827,7 +830,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           'Belgium': '🇧🇪', 'Panama': '🇵🇦', 'Tunisia': '🇹🇳', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
           'Poland': '🇵🇱', 'Senegal': '🇸🇳', 'Colombia': '🇨🇴', 'Japan': '🇯🇵',
           'Qatar': '🇶🇦', 'Ecuador': '🇪🇨', 'Netherlands': '🇳🇱', 'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
-          'USA': '🇺🇸', 'United States': '🇺🇸', 'Canada': '🇨🇦', 'Ghana': '🇬🇭', 'Cameroon': '🇨🇲'
+          'USA': '🇺🇸', 'United States': '🇺🇸', 'Canada': '🇨🇦', 'Ghana': '🇬🇭', 'Cameroon': '🇨🇲',
+          'South Africa': '🇿🇦', 'Czech Republic': '🇨🇿', 'Czechia': '🇨🇿',
+          'Bosnia & Herzegovina': '🇧🇦', 'Bosnia and Herzegovina': '🇧🇦'
         };
         return flags[teamName] || '🏳️';
       };
