@@ -219,6 +219,14 @@ const PredictPage: React.FC = () => {
     }
   };
 
+  const getTodayDateStr = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Real-time calculated stats
   const predictionsCount = Object.keys(userPredictions).length;
   const correctCount = matches.reduce((acc, m) => {
@@ -557,76 +565,85 @@ const PredictPage: React.FC = () => {
                           {/* Prediction Controls Section */}
                           <div className="mt-6 pt-6 border-t border-stone-900/60 space-y-4">
                             {isUpcoming && !userPred && (
-                              <div className="space-y-3">
-                                <p className="text-[9px] text-stone-500 uppercase tracking-widest font-black text-center mb-2">Predict Match Outcome</p>
-                                <div className="grid grid-cols-3 gap-2">
-                                  <button 
-                                    onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'teamA' }))}
-                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis ${
-                                      selectedVal === 'teamA' 
-                                        ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-98' 
-                                        : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
-                                    }`}
-                                  >
-                                    {match.teamA}
-                                  </button>
-                                  <button 
-                                    onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'draw' }))}
-                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 ${
-                                      selectedVal === 'draw' 
-                                        ? 'bg-amber-500/20 border-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.2)] scale-98' 
-                                        : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
-                                    }`}
-                                  >
-                                    Draw
-                                  </button>
-                                  <button 
-                                    onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'teamB' }))}
-                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis ${
-                                      selectedVal === 'teamB' 
-                                        ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-98' 
-                                        : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
-                                    }`}
-                                  >
-                                    {match.teamB}
-                                  </button>
-                                </div>
-
-                                {/* Step 2 Interactive Confirmation Panel */}
-                                {confirmPanelActive && (
-                                  <div className="bg-gradient-to-r from-stone-950 to-stone-900 border border-gold-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fade-in-up mt-3">
-                                    <div className="flex items-center gap-2">
-                                      <Zap size={14} className="text-gold-400 animate-bounce" />
-                                      <span className="text-[10px] text-stone-300 uppercase tracking-widest font-black">
-                                        Locks {selectedVal === 'teamA' ? match.teamA : selectedVal === 'teamB' ? match.teamB : 'Draw'}?
-                                      </span>
-                                    </div>
-                                    <div className="flex gap-2 w-full sm:w-auto">
-                                      <button 
-                                        onClick={() => setSelectedPrediction(p => {
-                                          const copy = { ...p };
-                                          delete copy[match.id];
-                                          return copy;
-                                        })}
-                                        className="flex-1 sm:flex-none px-4 py-2 border border-white/5 hover:border-white/10 rounded-xl bg-stone-950 text-[9px] text-stone-500 hover:text-white uppercase font-black tracking-wider transition-colors"
-                                      >
-                                        Cancel
-                                      </button>
-                                      <button 
-                                        onClick={() => handleConfirmPredict(match.id)}
-                                        disabled={loadingSubmit}
-                                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-lg shadow-gold-500/10 hover:shadow-gold-500/20 active:scale-95 transition-all disabled:opacity-50"
-                                      >
-                                        {loadingSubmit ? (
-                                          <Loader2 size={12} className="animate-spin text-stone-950" />
-                                        ) : (
-                                          <span>Confirm Prediction ⚡</span>
-                                        )}
-                                      </button>
-                                    </div>
+                              match.matchDate === getTodayDateStr() ? (
+                                <div className="space-y-3">
+                                  <p className="text-[9px] text-stone-500 uppercase tracking-widest font-black text-center mb-2">Predict Match Outcome</p>
+                                  <div className="grid grid-cols-3 gap-2">
+                                    <button 
+                                      onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'teamA' }))}
+                                      className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis ${
+                                        selectedVal === 'teamA' 
+                                          ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-98' 
+                                          : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
+                                      }`}
+                                    >
+                                      {match.teamA}
+                                    </button>
+                                    <button 
+                                      onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'draw' }))}
+                                      className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 ${
+                                        selectedVal === 'draw' 
+                                          ? 'bg-amber-500/20 border-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.2)] scale-98' 
+                                          : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
+                                      }`}
+                                    >
+                                      Draw
+                                    </button>
+                                    <button 
+                                      onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'teamB' }))}
+                                      className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis ${
+                                        selectedVal === 'teamB' 
+                                          ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-98' 
+                                          : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
+                                      }`}
+                                    >
+                                      {match.teamB}
+                                    </button>
                                   </div>
-                                )}
-                              </div>
+
+                                  {/* Step 2 Interactive Confirmation Panel */}
+                                  {confirmPanelActive && (
+                                    <div className="bg-gradient-to-r from-stone-950 to-stone-900 border border-gold-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fade-in-up mt-3">
+                                      <div className="flex items-center gap-2">
+                                        <Zap size={14} className="text-gold-400 animate-bounce" />
+                                        <span className="text-[10px] text-stone-300 uppercase tracking-widest font-black">
+                                          Locks {selectedVal === 'teamA' ? match.teamA : selectedVal === 'teamB' ? match.teamB : 'Draw'}?
+                                        </span>
+                                      </div>
+                                      <div className="flex gap-2 w-full sm:w-auto">
+                                        <button 
+                                          onClick={() => setSelectedPrediction(p => {
+                                            const copy = { ...p };
+                                            delete copy[match.id];
+                                            return copy;
+                                          })}
+                                          className="flex-1 sm:flex-none px-4 py-2 border border-white/5 hover:border-white/10 rounded-xl bg-stone-950 text-[9px] text-stone-500 hover:text-white uppercase font-black tracking-wider transition-colors"
+                                        >
+                                          Cancel
+                                        </button>
+                                        <button 
+                                          onClick={() => handleConfirmPredict(match.id)}
+                                          disabled={loadingSubmit}
+                                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-lg shadow-gold-500/10 hover:shadow-gold-500/20 active:scale-95 transition-all disabled:opacity-50"
+                                        >
+                                          {loadingSubmit ? (
+                                            <Loader2 size={12} className="animate-spin text-stone-950" />
+                                          ) : (
+                                            <span>Confirm Prediction ⚡</span>
+                                          )}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 text-center space-y-1">
+                                  <p className="text-[10px] text-stone-500 uppercase tracking-widest font-black flex items-center justify-center gap-1.5">
+                                    <span>🔒 Predictions Locked</span>
+                                  </p>
+                                  <p className="text-[9px] text-gold-500 font-mono tracking-wider">Unlocks on match day: {match.matchDate}</p>
+                                </div>
+                              )
                             )}
 
                             {(userPred || !isUpcoming) && (
