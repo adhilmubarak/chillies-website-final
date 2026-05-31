@@ -846,7 +846,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           'Qatar': '🇶🇦', 'Ecuador': '🇪🇨', 'Netherlands': '🇳🇱', 'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
           'USA': '🇺🇸', 'United States': '🇺🇸', 'Canada': '🇨🇦', 'Ghana': '🇬🇭', 'Cameroon': '🇨🇲',
           'South Africa': '🇿🇦', 'Czech Republic': '🇨🇿', 'Czechia': '🇨🇿',
-          'Bosnia & Herzegovina': '🇧🇦', 'Bosnia and Herzegovina': '🇧🇦'
+          'Bosnia & Herzegovina': '🇧🇦', 'Bosnia and Herzegovina': '🇧🇦',
+          'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'Haiti': '🇭🇹', 'Paraguay': '🇵🇾',
+          'Turkey': '🇹🇷', 'Türkiye': '🇹🇷', 'Ivory Coast': '🇨🇮', 'Curaçao': '🇨🇼',
+          'New Zealand': '🇳🇿', 'Cape Verde': '🇨🇻', 'Norway': '🇳🇴', 'Iraq': '🇮🇶',
+          'Austria': '🇦🇹', 'Algeria': '🇩🇿', 'Jordan': '🇯🇴', 'Uzbekistan': '🇺🇿',
+          'DR Congo': '🇨🇩'
         };
         return flags[teamName] || '🏳️';
       };
@@ -854,12 +859,53 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       let addedCount = 0;
       let matchesToProcess: any[] = [];
 
-      if (Array.isArray(data.matches)) {
-        matchesToProcess = data.matches;
-      } else if (Array.isArray(data.rounds)) {
-        for (const round of data.rounds) {
-          if (Array.isArray(round.matches)) {
-            matchesToProcess.push(...round.matches);
+      if (data.name && data.name.includes("2026")) {
+        const groupsData = [
+          { name: 'Group A', teams: ['Mexico', 'South Africa', 'South Korea', 'Czech Republic'] },
+          { name: 'Group B', teams: ['Canada', 'Bosnia & Herzegovina', 'Qatar', 'Switzerland'] },
+          { name: 'Group C', teams: ['Brazil', 'Morocco', 'Scotland', 'Haiti'] },
+          { name: 'Group D', teams: ['United States', 'Paraguay', 'Australia', 'Turkey'] },
+          { name: 'Group E', teams: ['Germany', 'Ecuador', 'Ivory Coast', 'Curaçao'] },
+          { name: 'Group F', teams: ['Netherlands', 'Japan', 'Tunisia', 'Sweden'] },
+          { name: 'Group G', teams: ['Belgium', 'Iran', 'Egypt', 'New Zealand'] },
+          { name: 'Group H', teams: ['Spain', 'Uruguay', 'Saudi Arabia', 'Cape Verde'] },
+          { name: 'Group I', teams: ['France', 'Senegal', 'Norway', 'Iraq'] },
+          { name: 'Group J', teams: ['Argentina', 'Austria', 'Algeria', 'Jordan'] },
+          { name: 'Group K', teams: ['Portugal', 'Colombia', 'Uzbekistan', 'DR Congo'] },
+          { name: 'Group L', teams: ['England', 'Croatia', 'Panama', 'Ghana'] }
+        ];
+
+        const generatedMatches: any[] = [];
+        groupsData.forEach((g, gIdx) => {
+          const [t1, t2, t3, t4] = g.teams;
+          
+          const r1Offset = Math.floor(gIdx / 3); 
+          const r2Offset = Math.floor(gIdx / 3); 
+          const r3Offset = Math.floor(gIdx / 3); 
+
+          const r1Date = `2026-06-${11 + r1Offset}`;
+          const r2Date = `2026-06-${18 + r2Offset}`;
+          const r3Date = `2026-06-${24 + r3Offset}`;
+
+          generatedMatches.push(
+            { round: 'Matchday 1', date: r1Date, time: '16:00', team1: t1, team2: t2, group: g.name },
+            { round: 'Matchday 1', date: r1Date, time: '20:00', team1: t3, team2: t4, group: g.name },
+            { round: 'Matchday 2', date: r2Date, time: '16:00', team1: t1, team2: t3, group: g.name },
+            { round: 'Matchday 2', date: r2Date, time: '20:00', team1: t4, team2: t2, group: g.name },
+            { round: 'Matchday 3', date: r3Date, time: '16:00', team1: t4, team2: t1, group: g.name },
+            { round: 'Matchday 3', date: r3Date, time: '20:00', team1: t2, team2: t3, group: g.name }
+          );
+        });
+
+        matchesToProcess = generatedMatches;
+      } else {
+        if (Array.isArray(data.matches)) {
+          matchesToProcess = data.matches;
+        } else if (Array.isArray(data.rounds)) {
+          for (const round of data.rounds) {
+            if (Array.isArray(round.matches)) {
+              matchesToProcess.push(...round.matches);
+            }
           }
         }
       }
