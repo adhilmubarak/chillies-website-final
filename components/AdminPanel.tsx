@@ -217,6 +217,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [matchTimeInput, setMatchTimeInput] = useState('');
   const [matchStatusInput, setMatchStatusInput] = useState<'upcoming' | 'live' | 'finished'>('upcoming');
   const [matchWinnerInput, setMatchWinnerInput] = useState<'teamA' | 'teamB' | 'draw' | ''>('');
+  const [matchVotesTeamA, setMatchVotesTeamA] = useState(0);
+  const [matchVotesTeamB, setMatchVotesTeamB] = useState(0);
+  const [matchVotesDraw, setMatchVotesDraw] = useState(0);
 
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
@@ -681,7 +684,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       return;
     }
 
-    const matchData = {
+    const matchData: any = {
       teamA: matchTeamA.trim(),
       teamB: matchTeamB.trim(),
       teamAFlag: matchTeamAFlag.trim() || '🏳️',
@@ -690,8 +693,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       matchTime: matchTimeInput,
       status: matchStatusInput,
       winner: matchWinnerInput || null,
-      createdAt: Date.now()
+      createdAt: editingMatch ? (editingMatch.createdAt || Date.now()) : Date.now()
     };
+
+    if (editingMatch) {
+      matchData.votesTeamA = Number(matchVotesTeamA) || 0;
+      matchData.votesTeamB = Number(matchVotesTeamB) || 0;
+      matchData.votesDraw = Number(matchVotesDraw) || 0;
+    }
 
     try {
       if (editingMatch && editingMatch.id) {
@@ -734,25 +743,42 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setMatchTimeInput('');
     setMatchStatusInput('upcoming');
     setMatchWinnerInput('');
+    setMatchVotesTeamA(0);
+    setMatchVotesTeamB(0);
+    setMatchVotesDraw(0);
     setEditingMatch(null);
   };
 
   const openNewMatchModal = () => {
     resetMatchForm();
     setIsMatchFormOpen(true);
+    // Scroll to form smoothly
+    setTimeout(() => {
+      const el = document.getElementById('match-form-container');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const openEditMatchModal = (match: any) => {
     setEditingMatch(match);
-    setMatchTeamA(match.teamA);
-    setMatchTeamB(match.teamB);
+    setMatchTeamA(match.teamA || '');
+    setMatchTeamB(match.teamB || '');
     setMatchTeamAFlag(match.teamAFlag || '🏳️');
     setMatchTeamBFlag(match.teamBFlag || '🏳️');
-    setMatchDateInput(match.matchDate);
-    setMatchTimeInput(match.matchTime);
-    setMatchStatusInput(match.status);
+    setMatchDateInput(match.matchDate || '');
+    setMatchTimeInput(match.matchTime || '');
+    setMatchStatusInput(match.status || 'upcoming');
     setMatchWinnerInput(match.winner || '');
+    setMatchVotesTeamA(match.votesTeamA || 0);
+    setMatchVotesTeamB(match.votesTeamB || 0);
+    setMatchVotesDraw(match.votesDraw || 0);
     setIsMatchFormOpen(true);
+    
+    // Scroll to form smoothly
+    setTimeout(() => {
+      const el = document.getElementById('match-form-container');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const handleStatusChange = async (order: Order, newStatus: Order['status'], paymentMethod?: string) => {
@@ -2582,7 +2608,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
 
                     {isMatchFormOpen && (
-                        <div className="bg-stone-900/90 border border-gold-500/20 rounded-[2.5rem] p-8 mb-8 shadow-2xl animate-fade-in relative">
+                        <div id="match-form-container" className="bg-stone-900/90 border border-gold-500/20 rounded-[2.5rem] p-8 mb-8 shadow-2xl animate-fade-in relative">
                             <button onClick={() => setIsMatchFormOpen(false)} className="absolute top-6 right-6 text-stone-500 hover:text-white transition-colors">
                                 <X size={20} />
                             </button>
@@ -2671,6 +2697,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             <option value="draw">Draw / Tie</option>
                                         </select>
                                     </div>
+                                    
+                                    {editingMatch && (
+                                        <div className="grid grid-cols-3 gap-4 border-t border-stone-800 pt-6 col-span-1 md:col-span-2">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Votes {matchTeamA || 'Team A'}</label>
+                                                <input 
+                                                    type="number" 
+                                                    value={matchVotesTeamA}
+                                                    onChange={e => setMatchVotesTeamA(Math.max(0, parseInt(e.target.value) || 0))}
+                                                    className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white font-mono"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Votes Draw</label>
+                                                <input 
+                                                    type="number" 
+                                                    value={matchVotesDraw}
+                                                    onChange={e => setMatchVotesDraw(Math.max(0, parseInt(e.target.value) || 0))}
+                                                    className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white font-mono"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Votes {matchTeamB || 'Team B'}</label>
+                                                <input 
+                                                    type="number" 
+                                                    value={matchVotesTeamB}
+                                                    onChange={e => setMatchVotesTeamB(Math.max(0, parseInt(e.target.value) || 0))}
+                                                    className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white font-mono"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex gap-4">
                                     <button 
