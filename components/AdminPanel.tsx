@@ -833,36 +833,49 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       };
 
       let addedCount = 0;
-      for (const round of data.rounds || []) {
-        for (const m of round.matches || []) {
-          const date = m.date;
-          const time = m.time || '18:00';
-          const teamA = m.team1.name;
-          const teamB = m.team2.name;
-          
-          const exists = worldCupMatches.some(ex => 
-            ex.teamA === teamA && 
-            ex.teamB === teamB && 
-            ex.matchDate === date
-          );
-          
-          if (!exists) {
-            await addDoc(collection(db, 'worldcup_matches'), {
-              teamA,
-              teamB,
-              teamAFlag: getTeamFlag(teamA),
-              teamBFlag: getTeamFlag(teamB),
-              matchDate: date,
-              matchTime: time,
-              status: 'upcoming',
-              winner: null,
-              votesTeamA: 0,
-              votesTeamB: 0,
-              votesDraw: 0,
-              createdAt: Date.now()
-            });
-            addedCount++;
+      let matchesToProcess: any[] = [];
+
+      if (Array.isArray(data.matches)) {
+        matchesToProcess = data.matches;
+      } else if (Array.isArray(data.rounds)) {
+        for (const round of data.rounds) {
+          if (Array.isArray(round.matches)) {
+            matchesToProcess.push(...round.matches);
           }
+        }
+      }
+
+      for (const m of matchesToProcess) {
+        const date = m.date;
+        const time = m.time || '18:00';
+        
+        const teamA = typeof m.team1 === 'string' ? m.team1 : m.team1?.name;
+        const teamB = typeof m.team2 === 'string' ? m.team2 : m.team2?.name;
+        
+        if (!teamA || !teamB) continue;
+
+        const exists = worldCupMatches.some(ex => 
+          ex.teamA === teamA && 
+          ex.teamB === teamB && 
+          ex.matchDate === date
+        );
+        
+        if (!exists) {
+          await addDoc(collection(db, 'worldcup_matches'), {
+            teamA,
+            teamB,
+            teamAFlag: getTeamFlag(teamA),
+            teamBFlag: getTeamFlag(teamB),
+            matchDate: date,
+            matchTime: time,
+            status: 'upcoming',
+            winner: null,
+            votesTeamA: 0,
+            votesTeamB: 0,
+            votesDraw: 0,
+            createdAt: Date.now()
+          });
+          addedCount++;
         }
       }
       
