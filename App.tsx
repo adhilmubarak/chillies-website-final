@@ -516,7 +516,7 @@ function App() {
 
   return (
     <React.Suspense fallback={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>}>
-      {(!isAdminOpen && location.pathname !== '/rewards' && location.pathname !== '/feedback' && location.pathname !== '/scream-challenge') && (
+      {(!isAdminOpen && location.pathname !== '/rewards' && location.pathname !== '/feedback' && location.pathname !== '/scream-challenge' && location.pathname !== '/predict') && (
         <>
           <Navbar 
             currentTime={currentTime}
