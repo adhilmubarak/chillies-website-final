@@ -220,6 +220,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [matchVotesTeamA, setMatchVotesTeamA] = useState(0);
   const [matchVotesTeamB, setMatchVotesTeamB] = useState(0);
   const [matchVotesDraw, setMatchVotesDraw] = useState(0);
+  const [luckyWinnerMatchId, setLuckyWinnerMatchId] = useState<string | null>(null);
+  const [luckyWinnerPhone, setLuckyWinnerPhone] = useState<string | null>(null);
+  const [isDrawingLuckyWinner, setIsDrawingLuckyWinner] = useState<Record<string, boolean>>({});
+  const [viewingVotersMatch, setViewingVotersMatch] = useState<any | null>(null);
+  const [votersList, setVotersList] = useState<any[]>([]);
+  const [isLoadingVoters, setIsLoadingVoters] = useState(false);
 
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
@@ -732,6 +738,77 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         console.error("Error deleting match:", err);
       }
     }
+  };
+
+  const handleDrawLuckyWinner = async (match: any) => {
+    if (!match.winner) {
+      alert("Please declare a match winner first!");
+      return;
+    }
+    
+    setIsDrawingLuckyWinner(prev => ({ ...prev, [match.id]: true }));
+    try {
+      const q = query(
+        collection(db, 'worldcup_predictions'),
+        where('matchId', '==', match.id),
+        where('predictedWinner', '==', match.winner)
+      );
+      const snap = await getDocs(q);
+      
+      if (snap.empty) {
+        alert("No correct predictions found for this match!");
+        return;
+      }
+      
+      const correctPreds = snap.docs.map(doc => doc.data());
+      const randomIdx = Math.floor(Math.random() * correctPreds.length);
+      const chosen = correctPreds[randomIdx];
+      
+      // Update match document in Firestore to persist
+      await updateDoc(doc(db, 'worldcup_matches', match.id), {
+        luckyWinnerPhone: chosen.phone
+      });
+      
+      setLuckyWinnerMatchId(match.id);
+      setLuckyWinnerPhone(chosen.phone);
+    } catch (err) {
+      console.error("Error drawing lucky winner:", err);
+      alert("Failed to draw lucky winner.");
+    } finally {
+      setIsDrawingLuckyWinner(prev => ({ ...prev, [match.id]: false }));
+    }
+  };
+
+  const handleViewVoters = async (match: any) => {
+    setViewingVotersMatch(match);
+    setIsLoadingVoters(true);
+    setVotersList([]);
+    try {
+      const q = query(collection(db, 'worldcup_predictions'), where('matchId', '==', match.id));
+      const snap = await getDocs(q);
+      const fetched = snap.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          phone: data.phone,
+          predictedWinner: data.predictedWinner,
+          createdAt: data.createdAt
+        };
+      });
+      // Sort by date newest first
+      fetched.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      setVotersList(fetched);
+    } catch (err) {
+      console.error("Error fetching voters list:", err);
+      alert("Failed to load voters list.");
+    } finally {
+      setIsLoadingVoters(false);
+    }
+  };
+
+  const maskPhone = (ph: string) => {
+    if (!ph || ph.length < 4) return ph || '';
+    return `${ph.slice(0, 2)}*****${ph.slice(-3)}`;
   };
 
   const resetMatchForm = () => {
@@ -2782,9 +2859,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                         <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div> Live
                                                     </span>
                                                 ) : match.status === 'finished' ? (
-                                                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-green-950 text-green-400 border border-green-800/30">
-                                                        Winner: {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.teamB : match.winner === 'draw' ? 'Draw' : 'TBD'}
-                                                    </span>
+                                                    <div className="flex flex-col gap-1.5 items-start">
+                                                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-green-950 text-green-400 border border-green-800/30">
+                                                            Winner: {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.winner === 'teamB' : match.winner === 'draw' ? 'Draw' : 'TBD'}
+                                                        </span>
+                                                        {match.winner && (
+                                                            match.luckyWinnerPhone ? (
+                                                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gold-400 text-glow-gold">
+                                                                    🎁 Lucky: {maskPhone(match.luckyWinnerPhone)}
+                                                                </span>
+                                                            ) : (
+                                                                <button 
+                                                                    onClick={() => handleDrawLuckyWinner(match)}
+                                                                    disabled={isDrawingLuckyWinner[match.id]}
+                                                                    className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gold-500 hover:text-gold-400 transition-colors"
+                                                                >
+                                                                    <Gift size={10} className={isDrawingLuckyWinner[match.id] ? 'animate-spin' : ''} /> Draw Lucky Winner 🎲
+                                                                </button>
+                                                            )
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-stone-800 text-stone-400 border border-stone-700/30">
                                                         Upcoming
@@ -2802,6 +2896,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             </td>
                                             <td className="py-6 pr-4 text-right">
                                                 <div className="flex justify-end gap-2">
+                                                    <button 
+                                                        onClick={() => handleViewVoters(match)}
+                                                        className="p-2.5 text-stone-400 hover:text-blue-400 hover:bg-stone-800/50 rounded-xl transition-all"
+                                                        title="View Predictions & Voter Contacts"
+                                                    >
+                                                        <User size={14} />
+                                                    </button>
                                                     <button 
                                                         onClick={() => openEditMatchModal(match)}
                                                         className="p-2.5 text-stone-400 hover:text-gold-500 hover:bg-stone-800/50 rounded-xl transition-all"
@@ -2827,6 +2928,98 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             </table>
                         </div>
                     </div>
+
+                    {/* Lucky Winner Celebration Modal */}
+                    {luckyWinnerPhone && (
+                      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4 animate-fade-in" onClick={() => { setLuckyWinnerPhone(null); setLuckyWinnerMatchId(null); }}>
+                        <div className="bg-stone-900 border border-gold-500 rounded-[3rem] p-10 max-w-md w-full text-center shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                          <div className="absolute inset-0 bg-gradient-to-br from-gold-500/5 to-transparent pointer-events-none"></div>
+                          
+                          {/* Sparkles / Celebration Icon */}
+                          <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-gold-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-gold-500/20 relative animate-bounce-slow">
+                            <PartyPopper size={36} className="text-stone-950" />
+                          </div>
+                          
+                          <h3 className="text-2xl font-serif text-white mb-2 uppercase tracking-wide">Lucky Winner Drawn!</h3>
+                          <p className="text-stone-500 text-xs leading-relaxed mb-6">A predictor has been randomly selected from the correct answers pool for this match!</p>
+                          
+                          <div className="bg-stone-950 border border-stone-800 rounded-2xl p-6 mb-8 shadow-inner">
+                            <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-2">Selected Account Phone</span>
+                            <span className="font-mono text-2xl font-black text-gold-400 tracking-wider text-glow-gold">{maskPhone(luckyWinnerPhone)}</span>
+                          </div>
+                          
+                          <button 
+                            onClick={() => { setLuckyWinnerPhone(null); setLuckyWinnerMatchId(null); }}
+                            className="w-full bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 font-black py-4 rounded-xl uppercase tracking-widest text-xs shadow-lg"
+                          >
+                            Excellent
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Voters / Predictions list modal */}
+                    {viewingVotersMatch && (
+                      <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setViewingVotersMatch(null)}>
+                        <div className="bg-stone-900 border border-stone-800 rounded-[2.5rem] w-full max-w-2xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+                          {/* Modal Header */}
+                          <div className="p-8 border-b border-stone-800 flex justify-between items-center bg-stone-950 shrink-0">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center text-stone-950 shadow-lg"><User size={20} className="stroke-[3]" /></div>
+                              <div>
+                                <h3 className="text-xl font-serif text-white leading-none">Predictions & Voter Contacts</h3>
+                                <p className="text-[10px] text-stone-500 uppercase tracking-widest mt-1">
+                                  {viewingVotersMatch.teamA} vs {viewingVotersMatch.teamB}
+                                </p>
+                              </div>
+                            </div>
+                            <button onClick={() => setViewingVotersMatch(null)} className="text-stone-500 hover:text-white transition-all"><X size={28} /></button>
+                          </div>
+
+                          {/* Modal Body */}
+                          <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                            {isLoadingVoters ? (
+                              <div className="text-center py-12 text-stone-500 font-mono text-xs uppercase tracking-widest animate-pulse">Loading Voters...</div>
+                            ) : votersList.length === 0 ? (
+                              <p className="text-center text-stone-600 italic py-12 bg-stone-950/40 border border-white/5 rounded-2xl">No votes cast yet for this match.</p>
+                            ) : (
+                              <div className="overflow-x-auto bg-stone-950/40 border border-white/5 rounded-2xl">
+                                <table className="w-full border-collapse text-left text-xs text-stone-300">
+                                  <thead>
+                                    <tr className="border-b border-stone-800 text-[10px] text-stone-500 uppercase tracking-widest font-black">
+                                      <th className="py-4 pl-6">Voter Phone</th>
+                                      <th className="py-4">Selection</th>
+                                      <th className="py-4 pr-6 text-right">Time Cast</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-stone-800/40 font-mono">
+                                    {votersList.map(voter => {
+                                      const dateStr = voter.createdAt ? new Date(voter.createdAt).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : 'N/A';
+                                      const selStr = voter.predictedWinner === 'teamA' ? viewingVotersMatch.teamA : voter.predictedWinner === 'teamB' ? viewingVotersMatch.teamB : 'Draw';
+                                      const selColor = voter.predictedWinner === 'draw' ? 'text-stone-450' : 'text-gold-400 font-bold';
+                                      
+                                      return (
+                                        <tr key={voter.id} className="hover:bg-white/3 transition-colors">
+                                          <td className="py-4 pl-6 text-white font-bold select-all">{voter.phone}</td>
+                                          <td className={`py-4 ${selColor}`}>{selStr}</td>
+                                          <td className="py-4 pr-6 text-right text-stone-500">{dateStr}</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Modal Footer */}
+                          <div className="p-6 bg-stone-950 border-t border-stone-800 shrink-0 flex justify-between items-center text-[10px] uppercase font-bold text-stone-500">
+                            <span>Total Predictions: {votersList.length}</span>
+                            <button onClick={() => setViewingVotersMatch(null)} className="px-6 py-3 bg-stone-900 border border-white/5 hover:border-white/10 rounded-xl text-white font-black uppercase tracking-widest">Close</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                 </div>
             )}
         </div>
