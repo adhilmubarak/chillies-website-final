@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   X, Plus, Trash2, Tag, List, 
-  Settings, LayoutDashboard, Search, 
+  Settings, LayoutDashboard, Search, Trophy,
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight, TrendingUp, BarChart3,
   Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone
@@ -203,7 +203,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   });
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty' | 'complaints'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty' | 'complaints' | 'predictions'>('dashboard');
+  
+  // FIFA predictions states
+  const [worldCupMatches, setWorldCupMatches] = useState<any[]>([]);
+  const [isMatchFormOpen, setIsMatchFormOpen] = useState(false);
+  const [editingMatch, setEditingMatch] = useState<any | null>(null);
+  const [matchTeamA, setMatchTeamA] = useState('');
+  const [matchTeamB, setMatchTeamB] = useState('');
+  const [matchTeamAFlag, setMatchTeamAFlag] = useState('🇧🇷');
+  const [matchTeamBFlag, setMatchTeamBFlag] = useState('🇭🇷');
+  const [matchDateInput, setMatchDateInput] = useState('');
+  const [matchTimeInput, setMatchTimeInput] = useState('');
+  const [matchStatusInput, setMatchStatusInput] = useState<'upcoming' | 'live' | 'finished'>('upcoming');
+  const [matchWinnerInput, setMatchWinnerInput] = useState<'teamA' | 'teamB' | 'draw' | ''>('');
+
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null);
   const [isItemFormOpen, setIsItemFormOpen] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -646,6 +660,101 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     return () => unsub();
   }, [activeChatOrderId]);
 
+  useEffect(() => {
+    const q = query(collection(db, 'worldcup_matches'));
+    const unsub = onSnapshot(q, (snap) => {
+      const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+      fetched.sort((a, b) => {
+        const dateTimeA = new Date(`${a.matchDate}T${a.matchTime || '00:00'}`).getTime();
+        const dateTimeB = new Date(`${b.matchDate}T${b.matchTime || '00:00'}`).getTime();
+        return dateTimeA - dateTimeB;
+      });
+      setWorldCupMatches(fetched);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleSaveMatch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!matchTeamA || !matchTeamB || !matchDateInput || !matchTimeInput) {
+      alert("Please fill in all match details.");
+      return;
+    }
+
+    const matchData = {
+      teamA: matchTeamA.trim(),
+      teamB: matchTeamB.trim(),
+      teamAFlag: matchTeamAFlag.trim() || '🏳️',
+      teamBFlag: matchTeamBFlag.trim() || '🏳️',
+      matchDate: matchDateInput,
+      matchTime: matchTimeInput,
+      status: matchStatusInput,
+      winner: matchWinnerInput || null,
+      createdAt: Date.now()
+    };
+
+    try {
+      if (editingMatch && editingMatch.id) {
+        await updateDoc(doc(db, 'worldcup_matches', editingMatch.id), matchData);
+        alert("Match updated successfully!");
+      } else {
+        await addDoc(collection(db, 'worldcup_matches'), {
+          ...matchData,
+          votesTeamA: 0,
+          votesTeamB: 0,
+          votesDraw: 0
+        });
+        alert("Match created successfully!");
+      }
+      setIsMatchFormOpen(false);
+      resetMatchForm();
+    } catch (err) {
+      console.error("Error saving match:", err);
+      alert("Failed to save match.");
+    }
+  };
+
+  const handleDeleteMatch = async (id: string) => {
+    if (confirm("Are you sure you want to delete this match? All predictions for this match will become dangling.")) {
+      try {
+        await deleteDoc(doc(db, 'worldcup_matches', id));
+        alert("Match deleted.");
+      } catch (err) {
+        console.error("Error deleting match:", err);
+      }
+    }
+  };
+
+  const resetMatchForm = () => {
+    setMatchTeamA('');
+    setMatchTeamB('');
+    setMatchTeamAFlag('🇧🇷');
+    setMatchTeamBFlag('🇭🇷');
+    setMatchDateInput('');
+    setMatchTimeInput('');
+    setMatchStatusInput('upcoming');
+    setMatchWinnerInput('');
+    setEditingMatch(null);
+  };
+
+  const openNewMatchModal = () => {
+    resetMatchForm();
+    setIsMatchFormOpen(true);
+  };
+
+  const openEditMatchModal = (match: any) => {
+    setEditingMatch(match);
+    setMatchTeamA(match.teamA);
+    setMatchTeamB(match.teamB);
+    setMatchTeamAFlag(match.teamAFlag || '🏳️');
+    setMatchTeamBFlag(match.teamBFlag || '🏳️');
+    setMatchDateInput(match.matchDate);
+    setMatchTimeInput(match.matchTime);
+    setMatchStatusInput(match.status);
+    setMatchWinnerInput(match.winner || '');
+    setIsMatchFormOpen(true);
+  };
+
   const handleStatusChange = async (order: Order, newStatus: Order['status'], paymentMethod?: string) => {
     onUpdateOrderStatus(order.id, newStatus, undefined, order.firestoreId);
   };
@@ -830,6 +939,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 { id: 'reviews', icon: Star, label: 'Feedback' },
                 { id: 'complaints', icon: AlertTriangle, label: 'Complaints' },
                 { id: 'payment', icon: Wallet, label: 'Payment' },
+                { id: 'predictions', icon: Trophy, label: 'FIFA Predictions' },
                 { id: 'settings', icon: Settings, label: 'Operations' }
             ].map(tab => (
                 <button 
@@ -2451,6 +2561,212 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 Test Push Notifications
                             </button>
                             <p className="text-stone-500 text-xs mt-3">Click to verify that your browser has granted permission and the ServiceWorker is capable of dispatching local Push Notification alerts.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'predictions' && (
+                <div className="max-w-6xl animate-fade-in mx-auto pb-12 px-4">
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h3 className="text-2xl font-serif text-white">FIFA World Cup Predictions</h3>
+                            <p className="text-stone-500 text-xs mt-1">Add, edit matches, set statuses, and declare winners to tally votes.</p>
+                        </div>
+                        <button 
+                            onClick={openNewMatchModal}
+                            className="bg-gold-500 hover:bg-gold-400 text-stone-950 font-black px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                        >
+                            <Plus size={14} className="stroke-[3]" /> Add Match
+                        </button>
+                    </div>
+
+                    {isMatchFormOpen && (
+                        <div className="bg-stone-900/90 border border-gold-500/20 rounded-[2.5rem] p-8 mb-8 shadow-2xl animate-fade-in relative">
+                            <button onClick={() => setIsMatchFormOpen(false)} className="absolute top-6 right-6 text-stone-500 hover:text-white transition-colors">
+                                <X size={20} />
+                            </button>
+                            <h4 className="text-lg font-serif text-white mb-6">{editingMatch ? 'Edit World Cup Match' : 'Add World Cup Match'}</h4>
+                            <form onSubmit={handleSaveMatch} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Team A</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                type="text" 
+                                                placeholder="Flag Emoji (e.g. 🇧🇷)" 
+                                                value={matchTeamAFlag}
+                                                onChange={e => setMatchTeamAFlag(e.target.value)}
+                                                className="w-20 bg-stone-950 border border-stone-800 rounded-xl p-4 text-center text-xl focus:border-gold-500 outline-none text-white"
+                                            />
+                                            <input 
+                                                type="text" 
+                                                placeholder="Team A Name (e.g. Brazil)" 
+                                                value={matchTeamA}
+                                                onChange={e => setMatchTeamA(e.target.value)}
+                                                className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Team B</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                type="text" 
+                                                placeholder="Flag Emoji (e.g. 🇭🇷)" 
+                                                value={matchTeamBFlag}
+                                                onChange={e => setMatchTeamBFlag(e.target.value)}
+                                                className="w-20 bg-stone-950 border border-stone-800 rounded-xl p-4 text-center text-xl focus:border-gold-500 outline-none text-white"
+                                            />
+                                            <input 
+                                                type="text" 
+                                                placeholder="Team B Name (e.g. Croatia)" 
+                                                value={matchTeamB}
+                                                onChange={e => setMatchTeamB(e.target.value)}
+                                                className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Match Date</label>
+                                        <input 
+                                            type="date" 
+                                            value={matchDateInput}
+                                            onChange={e => setMatchDateInput(e.target.value)}
+                                            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white [color-scheme:dark]"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Match Time</label>
+                                        <input 
+                                            type="time" 
+                                            value={matchTimeInput}
+                                            onChange={e => setMatchTimeInput(e.target.value)}
+                                            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white [color-scheme:dark]"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Match Status</label>
+                                        <select 
+                                            value={matchStatusInput}
+                                            onChange={e => setMatchStatusInput(e.target.value as any)}
+                                            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white"
+                                        >
+                                            <option value="upcoming">Upcoming</option>
+                                            <option value="live">Live</option>
+                                            <option value="finished">Finished</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Declared Winner (Finished Status only)</label>
+                                        <select 
+                                            value={matchWinnerInput}
+                                            onChange={e => setMatchWinnerInput(e.target.value as any)}
+                                            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white"
+                                            disabled={matchStatusInput !== 'finished'}
+                                        >
+                                            <option value="">Undecided / None</option>
+                                            <option value="teamA">{matchTeamA || 'Team A'} Winner</option>
+                                            <option value="teamB">{matchTeamB || 'Team B'} Winner</option>
+                                            <option value="draw">Draw / Tie</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button 
+                                        type="submit"
+                                        className="bg-gold-500 hover:bg-gold-400 text-stone-950 px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                                    >
+                                        Save Match
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setIsMatchFormOpen(false)}
+                                        className="bg-stone-800 hover:bg-stone-700 text-white px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    <div className="bg-stone-900/50 border border-white/5 rounded-[2.5rem] overflow-hidden p-6 md:p-10 shadow-2xl">
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse text-left">
+                                <thead>
+                                    <tr className="border-b border-stone-800 text-[10px] text-stone-500 uppercase tracking-widest font-black">
+                                        <th className="pb-6 pl-4">Match</th>
+                                        <th className="pb-6">Date & Time</th>
+                                        <th className="pb-6">Status</th>
+                                        <th className="pb-6">Votes (A / Draw / B)</th>
+                                        <th className="pb-6 pr-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-stone-800/40 text-xs">
+                                    {worldCupMatches.map(match => (
+                                        <tr key={match.id} className="hover:bg-white/5 transition-colors group">
+                                            <td className="py-6 pl-4 font-serif font-bold text-sm text-white">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-xl shrink-0">{match.teamAFlag}</span>
+                                                    <span>{match.teamA}</span>
+                                                    <span className="text-stone-600 font-light font-sans text-xs">vs</span>
+                                                    <span className="text-xl shrink-0">{match.teamBFlag}</span>
+                                                    <span>{match.teamB}</span>
+                                                </div>
+                                            </td>
+                                            <td className="py-6 text-stone-300 font-mono">
+                                                {match.matchDate} @ {match.matchTime}
+                                            </td>
+                                            <td className="py-6">
+                                                {match.status === 'live' ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-red-950 text-red-400 border border-red-800/30 animate-pulse">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div> Live
+                                                    </span>
+                                                ) : match.status === 'finished' ? (
+                                                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-green-950 text-green-400 border border-green-800/30">
+                                                        Winner: {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.teamB : match.winner === 'draw' ? 'Draw' : 'TBD'}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-stone-800 text-stone-400 border border-stone-700/30">
+                                                        Upcoming
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="py-6 font-mono text-stone-300">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-gold-500 font-bold">{match.votesTeamA || 0}</span>
+                                                    <span className="text-stone-700">/</span>
+                                                    <span className="text-stone-500">{match.votesDraw || 0}</span>
+                                                    <span className="text-stone-700">/</span>
+                                                    <span className="text-gold-500 font-bold">{match.votesTeamB || 0}</span>
+                                                </div>
+                                            </td>
+                                            <td className="py-6 pr-4 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <button 
+                                                        onClick={() => openEditMatchModal(match)}
+                                                        className="p-2.5 text-stone-400 hover:text-gold-500 hover:bg-stone-800/50 rounded-xl transition-all"
+                                                    >
+                                                        <Edit2 size={14} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDeleteMatch(match.id)}
+                                                        className="p-2.5 text-stone-400 hover:text-red-500 hover:bg-stone-800/50 rounded-xl transition-all"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {worldCupMatches.length === 0 && (
+                                        <tr>
+                                            <td colSpan={5} className="py-12 text-center text-stone-600 italic">No matches created yet. Click "+ Add Match" to get started.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

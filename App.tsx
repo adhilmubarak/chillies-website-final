@@ -12,7 +12,7 @@ import { Category, MenuItem, CartItem, Order, CategoryConfig, Coupon, CustomOffe
 import { MENU_ITEMS } from './data.ts';
 import { db } from './firebase';
 import { collection, addDoc, query, onSnapshot, doc, setDoc, updateDoc, getDocs, where, deleteDoc } from 'firebase/firestore';
-import { Search, Bike, Store, Clock, Flame, ShoppingBag, CheckCircle, XCircle, User, Star, AlertCircle, MessageSquare, Send, X, Info, ChevronRight } from 'lucide-react';
+import { Search, Bike, Store, Clock, Flame, ShoppingBag, CheckCircle, XCircle, User, Star, AlertCircle, MessageSquare, Send, X, Info, ChevronRight, Trophy } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import NotificationTicker from './components/NotificationTicker';
 import SmartSuggestion from './components/SmartSuggestion';
@@ -32,6 +32,7 @@ const DeliveryPanel = lazy(() => import('./components/DeliveryPanel'));
 const KitchenPanel = lazy(() => import('./components/KitchenPanel'));
 const ARViewerModal = lazy(() => import('./components/ARViewerModal'));
 const SignagePage = lazy(() => import('./components/SignagePage'));
+const PredictPage = lazy(() => import('./components/PredictPage'));
 import { App as CapApp } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { registerPlugin } from '@capacitor/core';
@@ -634,6 +635,7 @@ function App() {
             currentTime={currentTime}
           />
         } />
+        <Route path="/predict" element={<PredictPage />} />
         <Route path="/*" element={
           <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
             <Hero />
@@ -683,6 +685,44 @@ function App() {
                     
                     <span className="relative z-10 flex items-center gap-2 font-black">
                       Play Now <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* FIFA World Cup Predict & Win Banner */}
+            <div className="max-w-7xl mx-auto px-4 md:px-8 mt-4 mb-4">
+              <div 
+                onClick={() => navigate('/predict')}
+                className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-950/20 via-[#0c0c0c] to-stone-900/50 border border-emerald-500/20 hover:border-gold-500/50 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_40px_rgba(16,185,129,0.04)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
+              >
+                {/* Glowing decorative background meshes */}
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/30 via-transparent to-gold-950/20 pointer-events-none z-0"></div>
+                <div className="absolute top-0 right-0 w-80 h-80 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.12)_0%,_transparent_70%)] rounded-full pointer-events-none"></div>
+
+                <div className="flex items-center gap-5 relative z-10 text-center md:text-left flex-col md:flex-row">
+                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-500 to-gold-500 flex items-center justify-center shrink-0 shadow-[0_12px_24px_rgba(16,185,129,0.3)] group-hover:scale-105 transition-transform duration-500 relative">
+                    <div className="absolute inset-0 border border-white/20 rounded-3xl"></div>
+                    <Trophy size={28} className="text-white animate-bounce-slow" />
+                  </div>
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/25 rounded-full text-emerald-400 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5 animate-pulse">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> World Cup Special
+                    </div>
+                    <h3 className="text-white text-xl md:text-2xl font-serif leading-tight">
+                      Predict & Win <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 italic font-black">Free Rewards!</span>
+                    </h3>
+                    <p className="text-stone-400 text-xs mt-1.5 max-w-md font-light leading-relaxed">
+                      Predict match outcomes for the upcoming FIFA World Cup. Top our leaderboard and win direct cash discounts, free meals, and exclusive chef specials!
+                    </p>
+                  </div>
+                </div>
+
+                <div className="shrink-0 relative z-10 w-full md:w-auto">
+                  <button className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(var(--brand-500-rgb,212,175,55),0.25)] hover:shadow-[0_0_35px_rgba(var(--brand-500-rgb,212,175,55),0.55)] transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] relative overflow-hidden group/btn">
+                    <span className="relative z-10 flex items-center gap-2 font-black">
+                      Predict Now <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
                     </span>
                   </button>
                 </div>

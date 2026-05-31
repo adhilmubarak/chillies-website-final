@@ -106,3 +106,27 @@ export interface Complaint {
   status: 'open' | 'resolved';
   createdAt: number;
 }
+
+export interface WorldCupMatch {
+  id: string; // Firestore document ID
+  teamA: string;
+  teamB: string;
+  teamAFlag?: string; // Emoji flag (e.g. 🇧🇷, 🇭🇷)
+  teamBFlag?: string;
+  matchDate: string; // YYYY-MM-DD
+  matchTime: string; // HH:MM (24-hour format)
+  status: 'upcoming' | 'live' | 'finished';
+  winner?: 'teamA' | 'teamB' | 'draw' | null; // Set when status is finished
+  votesTeamA?: number; // Pre-aggregated stats for instant load
+  votesTeamB?: number;
+  votesDraw?: number;
+  createdAt: number;
+}
+
+export interface UserPrediction {
+  id?: string;
+  matchId: string;
+  phone: string;
+  predictedWinner: 'teamA' | 'teamB' | 'draw';
+  createdAt: number;
+}
