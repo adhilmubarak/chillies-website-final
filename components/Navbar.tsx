@@ -112,7 +112,6 @@ const Navbar: React.FC<NavbarProps> = ({
           <a href="#home" onClick={(e) => handleNavClick(e, 'home')} className={navLinkClass}>Home</a>
           <a href="#menu" onClick={(e) => handleNavClick(e, 'menu')} className={navLinkClass}>Menu</a>
           <a href="#offers" onClick={(e) => handleNavClick(e, 'offers')} className={`${navLinkClass} text-gold-400 flex items-center gap-1`}><Sparkles size={12} /> Offers</a>
-          <a href="/predict" onClick={(e) => { e.preventDefault(); navigate('/predict'); }} className={`${navLinkClass} text-amber-500 flex items-center gap-1`}><Trophy size={12} /> Predictor</a>
           <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className={navLinkClass}>Contact</a>
         </div>
 
@@ -176,7 +175,6 @@ const Navbar: React.FC<NavbarProps> = ({
               <a href="#home" onClick={(e) => handleNavClick(e, 'home')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Home</a>
               <a href="#menu" onClick={(e) => handleNavClick(e, 'menu')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Menu</a>
               <a href="#offers" onClick={(e) => handleNavClick(e, 'offers')} className="text-2xl text-gold-400 hover:text-gold-300 font-serif transition-colors flex items-center gap-2"><Sparkles size={20} /> Offers</a>
-              <a href="/predict" onClick={(e) => { e.preventDefault(); navigate('/predict'); setMobileMenuOpen(false); }} className="text-2xl text-amber-500 font-serif transition-colors flex items-center gap-2"><Trophy size={20} /> Predict & Win</a>
               <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="text-2xl text-stone-300 hover:text-gold-400 font-serif transition-colors">Contact</a>
               <a href="/complaints" className="text-xl text-stone-500 hover:text-white font-serif transition-colors uppercase tracking-[0.2em]">Help & Support</a>
             </nav>
