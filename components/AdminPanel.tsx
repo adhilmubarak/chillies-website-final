@@ -4,7 +4,7 @@ import {
   Settings, LayoutDashboard, Search, Trophy,
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight, TrendingUp, BarChart3,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone, RefreshCw
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone, RefreshCw, Upload
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount, Complaint } from '../types';
 import { printThermalBill, printKOT, printNetworkKOT, discoverNetworkPrinters } from '../App';
@@ -951,6 +951,95 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     } finally {
       setIsSyncingMatches(false);
     }
+  };
+
+  const handleUploadJSONMatches = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target?.result as string;
+        const data = JSON.parse(text);
+        
+        const getTeamFlag = (teamName: string): string => {
+          const flags: Record<string, string> = {
+            'Russia': '🇷🇺', 'Saudi Arabia': '🇸🇦', 'Egypt': '🇪🇬', 'Uruguay': '🇺🇾',
+            'Portugal': '🇵🇹', 'Spain': '🇪🇸', 'Morocco': '🇲🇦', 'Iran': '🇮🇷',
+            'France': '🇫🇷', 'Australia': '🇦🇺', 'Peru': '🇵🇪', 'Denmark': '🇩🇰',
+            'Argentina': '🇦🇷', 'Iceland': '🇮🇸', 'Croatia': '🇭🇷', 'Nigeria': '🇳🇬',
+            'Brazil': '🇧🇷', 'Switzerland': '🇨🇭', 'Costa Rica': '🇨🇷', 'Serbia': '🇷🇸',
+            'Germany': '🇩🇪', 'Mexico': '🇲🇽', 'Sweden': '🇸🇪', 'South Korea': '🇰🇷',
+            'Belgium': '🇧🇪', 'Panama': '🇵🇦', 'Tunisia': '🇹🇳', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+            'Poland': '🇵🇱', 'Senegal': '🇸🇳', 'Colombia': '🇨🇴', 'Japan': '🇯🇵',
+            'Qatar': '🇶🇦', 'Ecuador': '🇪🇨', 'Netherlands': '🇳🇱', 'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+            'USA': '🇺🇸', 'United States': '🇺🇸', 'Canada': '🇨🇦', 'Ghana': '🇬🇭', 'Cameroon': '🇨🇲',
+            'South Africa': '🇿🇦', 'Czech Republic': '🇨🇿', 'Czechia': '🇨🇿',
+            'Bosnia & Herzegovina': '🇧🇦', 'Bosnia and Herzegovina': '🇧🇦',
+            'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'Haiti': '🇭🇹', 'Paraguay': '🇵🇾',
+            'Turkey': '🇹🇷', 'Türkiye': '🇹🇷', 'Ivory Coast': '🇨🇮', 'Curaçao': '🇨🇼',
+            'New Zealand': '🇳🇿', 'Cape Verde': '🇨🇻', 'Norway': '🇳🇴', 'Iraq': '🇮🇶',
+            'Austria': '🇦🇹', 'Algeria': '🇩🇿', 'Jordan': '🇯🇴', 'Uzbekistan': '🇺🇿',
+            'DR Congo': '🇨🇩'
+          };
+          return flags[teamName] || '🏳️';
+        };
+
+        let matchesToProcess: any[] = [];
+        if (Array.isArray(data)) {
+          matchesToProcess = data;
+        } else if (Array.isArray(data.matches)) {
+          matchesToProcess = data.matches;
+        } else if (Array.isArray(data.rounds)) {
+          for (const round of data.rounds) {
+            if (Array.isArray(round.matches)) {
+              matchesToProcess.push(...round.matches);
+            }
+          }
+        }
+
+        let addedCount = 0;
+        for (const m of matchesToProcess) {
+          const teamA = m.teamA || (typeof m.team1 === 'string' ? m.team1 : m.team1?.name);
+          const teamB = m.teamB || (typeof m.team2 === 'string' ? m.team2 : m.team2?.name);
+          const date = m.matchDate || m.date;
+          const time = m.matchTime || m.time || '18:00';
+          
+          if (!teamA || !teamB || !date) continue;
+
+          const exists = worldCupMatches.some(ex => 
+            ex.teamA === teamA && 
+            ex.teamB === teamB && 
+            ex.matchDate === date
+          );
+
+          if (!exists) {
+            await addDoc(collection(db, 'worldcup_matches'), {
+              teamA,
+              teamB,
+              teamAFlag: m.teamAFlag || getTeamFlag(teamA),
+              teamBFlag: m.teamBFlag || getTeamFlag(teamB),
+              matchDate: date,
+              matchTime: time,
+              status: m.status || 'upcoming',
+              winner: m.winner || null,
+              votesTeamA: m.votesTeamA || 0,
+              votesTeamB: m.votesTeamB || 0,
+              votesDraw: m.votesDraw || 0,
+              createdAt: Date.now()
+            });
+            addedCount++;
+          }
+        }
+
+        alert(`Successfully imported ${addedCount} matches from JSON file!`);
+      } catch (err) {
+        console.error("JSON parsing error:", err);
+        alert("Failed to parse JSON file. Ensure it is a valid match fixtures file.");
+      }
+    };
+    reader.readAsText(file);
   };
 
   const maskPhone = (ph: string) => {
@@ -2824,6 +2913,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             <p className="text-stone-500 text-xs mt-1">Add, edit matches, set statuses, and declare winners to tally votes.</p>
                         </div>
                         <div className="flex gap-3">
+                            <input 
+                                type="file" 
+                                accept=".json"
+                                onChange={handleUploadJSONMatches}
+                                className="hidden"
+                                id="json-match-file-upload"
+                            />
+                            <button 
+                                onClick={() => document.getElementById('json-match-file-upload')?.click()}
+                                className="bg-stone-900 hover:bg-stone-800 border border-stone-850 text-gold-500 hover:text-gold-450 font-black px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                            >
+                                <Upload size={14} /> Upload Matches JSON
+                            </button>
                             <button 
                                 onClick={handleSyncMatchesFromAPI}
                                 disabled={isSyncingMatches}

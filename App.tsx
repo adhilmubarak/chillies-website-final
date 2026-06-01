@@ -12,7 +12,7 @@ import { Category, MenuItem, CartItem, Order, CategoryConfig, Coupon, CustomOffe
 import { MENU_ITEMS } from './data.ts';
 import { db } from './firebase';
 import { collection, addDoc, query, onSnapshot, doc, setDoc, updateDoc, getDocs, where, deleteDoc } from 'firebase/firestore';
-import { Search, Bike, Store, Clock, Flame, ShoppingBag, CheckCircle, XCircle, User, Star, AlertCircle, MessageSquare, Send, X, Info, ChevronRight, Trophy } from 'lucide-react';
+import { Search, Bike, Store, Clock, Flame, ShoppingBag, CheckCircle, XCircle, User, Star, AlertCircle, MessageSquare, Send, X, Info, ChevronRight, Trophy, Sparkles } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import NotificationTicker from './components/NotificationTicker';
 import SmartSuggestion from './components/SmartSuggestion';
@@ -230,6 +230,8 @@ function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [comingSoonTitle, setComingSoonTitle] = useState('');
 
   const handleViewAR = (item: MenuItem) => {
     window.localStorage.setItem('last_ar_image', item.image);
@@ -653,7 +655,7 @@ function App() {
                 }
               `}</style>
               <div 
-                onClick={() => navigate('/scream-challenge')}
+                onClick={() => { setComingSoonTitle('Scream Challenge'); setShowComingSoon(true); }}
                 className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-950/25 via-[#0c0c0c] to-stone-900/50 border border-red-500/20 hover:border-gold-500/50 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_40px_rgba(239,68,68,0.06)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
               >
                 {/* Glowing decorative background meshes */}
@@ -666,8 +668,8 @@ function App() {
                     <Flame size={28} className="text-white animate-pulse" />
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/25 rounded-full text-red-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5 animate-pulse">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></div> Live Game
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/25 rounded-full text-amber-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5">
+                      Coming Soon
                     </div>
                     <h3 className="text-white text-xl md:text-2xl font-serif leading-tight">
                       Scream For <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 italic font-black">Shawarma!</span>
@@ -684,7 +686,7 @@ function App() {
                     <div className="absolute top-0 bottom-0 left-0 w-12 bg-white/35 -translate-x-full animate-btn-shimmer blur-sm pointer-events-none z-0"></div>
                     
                     <span className="relative z-10 flex items-center gap-2 font-black">
-                      Play Now <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+                      Stay Tuned <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
                     </span>
                   </button>
                 </div>
@@ -694,7 +696,7 @@ function App() {
             {/* FIFA World Cup Predict & Win Banner */}
             <div className="max-w-7xl mx-auto px-4 md:px-8 mt-4 mb-4">
               <div 
-                onClick={() => navigate('/predict')}
+                onClick={() => { setComingSoonTitle('FIFA Predictor'); setShowComingSoon(true); }}
                 className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-950/20 via-[#0c0c0c] to-stone-900/50 border border-emerald-500/20 hover:border-gold-500/50 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_40px_rgba(16,185,129,0.04)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
               >
                 {/* Glowing decorative background meshes */}
@@ -707,8 +709,8 @@ function App() {
                     <Trophy size={28} className="text-white animate-bounce-slow" />
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/25 rounded-full text-emerald-400 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5 animate-pulse">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> World Cup Special
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/25 rounded-full text-amber-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5">
+                      Coming Soon
                     </div>
                     <h3 className="text-white text-xl md:text-2xl font-serif leading-tight">
                       Predict & Win <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 italic font-black">Free Rewards!</span>
@@ -722,7 +724,7 @@ function App() {
                 <div className="shrink-0 relative z-10 w-full md:w-auto">
                   <button className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(var(--brand-500-rgb,212,175,55),0.25)] hover:shadow-[0_0_35px_rgba(var(--brand-500-rgb,212,175,55),0.55)] transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] relative overflow-hidden group/btn">
                     <span className="relative z-10 flex items-center gap-2 font-black">
-                      Predict Now <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+                      Stay Tuned <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
                     </span>
                   </button>
                 </div>
@@ -806,6 +808,35 @@ function App() {
                 className="p-2 text-stone-600 hover:text-white transition-colors"
             >
                 <X size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showComingSoon && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-stone-950/80 backdrop-blur-md p-4 animate-fade-in" onClick={() => setShowComingSoon(false)}>
+          <div 
+            className="w-full max-w-md bg-stone-900/90 border border-gold-500/30 rounded-[2.5rem] p-8 sm:p-10 text-center shadow-2xl relative" 
+            onClick={e => e.stopPropagation()}
+          >
+            <button onClick={() => setShowComingSoon(false)} className="absolute top-6 right-6 text-stone-600 hover:text-white transition-colors">
+              <X size={20} />
+            </button>
+            <div className="w-20 h-20 bg-gradient-to-br from-amber-600 via-yellow-500 to-gold-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_12px_24px_rgba(212,175,55,0.25)] relative overflow-hidden group">
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <Sparkles className="text-stone-950 animate-pulse" size={32} />
+            </div>
+            <h3 className="text-2xl font-serif text-white mb-3 tracking-wide">
+              {comingSoonTitle || 'Offers'} Coming Soon!
+            </h3>
+            <p className="text-stone-400 text-sm leading-relaxed mb-8">
+              We are finalizing some exciting updates for you. This feature and its exclusive rewards will be live shortly. Stay tuned!
+            </p>
+            <button 
+              onClick={() => setShowComingSoon(false)} 
+              className="w-full bg-gradient-to-r from-brand-600 to-brand-500 text-stone-950 font-black py-4 rounded-xl uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all duration-300 shadow-lg active:scale-[0.97]"
+            >
+              Great, I'll Stay Tuned!
             </button>
           </div>
         </div>
