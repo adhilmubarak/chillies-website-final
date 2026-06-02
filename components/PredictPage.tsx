@@ -498,9 +498,10 @@ const PredictPage: React.FC = () => {
                       const isUpcoming = match.status === 'upcoming';
                       const isLive = match.status === 'live';
                       const isFinished = match.status === 'finished';
+                      const isVoteOpen = isUpcoming || isLive;
                       
                       const selectedVal = selectedPrediction[match.id];
-                      const confirmPanelActive = isUpcoming && selectedVal && !userPred;
+                      const confirmPanelActive = isVoteOpen && selectedVal && !userPred;
                       const loadingSubmit = isSubmitting[match.id];
                       const countdownText = isUpcoming ? getRelativeTimeStr(match.matchDate, match.matchTime) : '';
 
@@ -564,7 +565,7 @@ const PredictPage: React.FC = () => {
 
                           {/* Prediction Controls Section */}
                           <div className="mt-6 pt-6 border-t border-stone-900/60 space-y-4">
-                            {isUpcoming && !userPred && (
+                            {isVoteOpen && !userPred && (
                               <div className="space-y-3">
                                 <p className="text-[9px] text-stone-500 uppercase tracking-widest font-black text-center mb-2">Predict Match Outcome</p>
                                 <div className="grid grid-cols-3 gap-2">
@@ -637,18 +638,18 @@ const PredictPage: React.FC = () => {
                               </div>
                             )}
 
-                            {!isUpcoming && !userPred && (
+                            {!isVoteOpen && !userPred && (
                               <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 text-center space-y-1 mb-2">
                                 <p className="text-[10px] text-stone-500 uppercase tracking-widest font-black flex items-center justify-center gap-1.5">
-                                  <span>🔒 {isLive ? 'Live Game' : 'Match Ended'} - Predictions Locked</span>
+                                  <span>🔒 Match Ended - Predictions Locked</span>
                                 </p>
                                 <p className="text-[9px] text-gold-500 font-mono tracking-wider">
-                                  {isLive ? 'Voting locks once kickoff begins!' : 'Predictions are closed for this fixture.'}
+                                  Predictions are closed for this fixture.
                                 </p>
                               </div>
                             )}
 
-                            {(userPred || !isUpcoming) && (
+                            {(userPred || !isVoteOpen) && (
                               <div className="space-y-4 animate-fade-in">
                                 {/* Aggregated Vote Breakdown percentages */}
                                 <div className="space-y-2">
