@@ -7,7 +7,9 @@ import { useNavigate } from 'react-router-dom';
 const PredictPage: React.FC = () => {
   const navigate = useNavigate();
   const [phone, setPhone] = useState(() => localStorage.getItem('predict_user_phone') || '');
+  const [name, setName] = useState(() => localStorage.getItem('predict_user_name') || '');
   const [phoneInput, setPhoneInput] = useState('');
+  const [nameInput, setNameInput] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(!!phone);
   const [matches, setMatches] = useState<any[]>([]);
   const [userPredictions, setUserPredictions] = useState<Record<string, string>>({}); // matchId -> predictedWinner
@@ -105,12 +107,19 @@ const PredictPage: React.FC = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanPhone = phoneInput.trim();
+    const cleanName = nameInput.trim();
+    if (!cleanName) {
+      showToast("Please enter your name.", "error");
+      return;
+    }
     if (cleanPhone.length < 10) {
       showToast("Please enter a 10-digit mobile number.", "error");
       return;
     }
     localStorage.setItem('predict_user_phone', cleanPhone);
+    localStorage.setItem('predict_user_name', cleanName);
     setPhone(cleanPhone);
+    setName(cleanName);
     setIsLoggedIn(true);
     triggerConfetti();
     showToast("Successfully logged into Prediction Center!");
@@ -118,8 +127,11 @@ const PredictPage: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('predict_user_phone');
+    localStorage.removeItem('predict_user_name');
     setPhone('');
+    setName('');
     setPhoneInput('');
+    setNameInput('');
     setIsLoggedIn(false);
     setUserPredictions({});
     setSelectedPrediction({});
@@ -151,6 +163,7 @@ const PredictPage: React.FC = () => {
       await addDoc(collection(db, 'worldcup_predictions'), {
         matchId,
         phone,
+        name,
         predictedWinner: selection,
         createdAt: Date.now()
       });
@@ -360,6 +373,14 @@ const PredictPage: React.FC = () => {
             
             <form onSubmit={handleLogin} className="space-y-4">
               <input 
+                type="text" 
+                placeholder="Enter Your Full Name" 
+                value={nameInput} 
+                onChange={e => setNameInput(e.target.value)} 
+                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-center text-white focus:outline-none focus:border-gold-500 tracking-wide text-sm shadow-inner transition-colors"
+                required
+              />
+              <input 
                 type="tel" 
                 placeholder="Enter 10-Digit Mobile Number" 
                 value={phoneInput} 
@@ -381,7 +402,7 @@ const PredictPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row justify-between items-center bg-stone-900/50 border border-white/5 rounded-3xl p-5 sm:px-8 gap-4 shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                <span className="text-xs uppercase tracking-widest font-black text-stone-300">Predictor Account: <span className="font-mono text-gold-400 text-glow-gold">{maskPhone(phone)}</span></span>
+                <span className="text-xs uppercase tracking-widest font-black text-stone-300">Welcome, <span className="text-gold-400 text-glow-gold font-serif capitalize">{name || 'Predictor'}</span>! <span className="text-stone-500 font-sans normal-case ml-2">(Account: {maskPhone(phone)})</span></span>
               </div>
               <button onClick={handleLogout} className="text-stone-500 hover:text-white uppercase tracking-widest text-[9px] font-black transition-colors bg-stone-950/40 border border-white/5 hover:border-red-500/20 px-4 py-2 rounded-xl">Sign Out</button>
             </div>
@@ -558,10 +579,20 @@ const PredictPage: React.FC = () => {
                                     {match.teamBFlag || '🏳️'}
                                   </span>
                                 </div>
-                                <span className="text-white text-xs sm:text-sm font-serif font-black uppercase tracking-wider line-clamp-1">{match.teamB}</span>
+                                 <span className="text-white text-xs sm:text-sm font-serif font-black uppercase tracking-wider line-clamp-1">{match.teamB}</span>
                               </div>
                             </div>
                           </div>
+
+                          {isFinished && (
+                            <div className="mt-4 p-4 bg-emerald-950/20 border border-emerald-500/20 rounded-[1.5rem] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+                              <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black">🏆 Declared Winner</span>
+                              <span className="text-xs text-emerald-400 font-serif font-black uppercase tracking-wider flex items-center gap-2">
+                                <Award size={14} className="text-gold-500 animate-bounce" />
+                                {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.teamB : match.winner === 'draw' ? 'Draw Match 🤝' : 'Declared Draw 🤝'}
+                              </span>
+                            </div>
+                          )}
 
                           {/* Prediction Controls Section */}
                           <div className="mt-6 pt-6 border-t border-stone-900/60 space-y-4">
@@ -660,9 +691,9 @@ const PredictPage: React.FC = () => {
                                   
                                   {/* Custom Colorful Votes Progress Bar */}
                                   <div className="h-3 rounded-full bg-stone-950 overflow-hidden flex shadow-inner border border-white/5">
-                                    <div style={{ width: `${percentages.a}%` }} className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-1000" title={`${match.teamA}: ${percentages.a}%`}></div>
-                                    <div style={{ width: `${percentages.d}%` }} className="bg-stone-700 h-full transition-all duration-1000" title={`Draw: ${percentages.d}%`}></div>
-                                    <div style={{ width: `${percentages.b}%` }} className="bg-gradient-to-r from-gold-500 to-amber-500 h-full transition-all duration-1000" title={`${match.teamB}: ${percentages.b}%`}></div>
+                                    <div style={{ flexGrow: percentages.a, flexBasis: 0 }} className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-1000" title={`${match.teamA}: ${percentages.a}%`}></div>
+                                    <div style={{ flexGrow: percentages.d, flexBasis: 0 }} className="bg-stone-700 h-full transition-all duration-1000" title={`Draw: ${percentages.d}%`}></div>
+                                    <div style={{ flexGrow: percentages.b, flexBasis: 0 }} className="bg-gradient-to-r from-gold-500 to-amber-500 h-full transition-all duration-1000" title={`${match.teamB}: ${percentages.b}%`}></div>
                                   </div>
                                   <div className="flex justify-between text-[9px] font-mono font-bold">
                                     <span className="text-emerald-400">{match.teamA}: {percentages.a}%</span>

@@ -806,6 +806,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         return {
           id: doc.id,
           phone: data.phone,
+          name: data.name || 'Anonymous',
           predictedWinner: data.predictedWinner,
           createdAt: data.createdAt
         };
@@ -3125,12 +3126,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 ) : match.status === 'finished' ? (
                                                     <div className="flex flex-col gap-1.5 items-start">
                                                         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-green-950 text-green-400 border border-green-800/30">
-                                                            Winner: {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.winner === 'teamB' : match.winner === 'draw' ? 'Draw' : 'TBD'}
+                                                            Winner: {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.teamB : match.winner === 'draw' ? 'Draw' : 'TBD'}
                                                         </span>
                                                         {match.winner && (
                                                             match.luckyWinnerPhone ? (
                                                                 <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gold-400 text-glow-gold">
-                                                                    🎁 Lucky: {maskPhone(match.luckyWinnerPhone)}
+                                                                    🎁 Lucky: {match.luckyWinnerPhone}
                                                                 </span>
                                                             ) : (
                                                                 <button 
@@ -3209,7 +3210,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           
                           <div className="bg-stone-950 border border-stone-800 rounded-2xl p-6 mb-8 shadow-inner">
                             <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-2">Selected Account Phone</span>
-                            <span className="font-mono text-2xl font-black text-gold-400 tracking-wider text-glow-gold">{maskPhone(luckyWinnerPhone)}</span>
+                            <span className="font-mono text-2xl font-black text-gold-400 tracking-wider text-glow-gold">{luckyWinnerPhone}</span>
                           </div>
                           
                           <button 
@@ -3251,7 +3252,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                 <table className="w-full border-collapse text-left text-xs text-stone-300">
                                   <thead>
                                     <tr className="border-b border-stone-800 text-[10px] text-stone-500 uppercase tracking-widest font-black">
-                                      <th className="py-4 pl-6">Voter Phone</th>
+                                      <th className="py-4 pl-6">Voter Name</th>
+                                      <th className="py-4">Voter Phone</th>
                                       <th className="py-4">Selection</th>
                                       <th className="py-4 pr-6 text-right">Time Cast</th>
                                     </tr>
@@ -3264,7 +3266,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                       
                                       return (
                                         <tr key={voter.id} className="hover:bg-white/3 transition-colors">
-                                          <td className="py-4 pl-6 text-white font-bold select-all">{voter.phone}</td>
+                                          <td className="py-4 pl-6 text-stone-400 font-sans">{voter.name || 'Anonymous'}</td>
+                                          <td className="py-4 text-white font-bold select-all">{voter.phone}</td>
                                           <td className={`py-4 ${selColor}`}>{selStr}</td>
                                           <td className="py-4 pr-6 text-right text-stone-500">{dateStr}</td>
                                         </tr>
