@@ -30,6 +30,8 @@ const PredictPage: React.FC = () => {
   
   // Confetti celebration state
   const [confetti, setConfetti] = useState<{ id: number; left: number; delay: number; color: string }[]>([]);
+  // Track match currently celebrating in popup
+  const [celebratingMatch, setCelebratingMatch] = useState<any | null>(null);
 
   // Toast helper
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -105,6 +107,47 @@ const PredictPage: React.FC = () => {
     computeLeaderboard();
   }, [matches]);
 
+  // Listen for finished matches and check if user predicted correctly to trigger celebration popup
+  useEffect(() => {
+    if (isLoading || matches.length === 0 || Object.keys(userPredictions).length === 0) return;
+    
+    const celebratedStr = localStorage.getItem('predict_celebrated_matches') || '[]';
+    let celebratedList: string[] = [];
+    try {
+      celebratedList = JSON.parse(celebratedStr);
+    } catch (e) {
+      celebratedList = [];
+    }
+
+    const uncelebratedCorrectMatch = matches.find(m => {
+      if (m.status !== 'finished') return false;
+      const pred = userPredictions[m.id];
+      if (!pred || pred !== m.winner) return false;
+      return !celebratedList.includes(m.id);
+    });
+
+    if (uncelebratedCorrectMatch) {
+      setCelebratingMatch(uncelebratedCorrectMatch);
+      triggerConfetti();
+    }
+  }, [isLoading, matches, userPredictions]);
+
+  const handleCloseCelebration = () => {
+    if (!celebratingMatch) return;
+    const celebratedStr = localStorage.getItem('predict_celebrated_matches') || '[]';
+    let celebratedList: string[] = [];
+    try {
+      celebratedList = JSON.parse(celebratedStr);
+    } catch (e) {
+      celebratedList = [];
+    }
+    if (!celebratedList.includes(celebratingMatch.id)) {
+      celebratedList.push(celebratingMatch.id);
+      localStorage.setItem('predict_celebrated_matches', JSON.stringify(celebratedList));
+    }
+    setCelebratingMatch(null);
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanPhone = phoneInput.trim();
@@ -124,7 +167,6 @@ const PredictPage: React.FC = () => {
     setPhone(cleanPhone);
     setName(cleanName);
     setIsLoggedIn(true);
-    triggerConfetti();
     showToast("Successfully logged into Prediction Center!");
   };
 
@@ -156,6 +198,12 @@ const PredictPage: React.FC = () => {
 
   // Modern Two-Step Prediction Confirm
   const handleConfirmPredict = async (matchId: string) => {
+    const matchObj = matches.find(m => m.id === matchId);
+    if (!matchObj || matchObj.status !== 'live') {
+      showToast("Voting is only allowed when match is live!", "error");
+      return;
+    }
+
     const selection = selectedPrediction[matchId];
     if (!selection) return;
     if (userPredictions[matchId]) return;
@@ -205,7 +253,6 @@ const PredictPage: React.FC = () => {
       // Save to localStorage
       localStorage.setItem('predict_user_bill', cleanBill);
       
-      triggerConfetti();
       showToast("Prediction submitted successfully!");
     } catch (e) {
       console.error("Prediction error:", e);
@@ -555,7 +602,7 @@ const PredictPage: React.FC = () => {
                       const isUpcoming = match.status === 'upcoming';
                       const isLive = match.status === 'live';
                       const isFinished = match.status === 'finished';
-                      const isVoteOpen = isUpcoming || isLive;
+                      const isVoteOpen = isLive;
                       
                       const selectedVal = selectedPrediction[match.id];
                       const confirmPanelActive = isVoteOpen && selectedVal && !userPred;
@@ -621,12 +668,42 @@ const PredictPage: React.FC = () => {
                           </div>
 
                           {isFinished && (
-                            <div className="mt-4 p-4 bg-emerald-950/20 border border-emerald-500/20 rounded-[1.5rem] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
-                              <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black">🏆 Declared Winner</span>
-                              <span className="text-xs text-emerald-400 font-serif font-black uppercase tracking-wider flex items-center gap-2">
-                                <Award size={14} className="text-gold-500 animate-bounce" />
-                                {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.teamB : match.winner === 'draw' ? 'Draw Match 🤝' : 'Declared Draw 🤝'}
-                              </span>
+                            <div className="mt-6 p-6 bg-gradient-to-r from-stone-900 via-stone-950 to-stone-900 border border-gold-500/30 rounded-[2rem] text-center shadow-2xl relative overflow-hidden group/winner shadow-glow-gold">
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl pointer-events-none group-hover/winner:bg-gold-500/15 transition-all duration-700"></div>
+                              
+                              <div className="relative z-10 flex flex-col items-center gap-2">
+                                <div className="flex items-center gap-1">
+                                  <Sparkles size={12} className="text-gold-400 animate-pulse" />
+                                  <span className="text-[9px] text-gold-500 uppercase tracking-[0.25em] font-black text-glow-gold">Match Champion</span>
+                                  <Sparkles size={12} className="text-gold-400 animate-pulse" />
+                                </div>
+                                
+                                <div className="flex items-center justify-center gap-3 mt-1 select-none">
+                                  {match.winner === 'teamA' && (
+                                    <span className="text-4xl filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)] transform -rotate-12 transition-transform duration-500 group-hover/winner:rotate-0">
+                                      {match.teamAFlag || '🏳️'}
+                                    </span>
+                                  )}
+                                  {match.winner === 'teamB' && (
+                                    <span className="text-4xl filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)] transform rotate-12 transition-transform duration-500 group-hover/winner:rotate-0">
+                                      {match.teamBFlag || '🏳️'}
+                                    </span>
+                                  )}
+                                  
+                                  <h4 className="text-xl sm:text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-gold-400 to-amber-200 italic font-black uppercase tracking-wide text-glow-gold leading-none">
+                                    {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.teamB : 'Draw Fixture'}
+                                  </h4>
+                                  
+                                  {match.winner === 'draw' && (
+                                    <span className="text-3xl filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">🤝</span>
+                                  )}
+                                </div>
+                                
+                                <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/20 text-[9px] font-black uppercase tracking-widest text-gold-400 text-glow-gold">
+                                  <Trophy size={10} className="animate-bounce" />
+                                  {match.winner === 'draw' ? 'No Winner Declared' : 'Official Winner'}
+                                </div>
+                              </div>
                             </div>
                           )}
 
@@ -721,10 +798,10 @@ const PredictPage: React.FC = () => {
                             {!isVoteOpen && !userPred && (
                               <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 text-center space-y-1 mb-2">
                                 <p className="text-[10px] text-stone-500 uppercase tracking-widest font-black flex items-center justify-center gap-1.5">
-                                  <span>🔒 Match Ended - Predictions Locked</span>
+                                  <span>🔒 {isUpcoming ? 'Predictions Not Started Yet' : 'Match Ended - Predictions Locked'}</span>
                                 </p>
                                 <p className="text-[9px] text-gold-500 font-mono tracking-wider">
-                                  Predictions are closed for this fixture.
+                                  {isUpcoming ? 'Voting opens as soon as the match is LIVE!' : 'Predictions are closed for this fixture.'}
                                 </p>
                               </div>
                             )}
@@ -927,6 +1004,62 @@ const PredictPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Premium Prediction Winner Celebration Popup */}
+      {celebratingMatch && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-stone-950/85 backdrop-blur-md p-4 animate-fade-in">
+          <div className="bg-stone-900 border-2 border-gold-500 rounded-[3rem] p-8 sm:p-12 max-w-md w-full text-center shadow-2xl relative overflow-hidden shadow-glow-gold animate-scale-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gold-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+            
+            <div className="w-24 h-24 bg-gradient-to-br from-amber-400 via-gold-500 to-amber-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-gold-500/25 relative group overflow-hidden animate-bounce-slow">
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <Trophy size={48} className="text-stone-950 stroke-[2.5]" />
+            </div>
+
+            <div className="space-y-3 animate-fade-in">
+              <div className="flex items-center justify-center gap-1.5">
+                <Sparkles size={14} className="text-gold-400 animate-pulse" />
+                <span className="text-[10px] text-gold-500 uppercase tracking-[0.3em] font-black text-glow-gold">Prediction Winner</span>
+                <Sparkles size={14} className="text-gold-400 animate-pulse" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-serif text-white uppercase tracking-tight">You Are A Winner!</h3>
+              <p className="text-stone-400 text-xs sm:text-sm leading-relaxed font-sans font-light">
+                Your prediction for the match between <span className="text-white font-bold">{celebratingMatch.teamA}</span> and <span className="text-white font-bold">{celebratingMatch.teamB}</span> was 100% correct!
+              </p>
+            </div>
+
+            <div className="mt-8 mb-8 p-6 bg-stone-950 border border-stone-850 rounded-2xl flex flex-col items-center justify-center gap-2 shadow-inner">
+              <span className="text-[8px] text-stone-600 uppercase tracking-widest font-black block">Your Predicted Winner</span>
+              <div className="flex items-center gap-2 font-serif text-lg font-black text-gold-400 text-glow-gold uppercase">
+                {celebratingMatch.winner === 'teamA' ? (
+                  <>
+                    <span>{celebratingMatch.teamAFlag}</span>
+                    <span>{celebratingMatch.teamA}</span>
+                  </>
+                ) : celebratingMatch.winner === 'teamB' ? (
+                  <>
+                    <span>{celebratingMatch.teamBFlag}</span>
+                    <span>{celebratingMatch.teamB}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🤝</span>
+                    <span>Draw Match</span>
+                  </>
+                )}
+              </div>
+              <span className="text-[9px] text-emerald-400 font-black uppercase tracking-widest mt-1">1 Point Added To Scoreboard 🚀</span>
+            </div>
+
+            <button 
+              onClick={handleCloseCelebration}
+              className="w-full bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 font-black py-4 rounded-xl uppercase tracking-widest text-[10px] shadow-lg shadow-gold-500/10 hover:shadow-gold-500/25 active:scale-95 transition-all"
+            >
+              Claim Victory ⚡
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
