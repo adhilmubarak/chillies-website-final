@@ -637,6 +637,17 @@ const PredictPage: React.FC = () => {
                               </div>
                             )}
 
+                            {!isUpcoming && !userPred && (
+                              <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 text-center space-y-1 mb-2">
+                                <p className="text-[10px] text-stone-500 uppercase tracking-widest font-black flex items-center justify-center gap-1.5">
+                                  <span>🔒 {isLive ? 'Live Game' : 'Match Ended'} - Predictions Locked</span>
+                                </p>
+                                <p className="text-[9px] text-gold-500 font-mono tracking-wider">
+                                  {isLive ? 'Voting locks once kickoff begins!' : 'Predictions are closed for this fixture.'}
+                                </p>
+                              </div>
+                            )}
+
                             {(userPred || !isUpcoming) && (
                               <div className="space-y-4 animate-fade-in">
                                 {/* Aggregated Vote Breakdown percentages */}
