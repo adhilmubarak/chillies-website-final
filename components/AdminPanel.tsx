@@ -3130,19 +3130,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                             Winner: {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.teamB : match.winner === 'draw' ? 'Draw' : 'TBD'}
                                                         </span>
                                                         {match.winner && (
-                                                            match.luckyWinnerPhone ? (
-                                                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gold-400 text-glow-gold">
-                                                                    🎁 Lucky: {match.luckyWinnerPhone}
-                                                                </span>
-                                                            ) : (
+                                                            <div className="flex flex-col gap-1 items-start mt-1">
+                                                                {match.luckyWinnerPhone && (
+                                                                    (() => {
+                                                                        const matchingOrder = orders.find(o => o.id === match.luckyWinnerPhone);
+                                                                        const displayName = matchingOrder ? `${matchingOrder.customerName} (#${match.luckyWinnerPhone})` : `Bill #${match.luckyWinnerPhone}`;
+                                                                        return (
+                                                                            <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gold-400 text-glow-gold mb-1">
+                                                                                🎁 Lucky: {displayName}
+                                                                            </span>
+                                                                        );
+                                                                    })()
+                                                                )}
                                                                 <button 
                                                                     onClick={() => handleDrawLuckyWinner(match)}
                                                                     disabled={isDrawingLuckyWinner[match.id]}
                                                                     className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gold-500 hover:text-gold-400 transition-colors"
                                                                 >
-                                                                    <Gift size={10} className={isDrawingLuckyWinner[match.id] ? 'animate-spin' : ''} /> Draw Lucky Winner 🎲
+                                                                    <Gift size={10} className={isDrawingLuckyWinner[match.id] ? 'animate-spin' : ''} /> 
+                                                                    {match.luckyWinnerPhone ? 'Redraw Winner 🔄' : 'Draw Lucky Winner 🎲'}
                                                                 </button>
-                                                            )
+                                                            </div>
                                                         )}
                                                     </div>
                                                 ) : (
@@ -3210,8 +3218,33 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           <p className="text-stone-500 text-xs leading-relaxed mb-6">A predictor has been randomly selected from the correct answers pool for this match!</p>
                           
                           <div className="bg-stone-950 border border-stone-800 rounded-2xl p-6 mb-8 shadow-inner">
-                            <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-2">Selected Account Phone</span>
-                            <span className="font-mono text-2xl font-black text-gold-400 tracking-wider text-glow-gold">{luckyWinnerPhone}</span>
+                            {(() => {
+                              const matchingOrder = orders.find(o => o.id === luckyWinnerPhone);
+                              if (matchingOrder) {
+                                return (
+                                  <div className="space-y-3">
+                                    <div className="flex flex-col items-center">
+                                      <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-1">Customer Name</span>
+                                      <span className="text-lg font-bold text-white capitalize">{matchingOrder.customerName}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center mt-3">
+                                      <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-1">Contact Number</span>
+                                      <span className="font-mono text-xl font-black text-gold-400 tracking-wider text-glow-gold select-all">{matchingOrder.contactNumber}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center mt-3">
+                                      <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-1">Verified Bill</span>
+                                      <span className="font-mono text-xs text-stone-500 font-bold">#{luckyWinnerPhone}</span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <>
+                                  <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-2">Selected Account Phone</span>
+                                  <span className="font-mono text-2xl font-black text-gold-400 tracking-wider text-glow-gold">{luckyWinnerPhone}</span>
+                                </>
+                              );
+                            })()}
                           </div>
                           
                           <button 

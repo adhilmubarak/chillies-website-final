@@ -6,17 +6,12 @@ import { useNavigate } from 'react-router-dom';
 
 const PredictPage: React.FC = () => {
   const navigate = useNavigate();
-  const [phone, setPhone] = useState(() => localStorage.getItem('predict_user_bill') || localStorage.getItem('predict_user_phone') || '');
-  const [name, setName] = useState(() => {
-    const savedName = localStorage.getItem('predict_user_name');
-    if (savedName) return savedName;
-    const activeBill = localStorage.getItem('predict_user_bill');
-    return activeBill ? `Voter #${activeBill}` : '';
-  });
+  const [phone, setPhone] = useState(() => localStorage.getItem('predict_user_phone') || '');
+  const [name, setName] = useState(() => localStorage.getItem('predict_user_name') || '');
   const [phoneInput, setPhoneInput] = useState('');
   const [nameInput, setNameInput] = useState('');
   const [billInput, setBillInput] = useState(() => localStorage.getItem('predict_user_bill') || '');
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!phone);
   const [matches, setMatches] = useState<any[]>([]);
   const [userPredictions, setUserPredictions] = useState<Record<string, string>>({}); // matchId -> predictedWinner
   const [leaderboard, setLeaderboard] = useState<{ phone: string; score: number }[]>([]);
@@ -61,10 +56,7 @@ const PredictPage: React.FC = () => {
 
   // Load user predictions if logged in
   useEffect(() => {
-    if (!phone) {
-      setUserPredictions({});
-      return;
-    }
+    if (!isLoggedIn || !phone) return;
     const q = query(collection(db, 'worldcup_predictions'), where('phone', '==', phone));
     const unsub = onSnapshot(q, (snap) => {
       const preds: Record<string, string> = {};
@@ -75,7 +67,7 @@ const PredictPage: React.FC = () => {
       setUserPredictions(preds);
     });
     return () => unsub();
-  }, [phone]);
+  }, [isLoggedIn, phone]);
 
   // Compute Leaderboard
   useEffect(() => {
@@ -113,6 +105,29 @@ const PredictPage: React.FC = () => {
     computeLeaderboard();
   }, [matches]);
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanPhone = phoneInput.trim();
+    const cleanName = nameInput.trim();
+
+    if (!cleanName) {
+      showToast("Please enter your name.", "error");
+      return;
+    }
+    if (cleanPhone.length < 10) {
+      showToast("Please enter a 10-digit mobile number.", "error");
+      return;
+    }
+
+    localStorage.setItem('predict_user_phone', cleanPhone);
+    localStorage.setItem('predict_user_name', cleanName);
+    setPhone(cleanPhone);
+    setName(cleanName);
+    setIsLoggedIn(true);
+    triggerConfetti();
+    showToast("Successfully logged into Prediction Center!");
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('predict_user_phone');
     localStorage.removeItem('predict_user_name');
@@ -122,9 +137,10 @@ const PredictPage: React.FC = () => {
     setPhoneInput('');
     setNameInput('');
     setBillInput('');
+    setIsLoggedIn(false);
     setUserPredictions({});
     setSelectedPrediction({});
-    showToast("Session cleared successfully.");
+    showToast("Signed out of your account.");
   };
 
   const triggerConfetti = () => {
@@ -151,7 +167,7 @@ const PredictPage: React.FC = () => {
       const billNum = parseInt(cleanBill, 10);
 
       if (isNaN(billNum) || billNum < 3171) {
-        showToast("Please enter a valid bill number (starting from 3171) to lock vote.", "error");
+        showToast("Please enter a valid bill number to lock vote.", "error");
         setIsSubmitting(prev => ({ ...prev, [matchId]: false }));
         return;
       }
@@ -172,8 +188,8 @@ const PredictPage: React.FC = () => {
       // 1. Add prediction doc
       await addDoc(collection(db, 'worldcup_predictions'), {
         matchId,
-        phone: cleanBill,
-        name: `Voter #${cleanBill}`,
+        phone,
+        name,
         billNumber: cleanBill,
         predictedWinner: selection,
         createdAt: Date.now()
@@ -186,10 +202,8 @@ const PredictPage: React.FC = () => {
         [incrementField]: increment(1)
       });
 
-      // Save to localStorage and update session states
+      // Save to localStorage
       localStorage.setItem('predict_user_bill', cleanBill);
-      setPhone(cleanBill);
-      setName(`Voter #${cleanBill}`);
       
       triggerConfetti();
       showToast("Prediction submitted successfully!");
@@ -382,24 +396,52 @@ const PredictPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Predict Panel (Session-less Bill Verification Flow) */}
-        <div className="space-y-8 animate-fade-in">
-          {/* User welcome bar */}
-          <div className="flex flex-col sm:flex-row justify-between items-center bg-stone-900/50 border border-white/5 rounded-3xl p-5 sm:px-8 gap-4 shadow-xl">
-            <div className="flex items-center gap-3">
-              <div className={`w-2.5 h-2.5 rounded-full ${phone ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-stone-600'}`}></div>
-              <span className="text-xs uppercase tracking-widest font-black text-stone-300">
-                {phone ? (
-                  <>Welcome, <span className="text-gold-400 text-glow-gold font-serif capitalize">{name || `Voter #${phone}`}</span>! <span className="text-stone-500 font-sans normal-case ml-2">(Verified Bill: #{phone})</span></>
-                ) : (
-                  <>Welcome, Predictor! <span className="text-stone-500 font-sans normal-case ml-2">Select a match below and enter your bill number to lock your vote.</span></>
-                )}
-              </span>
+        {/* Login Prompt or Predict Panel */}
+        {!isLoggedIn ? (
+          <div className="max-w-md mx-auto bg-stone-900/80 border border-white/5 rounded-[2.5rem] p-10 text-center shadow-2xl relative shadow-glow-gold">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+            <div className="w-16 h-16 bg-stone-950 border border-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 relative group overflow-hidden">
+              <div className="absolute inset-0 bg-gold-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <Phone className="text-gold-500" size={24} />
             </div>
-            {phone && (
-              <button onClick={handleLogout} className="text-stone-500 hover:text-white uppercase tracking-widest text-[9px] font-black transition-colors bg-stone-950/40 border border-white/5 hover:border-red-500/20 px-4 py-2 rounded-xl">Clear Session</button>
-            )}
+            <h3 className="text-xl font-serif text-white mb-2">Unlocking Predictions</h3>
+            <p className="text-stone-500 text-xs leading-relaxed mb-8">Enter your mobile number to vote on World Cup matches. Stand a chance to top our scoreboard and win free shawarmas & discounts!</p>
+            
+            <form onSubmit={handleLogin} className="space-y-4">
+              <input 
+                type="text" 
+                placeholder="Enter Your Full Name" 
+                value={nameInput} 
+                onChange={e => setNameInput(e.target.value)} 
+                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-center text-white focus:outline-none focus:border-gold-500 tracking-wide text-sm shadow-inner transition-colors"
+                required
+              />
+              <input 
+                type="tel" 
+                placeholder="Enter 10-Digit Mobile Number" 
+                value={phoneInput} 
+                onChange={e => setPhoneInput(e.target.value.replace(/\D/g, '').slice(0, 10))} 
+                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-center text-white focus:outline-none focus:border-gold-500 tracking-wider font-mono text-sm shadow-inner transition-colors"
+                required
+              />
+              <button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-widest text-[10px] shadow-lg shadow-gold-500/10 hover:shadow-gold-500/25 active:scale-95 transition-all"
+              >
+                Enter Match Center
+              </button>
+            </form>
           </div>
+        ) : (
+          <div className="space-y-8 animate-fade-in">
+            {/* User welcome bar */}
+            <div className="flex flex-col sm:flex-row justify-between items-center bg-stone-900/50 border border-white/5 rounded-3xl p-5 sm:px-8 gap-4 shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                <span className="text-xs uppercase tracking-widest font-black text-stone-300">Welcome, <span className="text-gold-400 text-glow-gold font-serif capitalize">{name || 'Predictor'}</span>! <span className="text-stone-500 font-sans normal-case ml-2">(Account: {maskPhone(phone)})</span></span>
+              </div>
+              <button onClick={handleLogout} className="text-stone-500 hover:text-white uppercase tracking-widest text-[9px] font-black transition-colors bg-stone-950/40 border border-white/5 hover:border-red-500/20 px-4 py-2 rounded-xl">Sign Out</button>
+            </div>
 
             {/* Premium Stats Grid */}
             <div className="grid grid-cols-3 gap-4">
@@ -652,7 +694,7 @@ const PredictPage: React.FC = () => {
                                       <div className="w-full sm:flex-1 relative">
                                         <input 
                                           type="number"
-                                          placeholder="Enter Bill Number (e.g. 3171)"
+                                          placeholder="Enter Bill Number"
                                           value={billInput}
                                           onChange={e => setBillInput(e.target.value)}
                                           className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3.5 pl-4 text-white focus:outline-none focus:border-gold-500 tracking-wide font-mono text-xs shadow-inner"
@@ -883,6 +925,7 @@ const PredictPage: React.FC = () => {
               </div>
             )}
           </div>
+        )}
       </div>
     </div>
   );
