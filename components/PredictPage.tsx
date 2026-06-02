@@ -6,13 +6,17 @@ import { useNavigate } from 'react-router-dom';
 
 const PredictPage: React.FC = () => {
   const navigate = useNavigate();
-  const [phone, setPhone] = useState(() => localStorage.getItem('predict_user_phone') || '');
-  const [name, setName] = useState(() => localStorage.getItem('predict_user_name') || '');
-  const [bill, setBill] = useState(() => localStorage.getItem('predict_user_bill') || '');
+  const [phone, setPhone] = useState(() => localStorage.getItem('predict_user_bill') || localStorage.getItem('predict_user_phone') || '');
+  const [name, setName] = useState(() => {
+    const savedName = localStorage.getItem('predict_user_name');
+    if (savedName) return savedName;
+    const activeBill = localStorage.getItem('predict_user_bill');
+    return activeBill ? `Voter #${activeBill}` : '';
+  });
   const [phoneInput, setPhoneInput] = useState('');
   const [nameInput, setNameInput] = useState('');
-  const [billInput, setBillInput] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(!!phone);
+  const [billInput, setBillInput] = useState(() => localStorage.getItem('predict_user_bill') || '');
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [matches, setMatches] = useState<any[]>([]);
   const [userPredictions, setUserPredictions] = useState<Record<string, string>>({}); // matchId -> predictedWinner
   const [leaderboard, setLeaderboard] = useState<{ phone: string; score: number }[]>([]);
@@ -57,7 +61,10 @@ const PredictPage: React.FC = () => {
 
   // Load user predictions if logged in
   useEffect(() => {
-    if (!isLoggedIn || !phone) return;
+    if (!phone) {
+      setUserPredictions({});
+      return;
+    }
     const q = query(collection(db, 'worldcup_predictions'), where('phone', '==', phone));
     const unsub = onSnapshot(q, (snap) => {
       const preds: Record<string, string> = {};
@@ -68,7 +75,7 @@ const PredictPage: React.FC = () => {
       setUserPredictions(preds);
     });
     return () => unsub();
-  }, [isLoggedIn, phone]);
+  }, [phone]);
 
   // Compute Leaderboard
   useEffect(() => {
@@ -106,51 +113,18 @@ const PredictPage: React.FC = () => {
     computeLeaderboard();
   }, [matches]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanPhone = phoneInput.trim();
-    const cleanName = nameInput.trim();
-    const cleanBill = billInput.trim();
-    const billNum = parseInt(cleanBill, 10);
-
-    if (!cleanName) {
-      showToast("Please enter your name.", "error");
-      return;
-    }
-    if (cleanPhone.length < 10) {
-      showToast("Please enter a 10-digit mobile number.", "error");
-      return;
-    }
-    if (isNaN(billNum) || billNum < 3171) {
-      showToast("Please enter a valid bill number (starting from 3171).", "error");
-      return;
-    }
-
-    localStorage.setItem('predict_user_phone', cleanPhone);
-    localStorage.setItem('predict_user_name', cleanName);
-    localStorage.setItem('predict_user_bill', cleanBill);
-    setPhone(cleanPhone);
-    setName(cleanName);
-    setBill(cleanBill);
-    setIsLoggedIn(true);
-    triggerConfetti();
-    showToast("Successfully logged into Prediction Center!");
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('predict_user_phone');
     localStorage.removeItem('predict_user_name');
     localStorage.removeItem('predict_user_bill');
     setPhone('');
     setName('');
-    setBill('');
     setPhoneInput('');
     setNameInput('');
     setBillInput('');
-    setIsLoggedIn(false);
     setUserPredictions({});
     setSelectedPrediction({});
-    showToast("Signed out of your account.");
+    showToast("Session cleared successfully.");
   };
 
   const triggerConfetti = () => {
@@ -168,18 +142,39 @@ const PredictPage: React.FC = () => {
   const handleConfirmPredict = async (matchId: string) => {
     const selection = selectedPrediction[matchId];
     if (!selection) return;
-    if (!isLoggedIn || !phone) return;
     if (userPredictions[matchId]) return;
 
     setIsSubmitting(prev => ({ ...prev, [matchId]: true }));
 
     try {
+      const cleanBill = billInput.trim();
+      const billNum = parseInt(cleanBill, 10);
+
+      if (isNaN(billNum) || billNum < 3171) {
+        showToast("Please enter a valid bill number (starting from 3171) to lock vote.", "error");
+        setIsSubmitting(prev => ({ ...prev, [matchId]: false }));
+        return;
+      }
+
+      // Check if this bill number has already voted on this match
+      const billCheckQuery = query(
+        collection(db, 'worldcup_predictions'),
+        where('matchId', '==', matchId),
+        where('billNumber', '==', cleanBill)
+      );
+      const billCheckSnap = await getDocs(billCheckQuery);
+      if (!billCheckSnap.empty) {
+        showToast("This bill number has already been used to vote on this match.", "error");
+        setIsSubmitting(prev => ({ ...prev, [matchId]: false }));
+        return;
+      }
+
       // 1. Add prediction doc
       await addDoc(collection(db, 'worldcup_predictions'), {
         matchId,
-        phone,
-        name,
-        billNumber: bill,
+        phone: cleanBill,
+        name: `Voter #${cleanBill}`,
+        billNumber: cleanBill,
         predictedWinner: selection,
         createdAt: Date.now()
       });
@@ -190,6 +185,11 @@ const PredictPage: React.FC = () => {
       await updateDoc(matchRef, {
         [incrementField]: increment(1)
       });
+
+      // Save to localStorage and update session states
+      localStorage.setItem('predict_user_bill', cleanBill);
+      setPhone(cleanBill);
+      setName(`Voter #${cleanBill}`);
       
       triggerConfetti();
       showToast("Prediction submitted successfully!");
@@ -211,6 +211,12 @@ const PredictPage: React.FC = () => {
   };
 
   const maskPhone = (ph: string) => {
+    if (!ph) return '';
+    // If it's a bill number (numeric string under 10 digits)
+    const isBill = /^\d+$/.test(ph) && ph.length < 10;
+    if (isBill) {
+      return `Bill #${ph}`;
+    }
     if (ph.length < 4) return ph;
     return `${ph.slice(0, 2)}*****${ph.slice(-3)}`;
   };
@@ -376,60 +382,24 @@ const PredictPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Login Prompt or Predict Panel */}
-        {!isLoggedIn ? (
-          <div className="max-w-md mx-auto bg-stone-900/80 border border-white/5 rounded-[2.5rem] p-10 text-center shadow-2xl relative shadow-glow-gold">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none"></div>
-            <div className="w-16 h-16 bg-stone-950 border border-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 relative group overflow-hidden">
-              <div className="absolute inset-0 bg-gold-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <Phone className="text-gold-500" size={24} />
+        {/* Predict Panel (Session-less Bill Verification Flow) */}
+        <div className="space-y-8 animate-fade-in">
+          {/* User welcome bar */}
+          <div className="flex flex-col sm:flex-row justify-between items-center bg-stone-900/50 border border-white/5 rounded-3xl p-5 sm:px-8 gap-4 shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className={`w-2.5 h-2.5 rounded-full ${phone ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-stone-600'}`}></div>
+              <span className="text-xs uppercase tracking-widest font-black text-stone-300">
+                {phone ? (
+                  <>Welcome, <span className="text-gold-400 text-glow-gold font-serif capitalize">{name || `Voter #${phone}`}</span>! <span className="text-stone-500 font-sans normal-case ml-2">(Verified Bill: #{phone})</span></>
+                ) : (
+                  <>Welcome, Predictor! <span className="text-stone-500 font-sans normal-case ml-2">Select a match below and enter your bill number to lock your vote.</span></>
+                )}
+              </span>
             </div>
-            <h3 className="text-xl font-serif text-white mb-2">Unlocking Predictions</h3>
-            <p className="text-stone-500 text-xs leading-relaxed mb-8">Enter your mobile number to vote on World Cup matches. Stand a chance to top our scoreboard and win free shawarmas & discounts!</p>
-            
-            <form onSubmit={handleLogin} className="space-y-4">
-              <input 
-                type="text" 
-                placeholder="Enter Your Full Name" 
-                value={nameInput} 
-                onChange={e => setNameInput(e.target.value)} 
-                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-center text-white focus:outline-none focus:border-gold-500 tracking-wide text-sm shadow-inner transition-colors"
-                required
-              />
-              <input 
-                type="tel" 
-                placeholder="Enter 10-Digit Mobile Number" 
-                value={phoneInput} 
-                onChange={e => setPhoneInput(e.target.value.replace(/\D/g, '').slice(0, 10))} 
-                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-center text-white focus:outline-none focus:border-gold-500 tracking-wider font-mono text-sm shadow-inner transition-colors"
-                required
-              />
-              <input 
-                type="number" 
-                placeholder="Enter Bill Number (e.g. 3171)" 
-                value={billInput} 
-                onChange={e => setBillInput(e.target.value)} 
-                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-center text-white focus:outline-none focus:border-gold-500 tracking-wide font-mono text-sm shadow-inner transition-colors"
-                required
-              />
-              <button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-widest text-[10px] shadow-lg shadow-gold-500/10 hover:shadow-gold-500/25 active:scale-95 transition-all"
-              >
-                Enter Match Center
-              </button>
-            </form>
+            {phone && (
+              <button onClick={handleLogout} className="text-stone-500 hover:text-white uppercase tracking-widest text-[9px] font-black transition-colors bg-stone-950/40 border border-white/5 hover:border-red-500/20 px-4 py-2 rounded-xl">Clear Session</button>
+            )}
           </div>
-        ) : (
-          <div className="space-y-8 animate-fade-in">
-            {/* User welcome bar */}
-            <div className="flex flex-col sm:flex-row justify-between items-center bg-stone-900/50 border border-white/5 rounded-3xl p-5 sm:px-8 gap-4 shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                <span className="text-xs uppercase tracking-widest font-black text-stone-300">Welcome, <span className="text-gold-400 text-glow-gold font-serif capitalize">{name || 'Predictor'}</span>! <span className="text-stone-500 font-sans normal-case ml-2">(Bill: #{bill} | Account: {maskPhone(phone)})</span></span>
-              </div>
-              <button onClick={handleLogout} className="text-stone-500 hover:text-white uppercase tracking-widest text-[9px] font-black transition-colors bg-stone-950/40 border border-white/5 hover:border-red-500/20 px-4 py-2 rounded-xl">Sign Out</button>
-            </div>
 
             {/* Premium Stats Grid */}
             <div className="grid grid-cols-3 gap-4">
@@ -658,33 +628,46 @@ const PredictPage: React.FC = () => {
 
                                 {/* Step 2 Interactive Confirmation Panel */}
                                 {confirmPanelActive && (
-                                  <div className="bg-gradient-to-r from-stone-950 to-stone-900 border border-gold-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fade-in-up mt-3">
-                                    <div className="flex items-center gap-2">
-                                      <Zap size={14} className="text-gold-400 animate-bounce" />
-                                      <span className="text-[10px] text-stone-300 uppercase tracking-widest font-black">
-                                        Locks {selectedVal === 'teamA' ? match.teamA : selectedVal === 'teamB' ? match.teamB : 'Draw'}?
-                                      </span>
-                                    </div>
-                                    <div className="flex gap-2 w-full sm:w-auto">
+                                  <div className="bg-gradient-to-r from-stone-950 to-stone-900 border border-gold-500/20 rounded-2xl p-5 flex flex-col gap-4 animate-fade-in-up mt-3">
+                                    <div className="flex items-center justify-between border-b border-stone-850 pb-3">
+                                      <div className="flex items-center gap-2">
+                                        <Zap size={14} className="text-gold-400 animate-bounce" />
+                                        <span className="text-[10px] text-stone-300 uppercase tracking-widest font-black">
+                                          Confirm prediction: {selectedVal === 'teamA' ? match.teamA : selectedVal === 'teamB' ? match.teamB : 'Draw'}? 🎯
+                                        </span>
+                                      </div>
                                       <button 
                                         onClick={() => setSelectedPrediction(p => {
                                           const copy = { ...p };
                                           delete copy[match.id];
                                           return copy;
                                         })}
-                                        className="flex-1 sm:flex-none px-4 py-2 border border-white/5 hover:border-white/10 rounded-xl bg-stone-950 text-[9px] text-stone-500 hover:text-white uppercase font-black tracking-wider transition-colors"
+                                        className="text-[9px] text-stone-500 hover:text-red-400 uppercase font-black tracking-wider transition-colors"
                                       >
                                         Cancel
                                       </button>
+                                    </div>
+                                    
+                                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                                      <div className="w-full sm:flex-1 relative">
+                                        <input 
+                                          type="number"
+                                          placeholder="Enter Bill Number (e.g. 3171)"
+                                          value={billInput}
+                                          onChange={e => setBillInput(e.target.value)}
+                                          className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3.5 pl-4 text-white focus:outline-none focus:border-gold-500 tracking-wide font-mono text-xs shadow-inner"
+                                          required
+                                        />
+                                      </div>
                                       <button 
                                         onClick={() => handleConfirmPredict(match.id)}
                                         disabled={loadingSubmit}
-                                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-lg shadow-gold-500/10 hover:shadow-gold-500/20 active:scale-95 transition-all disabled:opacity-50"
+                                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-4 bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-lg shadow-gold-500/10 hover:shadow-gold-500/20 active:scale-95 transition-all disabled:opacity-50 whitespace-nowrap"
                                       >
                                         {loadingSubmit ? (
                                           <Loader2 size={12} className="animate-spin text-stone-950" />
                                         ) : (
-                                          <span>Confirm Prediction ⚡</span>
+                                          <span>Lock Prediction ⚡</span>
                                         )}
                                       </button>
                                     </div>
@@ -900,7 +883,6 @@ const PredictPage: React.FC = () => {
               </div>
             )}
           </div>
-        )}
       </div>
     </div>
   );

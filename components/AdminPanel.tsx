@@ -3266,11 +3266,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                       const selStr = voter.predictedWinner === 'teamA' ? viewingVotersMatch.teamA : voter.predictedWinner === 'teamB' ? viewingVotersMatch.teamB : 'Draw';
                                       const selColor = voter.predictedWinner === 'draw' ? 'text-stone-450' : 'text-gold-400 font-bold';
                                       
+                                      const matchingOrder = orders.find(o => o.id === voter.billNumber);
+                                      const voterName = matchingOrder ? matchingOrder.customerName : (voter.name && !voter.name.startsWith('Voter #') ? voter.name : 'Anonymous');
+                                      const voterPhone = matchingOrder ? matchingOrder.contactNumber : (voter.phone && voter.phone !== voter.billNumber ? voter.phone : 'N/A');
+
                                       return (
                                         <tr key={voter.id} className="hover:bg-white/3 transition-colors">
-                                          <td className="py-4 pl-6 text-stone-400 font-sans">{voter.name || 'Anonymous'}</td>
+                                          <td className="py-4 pl-6 text-stone-400 font-sans">{voterName}</td>
                                           <td className="py-4 text-gold-400 font-bold font-mono">#{voter.billNumber || 'N/A'}</td>
-                                          <td className="py-4 text-white font-bold select-all">{voter.phone}</td>
+                                          <td className="py-4 text-white font-bold select-all">{voterPhone}</td>
                                           <td className={`py-4 ${selColor}`}>{selStr}</td>
                                           <td className="py-4 pr-6 text-right text-stone-500">{dateStr}</td>
                                         </tr>
