@@ -703,6 +703,20 @@ const PredictPage: React.FC = () => {
                                   <Trophy size={10} className="animate-bounce" />
                                   {match.winner === 'draw' ? 'No Winner Declared' : 'Official Winner'}
                                 </div>
+
+                                {/* Lucky Draw Winner Block */}
+                                {match.luckyWinnerPhone && (
+                                  <div className="mt-4 pt-4 border-t border-stone-850 w-full flex flex-col items-center gap-1.5 animate-fade-in">
+                                    <span className="text-[8px] text-stone-500 uppercase tracking-widest font-black flex items-center gap-1.5">
+                                      <span>🎁 Lucky Draw Winner</span>
+                                    </span>
+                                    <span className="text-xs font-black text-white tracking-wide font-serif capitalize text-glow-gold">
+                                      {match.luckyWinnerName && !match.luckyWinnerName.startsWith('Voter #')
+                                        ? match.luckyWinnerName 
+                                        : `Voter (${maskPhone(match.luckyWinnerPhone)})`}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           )}

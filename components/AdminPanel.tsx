@@ -781,7 +781,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       
       // Update match document in Firestore to persist
       await updateDoc(doc(db, 'worldcup_matches', match.id), {
-        luckyWinnerPhone: chosen.phone
+        luckyWinnerPhone: chosen.phone,
+        luckyWinnerName: chosen.name || 'Anonymous'
       });
       
       setLuckyWinnerMatchId(match.id);
