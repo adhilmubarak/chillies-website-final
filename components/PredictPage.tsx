@@ -830,21 +830,42 @@ const PredictPage: React.FC = () => {
 
                                 {/* Selection Status Message */}
                                 {userPred && (
-                                  <div className="flex items-center justify-between p-3.5 bg-stone-950 rounded-xl border border-white/5 mt-2">
-                                    <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Your Prediction</span>
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-[10px] text-gold-500 uppercase font-black tracking-widest text-glow-gold flex items-center gap-1.5">
-                                        <Zap size={10} className="text-gold-500 animate-pulse" /> {userPred === 'teamA' ? match.teamA : userPred === 'teamB' ? match.teamB : 'Draw'}
-                                      </span>
-                                      <button 
-                                        onClick={() => sharePrediction(match, userPred)}
-                                        className="text-stone-500 hover:text-white transition-colors"
-                                        title="Share prediction on WhatsApp"
-                                      >
-                                        <Share2 size={12} />
-                                      </button>
-                                    </div>
-                                  </div>
+                                  (() => {
+                                    const isDrawPred = userPred === 'draw';
+                                    const isTeamAPred = userPred === 'teamA';
+                                    const predName = isTeamAPred ? match.teamA : userPred === 'teamB' ? match.teamB : 'Draw Match';
+                                    const predFlag = isTeamAPred ? (match.teamAFlag || '🏳️') : userPred === 'teamB' ? (match.teamBFlag || '🏳️') : '🤝';
+                                    
+                                    const borderClass = isDrawPred ? 'border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]' : 'border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]';
+                                    const gradientClass = isDrawPred ? 'from-stone-950 via-amber-950/10 to-stone-950' : 'from-stone-950 via-emerald-950/10 to-stone-950';
+                                    const glowTextClass = isDrawPred ? 'text-amber-400 text-glow-gold' : 'text-emerald-400 text-glow-emerald';
+
+                                    return (
+                                      <div className={`p-4 bg-gradient-to-r ${gradientClass} rounded-2xl border ${borderClass} mt-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner group/pred`}>
+                                        <div className="flex items-center gap-3">
+                                          <div className={`w-8 h-8 rounded-xl bg-stone-900 flex items-center justify-center border border-white/5`}>
+                                            <Zap size={14} className={isDrawPred ? 'text-amber-500' : 'text-emerald-400'} />
+                                          </div>
+                                          <div className="text-left">
+                                            <span className="text-[8px] text-stone-500 uppercase tracking-widest font-black block mb-0.5">Your Locked Vote</span>
+                                            <div className="flex items-center gap-1.5">
+                                              <span className="text-sm select-none">{predFlag}</span>
+                                              <span className={`text-xs uppercase font-black tracking-wider ${glowTextClass}`}>{predName}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        
+                                        <button 
+                                          onClick={() => sharePrediction(match, userPred)}
+                                          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-stone-905 hover:bg-gold-500/10 border border-white/5 hover:border-gold-500/30 text-stone-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 active:scale-95 group-hover/pred:border-gold-500/20 shadow-md"
+                                          title="Share prediction on WhatsApp"
+                                        >
+                                          <Share2 size={10} className="text-gold-500 animate-pulse" />
+                                          <span>Share prediction 🚀</span>
+                                        </button>
+                                      </div>
+                                    );
+                                  })()
                                 )}
 
                                 {isFinished && (
