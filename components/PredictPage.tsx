@@ -8,8 +8,10 @@ const PredictPage: React.FC = () => {
   const navigate = useNavigate();
   const [phone, setPhone] = useState(() => localStorage.getItem('predict_user_phone') || '');
   const [name, setName] = useState(() => localStorage.getItem('predict_user_name') || '');
+  const [bill, setBill] = useState(() => localStorage.getItem('predict_user_bill') || '');
   const [phoneInput, setPhoneInput] = useState('');
   const [nameInput, setNameInput] = useState('');
+  const [billInput, setBillInput] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(!!phone);
   const [matches, setMatches] = useState<any[]>([]);
   const [userPredictions, setUserPredictions] = useState<Record<string, string>>({}); // matchId -> predictedWinner
@@ -108,6 +110,9 @@ const PredictPage: React.FC = () => {
     e.preventDefault();
     const cleanPhone = phoneInput.trim();
     const cleanName = nameInput.trim();
+    const cleanBill = billInput.trim();
+    const billNum = parseInt(cleanBill, 10);
+
     if (!cleanName) {
       showToast("Please enter your name.", "error");
       return;
@@ -116,10 +121,17 @@ const PredictPage: React.FC = () => {
       showToast("Please enter a 10-digit mobile number.", "error");
       return;
     }
+    if (isNaN(billNum) || billNum < 3171) {
+      showToast("Please enter a valid bill number (starting from 3171).", "error");
+      return;
+    }
+
     localStorage.setItem('predict_user_phone', cleanPhone);
     localStorage.setItem('predict_user_name', cleanName);
+    localStorage.setItem('predict_user_bill', cleanBill);
     setPhone(cleanPhone);
     setName(cleanName);
+    setBill(cleanBill);
     setIsLoggedIn(true);
     triggerConfetti();
     showToast("Successfully logged into Prediction Center!");
@@ -128,10 +140,13 @@ const PredictPage: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('predict_user_phone');
     localStorage.removeItem('predict_user_name');
+    localStorage.removeItem('predict_user_bill');
     setPhone('');
     setName('');
+    setBill('');
     setPhoneInput('');
     setNameInput('');
+    setBillInput('');
     setIsLoggedIn(false);
     setUserPredictions({});
     setSelectedPrediction({});
@@ -164,6 +179,7 @@ const PredictPage: React.FC = () => {
         matchId,
         phone,
         name,
+        billNumber: bill,
         predictedWinner: selection,
         createdAt: Date.now()
       });
@@ -388,6 +404,14 @@ const PredictPage: React.FC = () => {
                 className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-center text-white focus:outline-none focus:border-gold-500 tracking-wider font-mono text-sm shadow-inner transition-colors"
                 required
               />
+              <input 
+                type="number" 
+                placeholder="Enter Bill Number (e.g. 3171)" 
+                value={billInput} 
+                onChange={e => setBillInput(e.target.value)} 
+                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-center text-white focus:outline-none focus:border-gold-500 tracking-wide font-mono text-sm shadow-inner transition-colors"
+                required
+              />
               <button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 font-black py-4 rounded-2xl uppercase tracking-widest text-[10px] shadow-lg shadow-gold-500/10 hover:shadow-gold-500/25 active:scale-95 transition-all"
@@ -402,7 +426,7 @@ const PredictPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row justify-between items-center bg-stone-900/50 border border-white/5 rounded-3xl p-5 sm:px-8 gap-4 shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                <span className="text-xs uppercase tracking-widest font-black text-stone-300">Welcome, <span className="text-gold-400 text-glow-gold font-serif capitalize">{name || 'Predictor'}</span>! <span className="text-stone-500 font-sans normal-case ml-2">(Account: {maskPhone(phone)})</span></span>
+                <span className="text-xs uppercase tracking-widest font-black text-stone-300">Welcome, <span className="text-gold-400 text-glow-gold font-serif capitalize">{name || 'Predictor'}</span>! <span className="text-stone-500 font-sans normal-case ml-2">(Bill: #{bill} | Account: {maskPhone(phone)})</span></span>
               </div>
               <button onClick={handleLogout} className="text-stone-500 hover:text-white uppercase tracking-widest text-[9px] font-black transition-colors bg-stone-950/40 border border-white/5 hover:border-red-500/20 px-4 py-2 rounded-xl">Sign Out</button>
             </div>

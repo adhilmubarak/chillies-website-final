@@ -807,6 +807,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           id: doc.id,
           phone: data.phone,
           name: data.name || 'Anonymous',
+          billNumber: data.billNumber || 'N/A',
           predictedWinner: data.predictedWinner,
           createdAt: data.createdAt
         };
@@ -3253,6 +3254,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                   <thead>
                                     <tr className="border-b border-stone-800 text-[10px] text-stone-500 uppercase tracking-widest font-black">
                                       <th className="py-4 pl-6">Voter Name</th>
+                                      <th className="py-4">Bill No.</th>
                                       <th className="py-4">Voter Phone</th>
                                       <th className="py-4">Selection</th>
                                       <th className="py-4 pr-6 text-right">Time Cast</th>
@@ -3267,6 +3269,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                       return (
                                         <tr key={voter.id} className="hover:bg-white/3 transition-colors">
                                           <td className="py-4 pl-6 text-stone-400 font-sans">{voter.name || 'Anonymous'}</td>
+                                          <td className="py-4 text-gold-400 font-bold font-mono">#{voter.billNumber || 'N/A'}</td>
                                           <td className="py-4 text-white font-bold select-all">{voter.phone}</td>
                                           <td className={`py-4 ${selColor}`}>{selStr}</td>
                                           <td className="py-4 pr-6 text-right text-stone-500">{dateStr}</td>
