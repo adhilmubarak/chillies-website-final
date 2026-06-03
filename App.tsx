@@ -566,12 +566,17 @@ function App() {
     return () => observer.disconnect();
   }, [activeCategory, orderedCats]);
 
+  const isPredictPage = location.pathname === '/predict';
+  const predictFallback = <PredictPageFallback />;
+  const defaultLoader = <div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>;
+  const currentFallback = isPredictPage ? predictFallback : defaultLoader;
+
   if (showSplash) {
-    return <div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>;
+    return isPredictPage ? predictFallback : defaultLoader;
   }
 
   return (
-    <React.Suspense fallback={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>}>
+    <React.Suspense fallback={currentFallback}>
       {(!isAdminOpen && location.pathname !== '/rewards' && location.pathname !== '/feedback' && location.pathname !== '/scream-challenge' && location.pathname !== '/predict') && (
         <>
           <Navbar 
@@ -593,7 +598,7 @@ function App() {
         </>
       )}
 
-      <Suspense fallback={<div className="min-h-screen bg-stone-950 flex items-center justify-center"><ShawarmaLoader /></div>}>
+      <Suspense fallback={currentFallback}>
       <Routes>
         <Route path="/admin" element={
           <AdminPanel 
