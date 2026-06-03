@@ -182,6 +182,91 @@
       .animate-dash-slide {
         animation: dash-slide 1.5s linear infinite;
       }
+
+      /* Soccer Loading Screen Animations */
+      @keyframes leg-kick {
+        0%, 100% {
+          transform: rotate(-15deg);
+        }
+        45% {
+          transform: rotate(35deg);
+        }
+        50% {
+          transform: rotate(40deg);
+        }
+        80% {
+          transform: rotate(-5deg);
+        }
+      }
+      .animate-leg-kick {
+        animation: leg-kick 1.6s infinite cubic-bezier(0.45, 0, 0.55, 1);
+        transform-origin: 86px 105px;
+      }
+
+      @keyframes arm-swing {
+        0%, 100% {
+          transform: rotate(-10deg);
+        }
+        45% {
+          transform: rotate(20deg);
+        }
+        50% {
+          transform: rotate(25deg);
+        }
+        80% {
+          transform: rotate(-5deg);
+        }
+      }
+      .animate-arm-swing {
+        animation: arm-swing 1.6s infinite ease-in-out;
+        transform-origin: 90px 75px;
+      }
+
+      @keyframes ball-fly {
+        0%, 45% {
+          transform: translate(0px, 0px) rotate(0deg);
+          opacity: 0;
+        }
+        46% {
+          transform: translate(0px, 0px) rotate(0deg);
+          opacity: 1;
+        }
+        75% {
+          transform: translate(110px, -45px) rotate(360deg);
+          opacity: 1;
+        }
+        85% {
+          transform: translate(130px, 0px) rotate(420deg);
+          opacity: 1;
+        }
+        90% {
+          transform: translate(140px, -5px) rotate(450deg);
+          opacity: 0.8;
+        }
+        95%, 100% {
+          transform: translate(150px, 0px) rotate(480deg);
+          opacity: 0;
+        }
+      }
+      .animate-ball-fly {
+        animation: ball-fly 1.6s infinite cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transform-origin: center;
+      }
+
+      @keyframes kid-bob {
+        0%, 100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        45% {
+          transform: translateY(-2px) rotate(1deg);
+        }
+        50% {
+          transform: translateY(1px) rotate(-1deg);
+        }
+      }
+      .animate-kid-bob {
+        animation: kid-bob 1.6s infinite ease-in-out;
+      }
     </style>
   <script type="importmap">
 {
