@@ -134,6 +134,54 @@
         background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.08), transparent);
         background-size: 200% 100%;
       }
+
+      /* Premium Predictor Card Custom Styles */
+      @keyframes live-pulse {
+        0%, 100% {
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.1), 0 0 3px rgba(239, 68, 68, 0.05);
+          border-color: rgba(239, 68, 68, 0.2);
+        }
+        50% {
+          box-shadow: 0 0 25px rgba(239, 68, 68, 0.3), 0 0 8px rgba(239, 68, 68, 0.15);
+          border-color: rgba(239, 68, 68, 0.45);
+        }
+      }
+      .shadow-glow-live {
+        animation: live-pulse 3s infinite ease-in-out;
+      }
+
+      @keyframes gold-pulse {
+        0%, 100% {
+          box-shadow: 0 0 12px rgba(212, 175, 55, 0.04), 0 0 0px rgba(212, 175, 55, 0);
+          border-color: rgba(212, 175, 55, 0.08);
+        }
+        50% {
+          box-shadow: 0 0 22px rgba(212, 175, 55, 0.15), 0 0 6px rgba(212, 175, 55, 0.08);
+          border-color: rgba(212, 175, 55, 0.25);
+        }
+      }
+      .shadow-glow-finished {
+        animation: gold-pulse 4s infinite ease-in-out;
+      }
+
+      .text-glow-gold {
+        text-shadow: 0 0 8px rgba(212, 175, 55, 0.35);
+      }
+      .text-glow-emerald {
+        text-shadow: 0 0 8px rgba(16, 185, 129, 0.35);
+      }
+      .text-glow-red {
+        text-shadow: 0 0 8px rgba(239, 68, 68, 0.35);
+      }
+
+      @keyframes dash-slide {
+        to {
+          stroke-dashoffset: -20;
+        }
+      }
+      .animate-dash-slide {
+        animation: dash-slide 1.5s linear infinite;
+      }
     </style>
   <script type="importmap">
 {

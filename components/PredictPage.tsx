@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, increment, getDocs } from 'firebase/firestore';
-import { Trophy, Phone, Calendar, Clock, CheckCircle2, XCircle, ChevronRight, Award, ArrowLeft, TrendingUp, Zap, Share2, Sparkles, Loader2 } from 'lucide-react';
+import { Trophy, Phone, Calendar, Clock, CheckCircle2, XCircle, ChevronRight, Award, ArrowLeft, TrendingUp, Zap, Share2, Sparkles, Loader2, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const PredictPage: React.FC = () => {
@@ -640,7 +640,7 @@ const PredictPage: React.FC = () => {
                             isLive 
                               ? 'bg-gradient-to-br from-stone-900/80 via-stone-900/60 to-red-950/10 border-red-500/25 shadow-[0_0_20px_rgba(239,68,68,0.07)] hover:border-red-500/40 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] shadow-glow-live' 
                               : isFinished 
-                                ? 'bg-gradient-to-br from-stone-900/80 via-stone-900/60 to-gold-950/5 border-gold-500/10 hover:border-gold-500/20' 
+                                ? 'bg-gradient-to-br from-stone-900/80 via-stone-900/60 to-gold-950/5 border-gold-500/10 hover:border-gold-500/20 shadow-glow-finished' 
                                 : 'bg-gradient-to-br from-stone-900/80 via-stone-900/60 to-stone-950/20 border-white/5 hover:border-stone-800'
                           }`}
                         >
@@ -653,7 +653,7 @@ const PredictPage: React.FC = () => {
                                 <Clock size={12} className="text-gold-500" /> {match.matchTime}
                               </span>
                               {isLive ? (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-red-950 text-red-400 border border-red-800/30 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.25)]">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-red-950 text-red-400 border border-red-800/30 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.25)] animate-dash-slide">
                                   <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div> Live Now
                                 </span>
                               ) : isFinished ? (
@@ -674,12 +674,22 @@ const PredictPage: React.FC = () => {
 
                             {/* Teams Grid Representation */}
                             <div className="flex items-center justify-around gap-2 text-center my-6 relative">
-                              {/* Dotted Line behind connecting the badges */}
-                              <div className="absolute top-8 sm:top-10 left-12 right-12 h-[1px] border-t border-dashed border-stone-850 pointer-events-none z-0"></div>
+                              {/* Animated SVG Connector line */}
+                              <svg className="absolute top-8 sm:top-10 left-16 right-16 w-[calc(100%-8rem)] h-[2px] pointer-events-none z-0">
+                                <line 
+                                  x1="0" 
+                                  y1="1" 
+                                  x2="100%" 
+                                  y2="1" 
+                                  className={`transition-colors duration-500 ${isLive ? 'stroke-red-500/40 animate-dash-slide' : isFinished ? 'stroke-gold-500/25' : 'stroke-stone-850'}`}
+                                  strokeWidth="1.5" 
+                                  strokeDasharray="6 4"
+                                />
+                              </svg>
                               
                               {/* Team A */}
                               <div className="flex flex-col items-center gap-3.5 flex-1 min-w-0 relative z-10">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-stone-950 border border-white/5 shadow-2xl flex items-center justify-center relative transition-all duration-500 overflow-hidden group-hover:border-gold-500/20 group-hover:scale-105">
+                                <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-stone-950 border flex items-center justify-center relative transition-all duration-500 overflow-hidden shadow-2xl group-hover:scale-105 cursor-pointer ${isLive ? 'border-red-500/25 hover:border-red-500/60 hover:scale-110 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-white/5 hover:border-gold-500/40 hover:scale-110 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]'}`}>
                                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.04)_0%,_transparent_70%)]"></div>
                                   <span className="text-4xl select-none filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] transition-transform duration-500 group-hover:rotate-6">
                                     {match.teamAFlag || '🏳️'}
@@ -691,9 +701,20 @@ const PredictPage: React.FC = () => {
                               {/* VS Badge or Scoreboard */}
                               <div className="flex flex-col items-center justify-center shrink-0 min-w-[70px] relative z-10">
                                 {(isLive || isFinished) && match.scoreTeamA !== undefined && match.scoreTeamB !== undefined && match.scoreTeamA !== null && match.scoreTeamB !== null ? (
-                                  <div className="bg-stone-950/90 border border-gold-500/35 px-4 py-2 rounded-2xl shadow-[0_0_20px_rgba(212,175,55,0.15)] font-mono text-lg sm:text-xl font-black text-gold-400 tracking-widest text-glow-gold transition-all duration-500 group-hover:border-gold-500/50 group-hover:shadow-[0_0_25px_rgba(212,175,55,0.25)] select-none">
-                                    {match.scoreTeamA} - {match.scoreTeamB}
-                                  </div>
+                                  isLive ? (
+                                    <div className="bg-stone-950/95 border border-red-500/45 px-4 py-2 rounded-2xl shadow-[0_0_18px_rgba(239,68,68,0.2)] font-mono text-lg sm:text-xl font-black text-red-500 tracking-widest text-glow-red select-none relative overflow-hidden flex items-center gap-1.5 transition-all duration-500 group-hover:border-red-500/70 group-hover:shadow-[0_0_25px_rgba(239,68,68,0.4)]">
+                                      <span className="relative z-10">{match.scoreTeamA}</span>
+                                      <span className="relative z-10 text-red-500/70 animate-pulse font-sans font-black">:</span>
+                                      <span className="relative z-10">{match.scoreTeamB}</span>
+                                      <div className="absolute inset-0 bg-red-500/3 opacity-10 animate-pulse pointer-events-none"></div>
+                                    </div>
+                                  ) : (
+                                    <div className="bg-stone-950/95 border border-gold-500/40 px-4 py-2 rounded-2xl shadow-[0_0_18px_rgba(212,175,55,0.15)] font-mono text-lg sm:text-xl font-black text-gold-400 tracking-widest text-glow-gold select-none relative overflow-hidden flex items-center gap-1.5 transition-all duration-500 group-hover:border-gold-500/60 group-hover:shadow-[0_0_25px_rgba(212,175,55,0.3)]">
+                                      <span className="relative z-10">{match.scoreTeamA}</span>
+                                      <span className="relative z-10 text-gold-500/40 font-sans font-black">-</span>
+                                      <span className="relative z-10">{match.scoreTeamB}</span>
+                                    </div>
+                                  )
                                 ) : (
                                   <div className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-stone-950 border border-white/10 shadow-lg transition-all duration-500 group-hover:border-gold-500/30 group-hover:shadow-[0_0_15px_rgba(212,175,55,0.1)]">
                                     <span className="font-serif italic font-black text-[9px] sm:text-[10px] text-stone-500 group-hover:text-gold-400 transition-colors uppercase">VS</span>
@@ -703,7 +724,7 @@ const PredictPage: React.FC = () => {
                               
                               {/* Team B */}
                               <div className="flex flex-col items-center gap-3.5 flex-1 min-w-0 relative z-10">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-stone-950 border border-white/5 shadow-2xl flex items-center justify-center relative transition-all duration-500 overflow-hidden group-hover:border-gold-500/20 group-hover:scale-105">
+                                <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-stone-950 border flex items-center justify-center relative transition-all duration-500 overflow-hidden shadow-2xl group-hover:scale-105 cursor-pointer ${isLive ? 'border-red-500/25 hover:border-red-500/60 hover:scale-110 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-white/5 hover:border-gold-500/40 hover:scale-110 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]'}`}>
                                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.04)_0%,_transparent_70%)]"></div>
                                   <span className="text-4xl select-none filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] transition-transform duration-500 group-hover:-rotate-6">
                                     {match.teamBFlag || '🏳️'}
@@ -715,7 +736,7 @@ const PredictPage: React.FC = () => {
                           </div>
 
                           {isFinished && (
-                            <div className="mt-6 p-6 bg-gradient-to-r from-stone-900 via-stone-950 to-stone-900 border border-gold-500/30 rounded-[2rem] text-center shadow-2xl relative overflow-hidden group/winner shadow-glow-gold">
+                            <div className="mt-6 p-6 bg-gradient-to-r from-stone-900 via-stone-950 to-stone-900 border border-gold-500/30 rounded-[2rem] text-center shadow-2xl relative overflow-hidden group/winner shadow-glow-gold before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent before:animate-shimmer">
                               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl pointer-events-none group-hover/winner:bg-gold-500/15 transition-all duration-700"></div>
                               
                               <div className="relative z-10 flex flex-col items-center gap-2">
@@ -753,15 +774,30 @@ const PredictPage: React.FC = () => {
 
                                 {/* Lucky Draw Winner Block */}
                                 {match.luckyWinnerPhone && (
-                                  <div className="mt-4 pt-4 border-t border-stone-850 w-full flex flex-col items-center gap-1.5 animate-fade-in">
-                                    <span className="text-[8px] text-stone-500 uppercase tracking-widest font-black flex items-center gap-1.5">
-                                      <span>🎁 Lucky Draw Winner</span>
-                                    </span>
-                                    <span className="text-xs font-black text-white tracking-wide font-serif capitalize text-glow-gold">
-                                      {match.luckyWinnerName && !match.luckyWinnerName.startsWith('Voter #')
-                                        ? match.luckyWinnerName 
-                                        : `Voter (${maskPhone(match.luckyWinnerPhone)})`}
-                                    </span>
+                                  <div className="mt-5 p-4 bg-gradient-to-r from-gold-500/10 via-amber-500/5 to-gold-500/10 border border-gold-500/35 rounded-2xl w-full flex items-center justify-between gap-3 animate-fade-in relative overflow-hidden shadow-[0_0_15px_rgba(212,175,55,0.05)] before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent before:animate-shimmer">
+                                    {/* Left/Right ticket circular notches */}
+                                    <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-stone-900 border-r border-gold-500/35"></div>
+                                    <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-stone-900 border-l border-gold-500/35"></div>
+                                    
+                                    <div className="flex items-center gap-3 pl-2">
+                                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-gold-500 flex items-center justify-center shadow-lg shadow-gold-500/10 shrink-0">
+                                        <Gift size={14} className="text-stone-950 animate-bounce-slow" />
+                                      </div>
+                                      <div className="text-left">
+                                        <span className="text-[7px] text-gold-500/70 uppercase tracking-widest font-black block leading-none mb-0.5">Lucky Winner</span>
+                                        <span className="text-xs font-serif font-black text-white tracking-wide capitalize text-glow-gold">
+                                          {match.luckyWinnerName && !match.luckyWinnerName.startsWith('Voter #')
+                                            ? match.luckyWinnerName 
+                                            : `Voter (${maskPhone(match.luckyWinnerPhone)})`}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="pr-2">
+                                       <span className="text-[7.5px] bg-gold-500 text-stone-950 px-2 py-0.5 rounded-full uppercase tracking-widest font-black font-sans leading-none shadow-md animate-pulse">
+                                         Picked 👑
+                                       </span>
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -776,33 +812,36 @@ const PredictPage: React.FC = () => {
                                 <div className="grid grid-cols-3 gap-2">
                                   <button 
                                     onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'teamA' }))}
-                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis ${
+                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center gap-1.5 ${
                                       selectedVal === 'teamA' 
                                         ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-98' 
-                                        : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
+                                        : 'bg-stone-950 border-white/5 text-stone-450 hover:border-stone-700 hover:text-white'
                                     }`}
                                   >
-                                    {match.teamA}
+                                    <span>{match.teamAFlag || '🏳️'}</span>
+                                    <span className="truncate">{match.teamA}</span>
                                   </button>
                                   <button 
                                     onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'draw' }))}
-                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 ${
+                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 flex items-center justify-center gap-1.5 ${
                                       selectedVal === 'draw' 
                                         ? 'bg-amber-500/20 border-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.2)] scale-98' 
-                                        : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
+                                        : 'bg-stone-950 border-white/5 text-stone-450 hover:border-stone-700 hover:text-white'
                                     }`}
                                   >
-                                    Draw
+                                    <span>🤝</span>
+                                    <span>Draw</span>
                                   </button>
                                   <button 
                                     onClick={() => setSelectedPrediction(p => ({ ...p, [match.id]: 'teamB' }))}
-                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis ${
+                                    className={`border rounded-xl p-3.5 transition-all text-[9px] font-black uppercase tracking-widest active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center gap-1.5 ${
                                       selectedVal === 'teamB' 
                                         ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-98' 
-                                        : 'bg-stone-950 border-white/5 text-stone-400 hover:border-stone-700 hover:text-white'
+                                        : 'bg-stone-950 border-white/5 text-stone-450 hover:border-stone-700 hover:text-white'
                                     }`}
                                   >
-                                    {match.teamB}
+                                    <span>{match.teamBFlag || '🏳️'}</span>
+                                    <span className="truncate">{match.teamB}</span>
                                   </button>
                                 </div>
 
@@ -878,15 +917,31 @@ const PredictPage: React.FC = () => {
                                   
                                   {/* Custom Colorful Votes Progress Bar */}
                                   <div className="h-3 rounded-full bg-stone-950 overflow-hidden flex shadow-inner border border-white/5">
-                                    <div style={{ flexGrow: percentages.a, flexBasis: 0 }} className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-1000" title={`${match.teamA}: ${percentages.a}%`}></div>
+                                    <div style={{ flexGrow: percentages.a, flexBasis: 0 }} className="bg-gradient-to-r from-emerald-600 to-emerald-450 h-full transition-all duration-1000" title={`${match.teamA}: ${percentages.a}%`}></div>
                                     <div style={{ flexGrow: percentages.d, flexBasis: 0 }} className="bg-stone-700 h-full transition-all duration-1000" title={`Draw: ${percentages.d}%`}></div>
                                     <div style={{ flexGrow: percentages.b, flexBasis: 0 }} className="bg-gradient-to-r from-gold-500 to-amber-500 h-full transition-all duration-1000" title={`${match.teamB}: ${percentages.b}%`}></div>
                                   </div>
-                                  <div className="flex justify-between text-[9px] font-mono font-bold">
-                                    <span className="text-emerald-400">{match.teamA}: {percentages.a}%</span>
-                                    <span className="text-stone-500">Draw: {percentages.d}%</span>
-                                    <span className="text-gold-400">{match.teamB}: {percentages.b}%</span>
-                                  </div>
+                                  
+                                  {/* Multi-Badge Row with Popular Choice highlights */}
+                                  {(() => {
+                                    const maxVal = Math.max(percentages.a, percentages.b, percentages.d);
+                                    const popularA = percentages.a === maxVal && percentages.a > 0;
+                                    const popularB = percentages.b === maxVal && percentages.b > 0;
+                                    const popularD = percentages.d === maxVal && percentages.d > 0;
+                                    return (
+                                      <div className="flex justify-between text-[9px] font-mono font-bold">
+                                        <span className={`flex items-center gap-1 ${popularA ? 'text-emerald-400 text-glow-gold' : 'text-stone-450'}`}>
+                                          {match.teamAFlag || '🏳️'} {percentages.a}% {popularA && <Trophy size={10} className="text-gold-500 animate-bounce-slow" />}
+                                        </span>
+                                        <span className={`flex items-center gap-1 ${popularD ? 'text-white text-glow-gold' : 'text-stone-500'}`}>
+                                          🤝 {percentages.d}% {popularD && <Trophy size={10} className="text-gold-500 animate-bounce-slow" />}
+                                        </span>
+                                        <span className={`flex items-center gap-1 ${popularB ? 'text-gold-400 text-glow-gold' : 'text-stone-450'}`}>
+                                          {match.teamBFlag || '🏳️'} {percentages.b}% {popularB && <Trophy size={10} className="text-gold-500 animate-bounce-slow" />}
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
 
                                 {/* Selection Status Message */}
@@ -929,14 +984,7 @@ const PredictPage: React.FC = () => {
                                   })()
                                 )}
 
-                                {isFinished && (
-                                  <div className="flex items-center justify-between p-3.5 bg-stone-950 rounded-xl border border-white/5">
-                                    <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black">Match Winner</span>
-                                    <span className="text-[10px] text-emerald-500 uppercase font-black tracking-widest text-glow-emerald flex items-center gap-1.5">
-                                      {match.winner === 'teamA' ? match.teamA : match.winner === 'teamB' ? match.teamB : 'Draw'}
-                                    </span>
-                                  </div>
-                                )}
+
 
                                 {isFinished && userPred && (
                                   <div className={`p-4 rounded-2xl flex items-center gap-3 border transition-all duration-500 ${match.winner === userPred ? 'bg-emerald-950/20 border-emerald-500/20 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.06)]' : 'bg-red-950/20 border-red-500/20 text-red-400'}`}>
