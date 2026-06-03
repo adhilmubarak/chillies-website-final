@@ -844,7 +844,7 @@ const PredictPage: React.FC = () => {
                               </div>
                             )}
 
-                            {(userPred || !isVoteOpen) && (
+                            {(userPred || isFinished) && (
                               <div className="space-y-4 animate-fade-in">
                                 {/* Aggregated Vote Breakdown percentages */}
                                 <div className="space-y-2">
