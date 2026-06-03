@@ -120,6 +120,8 @@ export interface WorldCupMatch {
   votesTeamA?: number; // Pre-aggregated stats for instant load
   votesTeamB?: number;
   votesDraw?: number;
+  scoreTeamA?: number | null; // Score for Team A
+  scoreTeamB?: number | null; // Score for Team B
   createdAt: number;
 }
 

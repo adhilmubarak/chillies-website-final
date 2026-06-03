@@ -634,7 +634,16 @@ const PredictPage: React.FC = () => {
                       const countdownText = isUpcoming ? getRelativeTimeStr(match.matchDate, match.matchTime) : '';
 
                       return (
-                        <div key={match.id} className={`bg-stone-900/60 border ${isLive ? 'border-red-500/25 shadow-glow-live' : 'border-white/5'} rounded-[2.5rem] p-6 sm:p-8 flex flex-col justify-between transition-all duration-500 hover:border-gold-500/20 group`}>
+                        <div 
+                          key={match.id} 
+                          className={`bg-stone-900/60 border rounded-[2.5rem] p-6 sm:p-8 flex flex-col justify-between transition-all duration-500 hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(212,175,55,0.04)] group ${
+                            isLive 
+                              ? 'bg-gradient-to-br from-stone-900/80 via-stone-900/60 to-red-950/10 border-red-500/25 shadow-[0_0_20px_rgba(239,68,68,0.07)] hover:border-red-500/40 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] shadow-glow-live' 
+                              : isFinished 
+                                ? 'bg-gradient-to-br from-stone-900/80 via-stone-900/60 to-gold-950/5 border-gold-500/10 hover:border-gold-500/20' 
+                                : 'bg-gradient-to-br from-stone-900/80 via-stone-900/60 to-stone-950/20 border-white/5 hover:border-stone-800'
+                          }`}
+                        >
                           <div>
                             {/* Match Header Info */}
                             <div className="flex justify-between items-center mb-6">
@@ -664,29 +673,43 @@ const PredictPage: React.FC = () => {
                             </div>
 
                             {/* Teams Grid Representation */}
-                            <div className="flex items-center justify-around gap-4 text-center my-6">
+                            <div className="flex items-center justify-around gap-2 text-center my-6 relative">
+                              {/* Dotted Line behind connecting the badges */}
+                              <div className="absolute top-8 sm:top-10 left-12 right-12 h-[1px] border-t border-dashed border-stone-850 pointer-events-none z-0"></div>
+                              
                               {/* Team A */}
-                              <div className="flex flex-col items-center gap-3.5 flex-1 min-w-0">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-stone-950 border border-white/5 hover:border-gold-500/30 shadow-2xl flex items-center justify-center relative transition-all duration-500 overflow-hidden group-hover:scale-105">
+                              <div className="flex flex-col items-center gap-3.5 flex-1 min-w-0 relative z-10">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-stone-950 border border-white/5 shadow-2xl flex items-center justify-center relative transition-all duration-500 overflow-hidden group-hover:border-gold-500/20 group-hover:scale-105">
                                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.04)_0%,_transparent_70%)]"></div>
                                   <span className="text-4xl select-none filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] transition-transform duration-500 group-hover:rotate-6">
                                     {match.teamAFlag || '🏳️'}
                                   </span>
                                 </div>
-                                <span className="text-white text-xs sm:text-sm font-serif font-black uppercase tracking-wider line-clamp-1">{match.teamA}</span>
+                                <span className="text-white text-xs sm:text-sm font-serif font-black uppercase tracking-wider line-clamp-1 group-hover:text-gold-400 transition-colors">{match.teamA}</span>
                               </div>
                               
-                              <div className="text-stone-700 font-sans italic text-sm font-light shrink-0">VS</div>
+                              {/* VS Badge or Scoreboard */}
+                              <div className="flex flex-col items-center justify-center shrink-0 min-w-[70px] relative z-10">
+                                {(isLive || isFinished) && match.scoreTeamA !== undefined && match.scoreTeamB !== undefined && match.scoreTeamA !== null && match.scoreTeamB !== null ? (
+                                  <div className="bg-stone-950/90 border border-gold-500/35 px-4 py-2 rounded-2xl shadow-[0_0_20px_rgba(212,175,55,0.15)] font-mono text-lg sm:text-xl font-black text-gold-400 tracking-widest text-glow-gold transition-all duration-500 group-hover:border-gold-500/50 group-hover:shadow-[0_0_25px_rgba(212,175,55,0.25)] select-none">
+                                    {match.scoreTeamA} - {match.scoreTeamB}
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-stone-950 border border-white/10 shadow-lg transition-all duration-500 group-hover:border-gold-500/30 group-hover:shadow-[0_0_15px_rgba(212,175,55,0.1)]">
+                                    <span className="font-serif italic font-black text-[9px] sm:text-[10px] text-stone-500 group-hover:text-gold-400 transition-colors uppercase">VS</span>
+                                  </div>
+                                )}
+                              </div>
                               
                               {/* Team B */}
-                              <div className="flex flex-col items-center gap-3.5 flex-1 min-w-0">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-stone-950 border border-white/5 hover:border-gold-500/30 shadow-2xl flex items-center justify-center relative transition-all duration-500 overflow-hidden group-hover:scale-105">
+                              <div className="flex flex-col items-center gap-3.5 flex-1 min-w-0 relative z-10">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-stone-950 border border-white/5 shadow-2xl flex items-center justify-center relative transition-all duration-500 overflow-hidden group-hover:border-gold-500/20 group-hover:scale-105">
                                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.04)_0%,_transparent_70%)]"></div>
                                   <span className="text-4xl select-none filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] transition-transform duration-500 group-hover:-rotate-6">
                                     {match.teamBFlag || '🏳️'}
                                   </span>
                                 </div>
-                                 <span className="text-white text-xs sm:text-sm font-serif font-black uppercase tracking-wider line-clamp-1">{match.teamB}</span>
+                                <span className="text-white text-xs sm:text-sm font-serif font-black uppercase tracking-wider line-clamp-1 group-hover:text-gold-400 transition-colors">{match.teamB}</span>
                               </div>
                             </div>
                           </div>

@@ -231,6 +231,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newBillInput, setNewBillInput] = useState('');
   const [isAddingBill, setIsAddingBill] = useState(false);
 
+  const [matchScoreTeamA, setMatchScoreTeamA] = useState<number | ''>('');
+  const [matchScoreTeamB, setMatchScoreTeamB] = useState<number | ''>('');
+
   useEffect(() => {
     if (activeTab !== 'predictions') return;
     const q = query(collection(db, 'worldcup_valid_bills'));
@@ -752,6 +755,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       matchTime: matchTimeInput,
       status: matchStatusInput,
       winner: matchWinnerInput || null,
+      scoreTeamA: (matchStatusInput === 'live' || matchStatusInput === 'finished') && matchScoreTeamA !== '' ? Number(matchScoreTeamA) : null,
+      scoreTeamB: (matchStatusInput === 'live' || matchStatusInput === 'finished') && matchScoreTeamB !== '' ? Number(matchScoreTeamB) : null,
       createdAt: editingMatch ? (editingMatch.createdAt || Date.now()) : Date.now()
     };
 
@@ -1117,6 +1122,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setMatchVotesTeamA(0);
     setMatchVotesTeamB(0);
     setMatchVotesDraw(0);
+    setMatchScoreTeamA('');
+    setMatchScoreTeamB('');
     setEditingMatch(null);
   };
 
@@ -1143,6 +1150,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setMatchVotesTeamA(match.votesTeamA || 0);
     setMatchVotesTeamB(match.votesTeamB || 0);
     setMatchVotesDraw(match.votesDraw || 0);
+    setMatchScoreTeamA(match.scoreTeamA !== undefined && match.scoreTeamA !== null ? match.scoreTeamA : '');
+    setMatchScoreTeamB(match.scoreTeamB !== undefined && match.scoreTeamB !== null ? match.scoreTeamB : '');
     setIsMatchFormOpen(true);
     
     // Scroll to form smoothly
@@ -3096,6 +3105,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             <option value="draw">Draw / Tie</option>
                                         </select>
                                     </div>
+
+                                    {(matchStatusInput === 'live' || matchStatusInput === 'finished') && (
+                                        <div className="grid grid-cols-2 gap-4 col-span-1 md:col-span-2 border-t border-stone-800 pt-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Score {matchTeamA || 'Team A'}</label>
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="0"
+                                                    value={matchScoreTeamA}
+                                                    onChange={e => setMatchScoreTeamA(e.target.value !== '' ? Math.max(0, parseInt(e.target.value) || 0) : '')}
+                                                    className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white font-mono"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Score {matchTeamB || 'Team B'}</label>
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="0"
+                                                    value={matchScoreTeamB}
+                                                    onChange={e => setMatchScoreTeamB(e.target.value !== '' ? Math.max(0, parseInt(e.target.value) || 0) : '')}
+                                                    className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm focus:border-gold-500 outline-none text-white font-mono"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                     
                                     {editingMatch && (
                                         <div className="grid grid-cols-3 gap-4 border-t border-stone-800 pt-6 col-span-1 md:col-span-2">
@@ -3167,7 +3201,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-xl shrink-0">{match.teamAFlag}</span>
                                                     <span>{match.teamA}</span>
-                                                    <span className="text-stone-600 font-light font-sans text-xs">vs</span>
+                                                    
+                                                    {(match.status === 'live' || match.status === 'finished') && match.scoreTeamA !== undefined && match.scoreTeamB !== undefined && match.scoreTeamA !== null && match.scoreTeamB !== null ? (
+                                                      <span className="px-2 py-1 rounded bg-stone-950 border border-stone-850 text-gold-400 font-mono text-xs font-black mx-1 tracking-wider shadow-inner">
+                                                        {match.scoreTeamA} - {match.scoreTeamB}
+                                                      </span>
+                                                    ) : (
+                                                      <span className="text-stone-600 font-light font-sans text-xs">vs</span>
+                                                    )}
+                                                    
                                                     <span className="text-xl shrink-0">{match.teamBFlag}</span>
                                                     <span>{match.teamB}</span>
                                                 </div>
