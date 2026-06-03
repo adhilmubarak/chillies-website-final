@@ -33,6 +33,60 @@ const KitchenPanel = lazy(() => import('./components/KitchenPanel'));
 const ARViewerModal = lazy(() => import('./components/ARViewerModal'));
 const SignagePage = lazy(() => import('./components/SignagePage'));
 const PredictPage = lazy(() => import('./components/PredictPage'));
+
+const PredictPageFallback = () => {
+  return (
+    <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center p-4">
+      <div className="flex flex-col items-center justify-center py-16 min-h-[320px] text-center space-y-6 animate-fade-in w-full">
+        <div className="relative w-64 h-48 mx-auto bg-stone-900/40 border border-white/5 rounded-[2.5rem] p-4 flex items-center justify-center shadow-2xl backdrop-blur-sm overflow-hidden group">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gold-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <svg viewBox="0 0 300 160" className="w-full h-full relative z-10">
+            <defs>
+              <linearGradient id="trail-gradient-fallback" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="var(--brand-500)" stopOpacity="0" />
+                <stop offset="50%" stopColor="var(--brand-400)" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="var(--brand-500)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <line x1="20" y1="140" x2="280" y2="140" className="stroke-stone-800" strokeWidth="2" strokeDasharray="5 5" />
+            <path d="M120,125 Q175,70 240,125" stroke="url(#trail-gradient-fallback)" strokeWidth="2" strokeDasharray="6 4" className="fill-none animate-dash-slide" />
+            <g className="animate-kid-bob">
+              <path d="M90,105 L80,140" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" className="fill-none" />
+              <line x1="90" y1="75" x2="75" y2="90" stroke="var(--brand-600)" strokeWidth="4" strokeLinecap="round" />
+              <path d="M92,72 L86,105" stroke="var(--brand-500)" strokeWidth="8" strokeLinecap="round" className="fill-none" />
+              <circle cx="95" cy="55" r="9" className="fill-gold-500" />
+              <g className="animate-arm-swing">
+                <line x1="90" y1="75" x2="105" y2="92" stroke="var(--brand-500)" strokeWidth="4" strokeLinecap="round" />
+              </g>
+              <g className="animate-leg-kick">
+                <line x1="86" y1="105" x2="105" y2="125" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" />
+                <line x1="105" y1="125" x2="125" y2="125" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" />
+                <polygon points="123,125 129,121 129,127" className="fill-gold-400" />
+              </g>
+            </g>
+            <g className="animate-ball-fly">
+              <circle cx="120" cy="125" r="8" className="fill-stone-950 stroke-gold-500" strokeWidth="1.5" />
+              <polygon points="120,121 124,124 122,128 118,128 116,124" className="fill-gold-500" />
+              <line x1="120" y1="121" x2="120" y2="117" stroke="var(--brand-500)" strokeWidth="1" />
+              <line x1="124" y1="124" x2="127" y2="122" stroke="var(--brand-500)" strokeWidth="1" />
+              <line x1="122" y1="128" x2="124" y2="132" stroke="var(--brand-500)" strokeWidth="1" />
+              <line x1="118" y1="128" x2="116" y2="132" stroke="var(--brand-500)" strokeWidth="1" />
+              <line x1="116" y1="124" x2="113" y2="122" stroke="var(--brand-500)" strokeWidth="1" />
+            </g>
+          </svg>
+        </div>
+        <div className="space-y-2">
+          <div className="text-[10px] text-gold-500 font-mono tracking-[0.25em] uppercase font-black text-glow-gold animate-pulse">
+            Kicking Off Match Center
+          </div>
+          <div className="text-[9px] text-stone-500 uppercase tracking-widest font-black font-sans">
+            Preparing the field...
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 import { App as CapApp } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { registerPlugin } from '@capacitor/core';
@@ -637,7 +691,11 @@ function App() {
             currentTime={currentTime}
           />
         } />
-        <Route path="/predict" element={<PredictPage />} />
+        <Route path="/predict" element={
+          <Suspense fallback={<PredictPageFallback />}>
+            <PredictPage />
+          </Suspense>
+        } />
         <Route path="/*" element={
           <div className="relative min-h-screen font-sans text-stone-200 overflow-x-hidden bg-stone-950">
             <Hero />
