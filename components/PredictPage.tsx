@@ -654,16 +654,29 @@ const PredictPage: React.FC = () => {
                             <line x1="90" y1="75" x2="105" y2="92" stroke="var(--brand-500)" strokeWidth="4" strokeLinecap="round" />
                           </g>
 
-                          {/* Kicking front leg group */}
-                          <g className="animate-leg-kick">
-                            {/* Hip to knee */}
+                          {/* Kicking front leg group (nested thigh + shin) */}
+                          <g className="animate-leg-thigh">
+                            {/* Thigh: Hip to Knee */}
                             <line x1="86" y1="105" x2="105" y2="125" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" />
-                            {/* Knee to foot */}
-                            <line x1="105" y1="125" x2="125" y2="125" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" />
-                            {/* Shoe */}
-                            <polygon points="123,125 129,121 129,127" className="fill-gold-400" />
+                            
+                            {/* Shin Knee-to-foot (nested inside thigh) */}
+                            <g className="animate-leg-shin">
+                              <line x1="105" y1="125" x2="125" y2="125" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" />
+                              <polygon points="123,125 129,121 129,127" className="fill-gold-400" />
+                            </g>
                           </g>
                         </g>
+
+                        {/* Ball Shadow on Ground */}
+                        <ellipse cx="120" cy="125" rx="8" ry="2.5" className="fill-stone-950/80 animate-ball-shadow pointer-events-none" />
+
+                        {/* Kick Impact Flash */}
+                        <circle cx="120" cy="125" r="6" className="fill-gold-300 filter blur-[1px] animate-kick-flash pointer-events-none" />
+
+                        {/* Flying grass blade particles on impact */}
+                        <path d="M120,125 Q122,120 124,124" className="stroke-emerald-500 fill-none animate-grass-1" strokeWidth="1.5" strokeLinecap="round" />
+                        <path d="M120,125 Q118,122 119,126" className="stroke-emerald-400 fill-none animate-grass-2" strokeWidth="1.5" strokeLinecap="round" />
+                        <path d="M120,125 Q121,121 123,125" className="stroke-gold-500/80 fill-none animate-grass-3" strokeWidth="1.5" strokeLinecap="round" />
 
                         {/* Flying soccer ball group */}
                         <g className="animate-ball-fly">
