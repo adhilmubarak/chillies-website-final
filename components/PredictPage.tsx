@@ -622,73 +622,96 @@ const PredictPage: React.FC = () => {
                       
                       <svg viewBox="0 0 300 160" className="w-full h-full relative z-10">
                         <defs>
-                          <linearGradient id="trail-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="var(--brand-500)" stopOpacity="0" />
-                            <stop offset="50%" stopColor="var(--brand-400)" stopOpacity="0.5" />
+                          {/* 3D Spherical Shading Gradient */}
+                          <radialGradient id="sphere-shading-predict" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6" />
+                            <stop offset="40%" stopColor="#ffffff" stopOpacity="0" />
+                            <stop offset="80%" stopColor="#000000" stopOpacity="0.5" />
+                            <stop offset="100%" stopColor="#000000" stopOpacity="0.95" />
+                          </radialGradient>
+                          
+                          {/* Gold/Amber Glow for the Ball Core */}
+                          <radialGradient id="gold-glow-predict" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="var(--brand-400)" stopOpacity="0.45" />
+                            <stop offset="100%" stopColor="var(--brand-600)" stopOpacity="0" />
+                          </radialGradient>
+
+                          {/* Field light under the ball */}
+                          <radialGradient id="field-gradient-predict" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.7" />
+                            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                          </radialGradient>
+
+                          {/* Spotlight Gradients */}
+                          <linearGradient id="spotlight-left-predict" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="var(--brand-500)" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="var(--brand-500)" stopOpacity="0" />
+                          </linearGradient>
+                          <linearGradient id="spotlight-right-predict" x1="100%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="var(--brand-500)" stopOpacity="0.2" />
                             <stop offset="100%" stopColor="var(--brand-500)" stopOpacity="0" />
                           </linearGradient>
                         </defs>
 
-                        {/* Ground line */}
-                        <line x1="20" y1="140" x2="280" y2="140" className="stroke-stone-800" strokeWidth="2" strokeDasharray="5 5" />
-                        
-                        {/* Glowing trajectory arc for the ball */}
-                        <path d="M120,125 Q175,70 240,125" stroke="url(#trail-gradient)" strokeWidth="2" strokeDasharray="6 4" className="fill-none animate-dash-slide" />
+                        {/* Stadium Spotlights Background */}
+                        <polygon points="0,-20 90,-20 150,130 0,130" fill="url(#spotlight-left-predict)" className="pointer-events-none" opacity="0.4" />
+                        <polygon points="300,-20 210,-20 150,130 300,130" fill="url(#spotlight-right-predict)" className="pointer-events-none" opacity="0.4" />
 
-                        {/* Kid character group */}
-                        <g className="animate-kid-bob">
-                          {/* Standing back leg */}
-                          <path d="M90,105 L80,140" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" className="fill-none" />
-                          
-                          {/* Back arm balance */}
-                          <line x1="90" y1="75" x2="75" y2="90" stroke="var(--brand-600)" strokeWidth="4" strokeLinecap="round" />
-                          
-                          {/* Torso / Jersey */}
-                          <path d="M92,72 L86,105" stroke="var(--brand-500)" strokeWidth="8" strokeLinecap="round" className="fill-none" />
-                          
-                          {/* Head */}
-                          <circle cx="95" cy="55" r="9" className="fill-gold-500" />
-                          
-                          {/* Front arm balance swing */}
-                          <g className="animate-arm-swing">
-                            <line x1="90" y1="75" x2="105" y2="92" stroke="var(--brand-500)" strokeWidth="4" strokeLinecap="round" />
-                          </g>
+                        {/* Soft Green Turf Glow */}
+                        <ellipse cx="150" cy="130" rx="70" ry="12" fill="url(#field-gradient-predict)" opacity="0.25" className="pointer-events-none" />
 
-                          {/* Kicking front leg group (nested thigh + shin) */}
-                          <g className="animate-leg-thigh">
-                            {/* Thigh: Hip to Knee */}
-                            <line x1="86" y1="105" x2="105" y2="125" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" />
-                            
-                            {/* Shin Knee-to-foot (nested inside thigh) */}
-                            <g className="animate-leg-shin">
-                              <line x1="105" y1="125" x2="125" y2="125" stroke="var(--brand-500)" strokeWidth="5" strokeLinecap="round" />
-                              <polygon points="123,125 129,121 129,127" className="fill-gold-400" />
-                            </g>
-                          </g>
+                        {/* Swaying Grass Blades */}
+                        <g className="animate-grass-sway" style={{ transformOrigin: '150px 132px' }}>
+                          <path d="M138,132 Q135,122 130,118 Q134,123 139,132" fill="#047857" />
+                          <path d="M144,132 Q142,118 137,112 Q141,120 145,132" fill="#10b981" />
+                          <path d="M150,132 Q152,115 156,108 Q153,118 151,132" fill="#059669" />
+                          <path d="M156,132 Q160,120 165,114 Q159,122 157,132" fill="#10b981" />
+                          <path d="M162,132 Q166,124 170,120 Q165,125 163,132" fill="#047857" />
                         </g>
 
-                        {/* Ball Shadow on Ground */}
-                        <ellipse cx="120" cy="125" rx="8" ry="2.5" className="fill-stone-950/80 animate-ball-shadow pointer-events-none" />
+                        {/* Synchronized Ground Shadow */}
+                        <ellipse cx="150" cy="130" rx="22" ry="6" className="fill-stone-950/90 animate-shadow-bounce pointer-events-none" style={{ transformOrigin: '150px 130px' }} />
 
-                        {/* Kick Impact Flash */}
-                        <circle cx="120" cy="125" r="6" className="fill-gold-300 filter blur-[1px] animate-kick-flash pointer-events-none" />
+                        {/* Bouncing Soccer Ball Group */}
+                        <g className="animate-realistic-bounce" style={{ transformOrigin: '150px 121px' }}>
+                          {/* Ball Gold Aura Glow */}
+                          <circle cx="150" cy="95" r="30" fill="url(#gold-glow-predict)" className="pointer-events-none" />
 
-                        {/* Flying grass blade particles on impact */}
-                        <path d="M120,125 Q122,120 124,124" className="stroke-emerald-500 fill-none animate-grass-1" strokeWidth="1.5" strokeLinecap="round" />
-                        <path d="M120,125 Q118,122 119,126" className="stroke-emerald-400 fill-none animate-grass-2" strokeWidth="1.5" strokeLinecap="round" />
-                        <path d="M120,125 Q121,121 123,125" className="stroke-gold-500/80 fill-none animate-grass-3" strokeWidth="1.5" strokeLinecap="round" />
+                          {/* Ball Base */}
+                          <circle cx="150" cy="95" r="26" fill="#fafafa" stroke="var(--brand-500)" strokeWidth="1.2" />
 
-                        {/* Flying soccer ball group */}
-                        <g className="animate-ball-fly">
-                          <circle cx="120" cy="125" r="8" className="fill-stone-950 stroke-gold-500" strokeWidth="1.5" />
-                          {/* Soccer ball pattern */}
-                          <polygon points="120,121 124,124 122,128 118,128 116,124" className="fill-gold-500" />
-                          <line x1="120" y1="121" x2="120" y2="117" stroke="var(--brand-500)" strokeWidth="1" />
-                          <line x1="124" y1="124" x2="127" y2="122" stroke="var(--brand-500)" strokeWidth="1" />
-                          <line x1="122" y1="128" x2="124" y2="132" stroke="var(--brand-500)" strokeWidth="1" />
-                          <line x1="118" y1="128" x2="116" y2="132" stroke="var(--brand-500)" strokeWidth="1" />
-                          <line x1="116" y1="124" x2="113" y2="122" stroke="var(--brand-500)" strokeWidth="1" />
+                          {/* Center pentagon */}
+                          <polygon points="150,87 158,92.5 155,101.5 145,101.5 142,92.5" fill="#1c1917" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          
+                          {/* Seam lines radiating from center pentagon corners */}
+                          <line x1="150" y1="87" x2="150" y2="77" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <line x1="158" y1="92.5" x2="167" y2="90" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <line x1="155" y1="101.5" x2="161" y2="110.5" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <line x1="145" y1="101.5" x2="139" y2="110.5" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <line x1="142" y1="92.5" x2="133" y2="90" stroke="var(--brand-500)" strokeWidth="0.8" />
+
+                          {/* Outer panels */}
+                          <polygon points="150,77 140,73 133,82 133,90 142,92.5 150,87" fill="#fafafa" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <polygon points="150,77 160,73 167,82 167,90 158,92.5 150,87" fill="#fafafa" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <polygon points="155,101.5 161,110.5 150,116 139,110.5 145,101.5" fill="#1c1917" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <polygon points="142,92.5 133,90 127,99 139,110.5 145,101.5" fill="#fafafa" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <polygon points="158,92.5 167,90 173,99 161,110.5 155,101.5" fill="#fafafa" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          
+                          {/* Outer curved boundary arcs to simulate 3D projection */}
+                          <path d="M 127 99 A 26 26 0 0 0 139 110.5" fill="none" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <path d="M 161 110.5 A 26 26 0 0 0 173 99" fill="none" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <path d="M 167 82 A 26 26 0 0 0 160 73" fill="none" stroke="var(--brand-500)" strokeWidth="0.8" />
+                          <path d="M 140 73 A 26 26 0 0 0 133 82" fill="none" stroke="var(--brand-500)" strokeWidth="0.8" />
+
+                          {/* 3D Spherical Shading Overlay */}
+                          <circle cx="150" cy="95" r="26" fill="url(#sphere-shading-predict)" className="pointer-events-none" />
                         </g>
+
+                        {/* Stadium dust particles */}
+                        <circle cx="45" cy="50" r="1.5" fill="var(--brand-300)" className="pointer-events-none" style={{ animation: 'float-up 4s infinite linear', animationDelay: '0s' }} />
+                        <circle cx="255" cy="80" r="1.2" fill="var(--brand-300)" className="pointer-events-none" style={{ animation: 'float-up 3.5s infinite linear', animationDelay: '1.2s' }} />
+                        <circle cx="80" cy="30" r="1.8" fill="var(--brand-300)" className="pointer-events-none" style={{ animation: 'float-up 4.5s infinite linear', animationDelay: '2.5s' }} />
+                        <circle cx="220" cy="60" r="1" fill="var(--brand-300)" className="pointer-events-none" style={{ animation: 'float-up 5s infinite linear', animationDelay: '0.8s' }} />
                       </svg>
                     </div>
 

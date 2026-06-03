@@ -183,181 +183,75 @@
         animation: dash-slide 1.5s linear infinite;
       }
 
-      /* Soccer Loading Screen Animations */
-      @keyframes leg-thigh {
-        0%, 100% { transform: rotate(-10deg); }
-        35% { transform: rotate(-25deg); }      /* backswing peak */
-        45% { transform: rotate(15deg); }       /* contact kick */
-        55% { transform: rotate(32deg); }       /* follow-through peak */
-        80% { transform: rotate(0deg); }        /* return phase */
+      /* Realistic Bouncing Football Loader */
+      @keyframes realistic-bounce {
+        0%, 100% {
+          transform: translateY(18px) scaleY(0.78) scaleX(1.18) rotate(0deg);
+          animation-timing-function: cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+        8% {
+          transform: translateY(10px) scaleY(1.12) scaleX(0.88) rotate(28deg);
+          animation-timing-function: cubic-bezier(0.3, 0, 0.7, 0.3);
+        }
+        50% {
+          transform: translateY(-55px) scaleY(1) scaleX(1) rotate(180deg);
+          animation-timing-function: cubic-bezier(0.3, 0.7, 0.1, 1);
+        }
+        92% {
+          transform: translateY(10px) scaleY(1.12) scaleX(0.88) rotate(332deg);
+          animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.2);
+        }
       }
-      .animate-leg-thigh {
-        animation: leg-thigh 1.6s infinite cubic-bezier(0.45, 0, 0.55, 1);
-        transform-origin: 86px 105px;
-      }
-
-      @keyframes leg-shin {
-        0%, 100% { transform: rotate(0deg); }
-        35% { transform: rotate(-50deg); }      /* bend knee back */
-        45% { transform: rotate(5deg); }        /* extend straight on kick */
-        55% { transform: rotate(12deg); }       /* extend forward fully */
-        80% { transform: rotate(0deg); }        /* return */
-      }
-      .animate-leg-shin {
-        animation: leg-shin 1.6s infinite cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        transform-origin: 105px 125px;
-      }
-
-      @keyframes arm-swing {
-        0%, 100% { transform: rotate(-10deg); }
-        35% { transform: rotate(20deg); }       /* swing to balance back leg */
-        45% { transform: rotate(-15deg); }      /* swing forward on kick */
-        55% { transform: rotate(-25deg); }      /* hold balance on follow-through */
-        80% { transform: rotate(-5deg); }
-      }
-      .animate-arm-swing {
-        animation: arm-swing 1.6s infinite ease-in-out;
-        transform-origin: 90px 75px;
+      .animate-realistic-bounce {
+        animation: realistic-bounce 1.5s infinite;
+        transform-origin: bottom center;
       }
 
-      @keyframes ball-fly {
-        0%, 44% {
-          transform: translate(0px, 0px) rotate(0deg);
-          opacity: 0;
+      @keyframes shadow-bounce {
+        0%, 100% {
+          transform: scaleX(1.3) scaleY(1.0);
+          opacity: 0.65;
+          filter: blur(1.5px);
+          animation-timing-function: cubic-bezier(0.1, 0.8, 0.3, 1);
         }
-        45% {
-          transform: translate(0px, 0px) rotate(0deg);
-          opacity: 1;
+        8% {
+          transform: scaleX(1.0) scaleY(0.8);
+          opacity: 0.55;
+          filter: blur(2px);
+          animation-timing-function: cubic-bezier(0.3, 0, 0.7, 0.3);
         }
-        58% {
-          transform: translate(50px, -55px) rotate(180deg);
-          opacity: 1;
+        50% {
+          transform: scaleX(0.35) scaleY(0.25);
+          opacity: 0.15;
+          filter: blur(7px);
+          animation-timing-function: cubic-bezier(0.3, 0.7, 0.1, 1);
         }
-        68% {
-          transform: translate(95px, 13px) rotate(320deg);
-          opacity: 1;
-        }
-        74% {
-          transform: translate(130px, -15px) rotate(420deg);
-          opacity: 1;
-        }
-        80% {
-          transform: translate(160px, 13px) rotate(520deg);
-          opacity: 1;
-        }
-        85% {
-          transform: translate(185px, 2px) rotate(580deg);
-          opacity: 1;
-        }
-        89% {
-          transform: translate(205px, 13px) rotate(640deg);
-          opacity: 1;
-        }
-        95% {
-          transform: translate(230px, 13px) rotate(700deg);
-          opacity: 0;
-        }
-        100% {
-          transform: translate(230px, 13px) rotate(700deg);
-          opacity: 0;
+        92% {
+          transform: scaleX(1.0) scaleY(0.8);
+          opacity: 0.55;
+          filter: blur(2px);
+          animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.2);
         }
       }
-      .animate-ball-fly {
-        animation: ball-fly 1.6s infinite cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      .animate-shadow-bounce {
+        animation: shadow-bounce 1.5s infinite;
         transform-origin: center;
       }
 
-      @keyframes ball-shadow {
-        0%, 44% {
-          transform: translate(0px, 13px) scaleX(0);
-          opacity: 0;
-        }
-        45% {
-          transform: translate(0px, 13px) scaleX(1);
-          opacity: 0.4;
-        }
-        58% {
-          transform: translate(50px, 13px) scaleX(0.4);
-          opacity: 0.1;
-        }
-        68% {
-          transform: translate(95px, 13px) scaleX(1);
-          opacity: 0.4;
-        }
-        74% {
-          transform: translate(130px, 13px) scaleX(0.65);
-          opacity: 0.18;
-        }
-        80% {
-          transform: translate(160px, 13px) scaleX(1);
-          opacity: 0.4;
-        }
-        85% {
-          transform: translate(185px, 13px) scaleX(0.8);
-          opacity: 0.28;
-        }
-        89% {
-          transform: translate(205px, 13px) scaleX(1);
-          opacity: 0.4;
-        }
-        95% {
-          transform: translate(230px, 13px) scaleX(0.9);
-          opacity: 0;
-        }
-        100% {
-          transform: translate(230px, 13px) scaleX(0.9);
-          opacity: 0;
-        }
+      @keyframes grass-sway {
+        0%, 100% { transform: skewX(-4deg); }
+        50% { transform: skewX(4deg); }
       }
-      .animate-ball-shadow {
-        animation: ball-shadow 1.6s infinite cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        transform-origin: 120px 125px;
+      .animate-grass-sway {
+        animation: grass-sway 3s infinite ease-in-out;
+        transform-origin: bottom center;
       }
 
-      @keyframes grass-fly-1 {
-        0%, 44% { transform: translate(0, 0) scale(0); opacity: 0; }
-        45% { transform: translate(0, 0) scale(1); opacity: 1; }
-        70% { transform: translate(25px, -35px) rotate(180deg); opacity: 0.8; }
-        90% { transform: translate(35px, -20px) rotate(360deg); opacity: 0; }
-        100% { transform: translate(35px, -20px) scale(0); opacity: 0; }
-      }
-      @keyframes grass-fly-2 {
-        0%, 44% { transform: translate(0, 0) scale(0); opacity: 0; }
-        45% { transform: translate(0, 0) scale(1); opacity: 1; }
-        70% { transform: translate(15px, -25px) rotate(-120deg); opacity: 0.8; }
-        90% { transform: translate(20px, -10px) rotate(-240deg); opacity: 0; }
-        100% { transform: translate(20px, -10px) scale(0); opacity: 0; }
-      }
-      @keyframes grass-fly-3 {
-        0%, 44% { transform: translate(0, 0) scale(0); opacity: 0; }
-        45% { transform: translate(0, 0) scale(1); opacity: 1; }
-        70% { transform: translate(35px, -30px) rotate(90deg); opacity: 0.8; }
-        90% { transform: translate(45px, -15px) rotate(180deg); opacity: 0; }
-        100% { transform: translate(45px, -15px) scale(0); opacity: 0; }
-      }
-      .animate-grass-1 { animation: grass-fly-1 1.6s infinite ease-out; transform-origin: 120px 125px; }
-      .animate-grass-2 { animation: grass-fly-2 1.6s infinite ease-out; transform-origin: 120px 125px; }
-      .animate-grass-3 { animation: grass-fly-3 1.6s infinite ease-out; transform-origin: 120px 125px; }
-
-      @keyframes kick-flash {
-        0%, 44% { transform: scale(0); opacity: 0; }
-        45% { transform: scale(1); opacity: 0.9; }
-        55% { transform: scale(2.2); opacity: 0; }
-        100% { transform: scale(0); opacity: 0; }
-      }
-      .animate-kick-flash {
-        animation: kick-flash 1.6s infinite ease-out;
-        transform-origin: 120px 125px;
-      }
-
-      @keyframes kid-bob {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        35% { transform: translateY(-1px) rotate(-1deg); }    /* back leg stance load */
-        45% { transform: translateY(2px) rotate(1deg); }       /* weight push on kick */
-        55% { transform: translateY(0px) rotate(0deg); }       /* landing follow through */
-      }
-      .animate-kid-bob {
-        animation: kid-bob 1.6s infinite ease-in-out;
+      @keyframes float-up {
+        0% { transform: translateY(20px) translateX(0); opacity: 0; }
+        20% { opacity: 0.6; }
+        80% { opacity: 0.6; }
+        100% { transform: translateY(-70px) translateX(15px); opacity: 0; }
       }
     </style>
   <script type="importmap">
