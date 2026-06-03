@@ -222,8 +222,60 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [matchVotesDraw, setMatchVotesDraw] = useState(0);
   const [luckyWinnerMatchId, setLuckyWinnerMatchId] = useState<string | null>(null);
   const [luckyWinnerPhone, setLuckyWinnerPhone] = useState<string | null>(null);
+  const [luckyWinnerBill, setLuckyWinnerBill] = useState<string | null>(null);
+  const [luckyWinnerName, setLuckyWinnerName] = useState<string | null>(null);
   const [isDrawingLuckyWinner, setIsDrawingLuckyWinner] = useState<Record<string, boolean>>({});
   const [viewingVotersMatch, setViewingVotersMatch] = useState<any | null>(null);
+
+  const [validBillsList, setValidBillsList] = useState<any[]>([]);
+  const [newBillInput, setNewBillInput] = useState('');
+  const [isAddingBill, setIsAddingBill] = useState(false);
+
+  useEffect(() => {
+    if (activeTab !== 'predictions') return;
+    const q = query(collection(db, 'worldcup_valid_bills'));
+    const unsub = onSnapshot(q, (snap) => {
+      const bills = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      bills.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0));
+      setValidBillsList(bills);
+    });
+    return () => unsub();
+  }, [activeTab]);
+
+  const handleAddValidBill = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanBill = newBillInput.trim();
+    if (!cleanBill) return;
+    
+    if (validBillsList.some(b => b.billNumber === cleanBill)) {
+      alert("This bill number is already whitelisted.");
+      return;
+    }
+    
+    setIsAddingBill(true);
+    try {
+      await addDoc(collection(db, 'worldcup_valid_bills'), {
+        billNumber: cleanBill,
+        createdAt: Date.now()
+      });
+      setNewBillInput('');
+    } catch (err) {
+      console.error("Error adding bill:", err);
+      alert("Failed to whitelist bill number.");
+    } finally {
+      setIsAddingBill(false);
+    }
+  };
+
+  const handleDeleteValidBill = async (docId: string) => {
+    if (!confirm("Are you sure you want to remove this bill number from the whitelist?")) return;
+    try {
+      await deleteDoc(doc(db, 'worldcup_valid_bills', docId));
+    } catch (err) {
+      console.error("Error deleting bill:", err);
+      alert("Failed to delete bill number.");
+    }
+  };
   const [votersList, setVotersList] = useState<any[]>([]);
   const [isLoadingVoters, setIsLoadingVoters] = useState(false);
   const [isSyncingMatches, setIsSyncingMatches] = useState(false);
@@ -782,11 +834,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       // Update match document in Firestore to persist
       await updateDoc(doc(db, 'worldcup_matches', match.id), {
         luckyWinnerPhone: chosen.phone,
-        luckyWinnerName: chosen.name || 'Anonymous'
+        luckyWinnerName: chosen.name || 'Anonymous',
+        luckyWinnerBill: chosen.billNumber || null
       });
       
       setLuckyWinnerMatchId(match.id);
       setLuckyWinnerPhone(chosen.phone);
+      setLuckyWinnerBill(chosen.billNumber || null);
+      setLuckyWinnerName(chosen.name || 'Anonymous');
     } catch (err) {
       console.error("Error drawing lucky winner:", err);
       alert("Failed to draw lucky winner.");
@@ -3134,8 +3189,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                             <div className="flex flex-col gap-1 items-start mt-1">
                                                                 {match.luckyWinnerPhone && (
                                                                     (() => {
-                                                                        const matchingOrder = orders.find(o => o.id === match.luckyWinnerPhone);
-                                                                        const displayName = matchingOrder ? `${matchingOrder.customerName} (#${match.luckyWinnerPhone})` : `Bill #${match.luckyWinnerPhone}`;
+                                                                        const billNum = match.luckyWinnerBill || match.luckyWinnerPhone;
+                                                                        const matchingOrder = orders.find(o => o.id === billNum);
+                                                                        const displayName = matchingOrder 
+                                                                            ? `${matchingOrder.customerName} (Bill #${billNum}) - Phone: ${match.luckyWinnerPhone}` 
+                                                                            : `${match.luckyWinnerName || 'Anonymous'} (Bill #${billNum || 'N/A'}) - Phone: ${match.luckyWinnerPhone}`;
                                                                         return (
                                                                             <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gold-400 text-glow-gold mb-1">
                                                                                 🎁 Lucky: {displayName}
@@ -3204,9 +3262,58 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
                     </div>
 
+                    {/* Pre-Validated Bill Whitelist Section */}
+                    <div className="mt-10 bg-stone-900/50 border border-white/5 rounded-[2.5rem] p-6 md:p-10 shadow-2xl">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                            <div>
+                                <h4 className="text-lg font-serif text-white flex items-center gap-2">
+                                    <Ticket className="text-gold-500" size={20} /> Pre-Validated Bill Whitelist
+                                </h4>
+                                <p className="text-stone-500 text-xs mt-1">Add manual/offline bill numbers here. Users will be able to vote using these bills even if they don't have online orders.</p>
+                            </div>
+                            
+                            <form onSubmit={handleAddValidBill} className="flex gap-2 w-full md:w-auto">
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter Bill Number (e.g. 9999)" 
+                                    value={newBillInput}
+                                    onChange={e => setNewBillInput(e.target.value.trim())}
+                                    className="bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs focus:border-gold-500 outline-none text-white w-full md:w-60 font-mono"
+                                    required
+                                />
+                                <button 
+                                    type="submit" 
+                                    disabled={isAddingBill}
+                                    className="bg-gold-500 hover:bg-gold-400 disabled:opacity-50 text-stone-950 font-black px-6 py-3 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center gap-2 shrink-0"
+                                >
+                                    {isAddingBill ? 'Adding...' : 'Whitelist Bill'}
+                                </button>
+                            </form>
+                        </div>
+
+                        {validBillsList.length === 0 ? (
+                            <p className="text-center text-stone-600 italic py-8 border border-dashed border-stone-800 rounded-2xl">No custom bill numbers whitelisted yet.</p>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                                {validBillsList.map(bill => (
+                                    <div key={bill.id} className="bg-stone-950 border border-stone-850 hover:border-gold-500/20 rounded-xl p-3.5 flex justify-between items-center transition-all group">
+                                        <span className="font-mono text-sm font-bold text-white tracking-wider">#{bill.billNumber}</span>
+                                        <button 
+                                            onClick={() => handleDeleteValidBill(bill.id)}
+                                            className="text-stone-600 hover:text-red-500 transition-colors p-1"
+                                            title="Delete Whitelist Entry"
+                                        >
+                                            <Trash2 size={12} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Lucky Winner Celebration Modal */}
                     {luckyWinnerPhone && (
-                      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4 animate-fade-in" onClick={() => { setLuckyWinnerPhone(null); setLuckyWinnerMatchId(null); }}>
+                      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4 animate-fade-in" onClick={() => { setLuckyWinnerPhone(null); setLuckyWinnerMatchId(null); setLuckyWinnerBill(null); setLuckyWinnerName(null); }}>
                         <div className="bg-stone-900 border border-gold-500 rounded-[3rem] p-10 max-w-md w-full text-center shadow-2xl relative" onClick={e => e.stopPropagation()}>
                           <div className="absolute inset-0 bg-gradient-to-br from-gold-500/5 to-transparent pointer-events-none"></div>
                           
@@ -3220,7 +3327,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           
                           <div className="bg-stone-950 border border-stone-800 rounded-2xl p-6 mb-8 shadow-inner">
                             {(() => {
-                              const matchingOrder = orders.find(o => o.id === luckyWinnerPhone);
+                              const matchingOrder = orders.find(o => o.id === luckyWinnerBill);
                               if (matchingOrder) {
                                 return (
                                   <div className="space-y-3">
@@ -3234,22 +3341,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     </div>
                                     <div className="flex flex-col items-center mt-3">
                                       <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-1">Verified Bill</span>
-                                      <span className="font-mono text-xs text-stone-500 font-bold">#{luckyWinnerPhone}</span>
+                                      <span className="font-mono text-xs text-stone-500 font-bold">#{luckyWinnerBill}</span>
                                     </div>
                                   </div>
                                 );
                               }
                               return (
-                                <>
-                                  <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-2">Selected Account Phone</span>
-                                  <span className="font-mono text-2xl font-black text-gold-400 tracking-wider text-glow-gold">{luckyWinnerPhone}</span>
-                                </>
+                                <div className="space-y-3">
+                                  <div className="flex flex-col items-center">
+                                    <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-1">Voter Name</span>
+                                    <span className="text-lg font-bold text-white capitalize">{luckyWinnerName || 'Anonymous'}</span>
+                                  </div>
+                                  <div className="flex flex-col items-center mt-3">
+                                    <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-1">Selected Account Phone</span>
+                                    <span className="font-mono text-xl font-black text-gold-400 tracking-wider text-glow-gold select-all">{luckyWinnerPhone}</span>
+                                  </div>
+                                  <div className="flex flex-col items-center mt-3">
+                                    <span className="text-[10px] text-stone-600 uppercase tracking-[0.2em] font-black block mb-1">Verified Bill</span>
+                                    <span className="font-mono text-xs text-stone-500 font-bold">#{luckyWinnerBill || 'N/A'}</span>
+                                  </div>
+                                </div>
                               );
                             })()}
                           </div>
                           
                           <button 
-                            onClick={() => { setLuckyWinnerPhone(null); setLuckyWinnerMatchId(null); }}
+                            onClick={() => { setLuckyWinnerPhone(null); setLuckyWinnerMatchId(null); setLuckyWinnerBill(null); setLuckyWinnerName(null); }}
                             className="w-full bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-stone-950 font-black py-4 rounded-xl uppercase tracking-widest text-xs shadow-lg"
                           >
                             Excellent

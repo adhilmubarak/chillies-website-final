@@ -212,9 +212,33 @@ const PredictPage: React.FC = () => {
 
     try {
       const cleanBill = billInput.trim();
-      const billNum = parseInt(cleanBill, 10);
+      if (!cleanBill) {
+        showToast("Please enter a valid bill number to lock vote.", "error");
+        setIsSubmitting(prev => ({ ...prev, [matchId]: false }));
+        return;
+      }
 
-      if (isNaN(billNum) || billNum < 3171) {
+      // Validate the bill number against orders and whitelisted bills
+      let isValidBill = false;
+      try {
+        // 1. Check orders collection where 'id' field matches the bill number
+        const ordersQuery = query(collection(db, 'orders'), where('id', '==', cleanBill));
+        const ordersSnap = await getDocs(ordersQuery);
+        if (!ordersSnap.empty) {
+          isValidBill = true;
+        } else {
+          // 2. Check worldcup_valid_bills manual whitelist collection
+          const validBillsQuery = query(collection(db, 'worldcup_valid_bills'), where('billNumber', '==', cleanBill));
+          const validBillsSnap = await getDocs(validBillsQuery);
+          if (!validBillsSnap.empty) {
+            isValidBill = true;
+          }
+        }
+      } catch (err) {
+        console.error("Error validating bill number:", err);
+      }
+
+      if (!isValidBill) {
         showToast("Please enter a valid bill number to lock vote.", "error");
         setIsSubmitting(prev => ({ ...prev, [matchId]: false }));
         return;
