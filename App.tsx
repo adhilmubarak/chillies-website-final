@@ -884,7 +884,7 @@ function App() {
             {/* FIFA World Cup Predict & Win Banner */}
             <div className="max-w-7xl mx-auto px-4 md:px-8 mt-4 mb-4">
               <div 
-                onClick={() => navigate('/predict')}
+                onClick={() => { setComingSoonTitle('FIFA Predictor'); setShowComingSoon(true); }}
                 className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-950/20 via-[#0c0c0c] to-stone-900/50 border border-emerald-500/20 hover:border-gold-500/50 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_40px_rgba(16,185,129,0.04)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
               >
                 {/* Glowing decorative background meshes */}
@@ -898,11 +898,11 @@ function App() {
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2 mb-2.5">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/25 rounded-full text-emerald-400 text-[9px] font-black uppercase tracking-[0.2em]">
-                        Active Now
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/25 rounded-full text-amber-500 text-[9px] font-black uppercase tracking-[0.2em]">
+                        Coming Soon
                       </div>
                       {votingCloseCountdown && (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-500 text-[9px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[9px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.1)]">
                           <Clock size={10} className="animate-spin-slow" />
                           {votingCloseCountdown}
                         </div>
@@ -920,7 +920,7 @@ function App() {
                 <div className="shrink-0 relative z-10 w-full md:w-auto">
                   <button className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_35px_rgba(212,175,55,0.55)] transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] relative overflow-hidden group/btn">
                     <span className="relative z-10 flex items-center gap-2 font-black">
-                      Predict Now <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+                      Stay Tuned <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
                     </span>
                   </button>
                 </div>
