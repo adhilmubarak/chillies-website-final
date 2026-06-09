@@ -264,6 +264,71 @@ function App() {
   const [customOffers, setCustomOffers] = useState<CustomOffer[]>([]);
   const [loyaltyAccounts, setLoyaltyAccounts] = useState<LoyaltyAccount[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const [worldCupMatches, setWorldCupMatches] = useState<any[]>([]);
+
+  useEffect(() => {
+    const q = query(collection(db, 'worldcup_matches'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+      // Sort chronologically
+      fetched.sort((a, b) => {
+        const dateTimeA = new Date(`${a.matchDate}T${a.matchTime || '00:00'}`).getTime();
+        const dateTimeB = new Date(`${b.matchDate}T${b.matchTime || '00:00'}`).getTime();
+        return dateTimeA - dateTimeB;
+      });
+      setWorldCupMatches(fetched);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const votingCloseCountdown = useMemo(() => {
+    // Find the next upcoming match whose voting is open (i.e. kickoff is more than 10 minutes in the future)
+    const nextMatch = worldCupMatches.find(m => {
+      if (m.status !== 'upcoming') return false;
+      const kickoff = new Date(`${m.matchDate}T${m.matchTime || '00:00'}`);
+      const diffMs = kickoff.getTime() - currentTime.getTime();
+      const tenMinsMs = 10 * 60 * 1000;
+      return diffMs > tenMinsMs;
+    });
+
+    if (!nextMatch) return null;
+
+    const kickoff = new Date(`${nextMatch.matchDate}T${nextMatch.matchTime || '00:00'}`);
+    const closeTimeMs = kickoff.getTime() - 10 * 60 * 1000;
+    const diffMs = closeTimeMs - currentTime.getTime();
+
+    if (diffMs <= 0) return null;
+
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    const s = diffSecs % 60;
+    const m = diffMins % 60;
+    const h = diffHours % 24;
+
+    const formattedSecs = String(s).padStart(2, '0');
+    const formattedMins = String(m).padStart(2, '0');
+    const formattedHours = String(h).padStart(2, '0');
+
+    if (diffDays > 0) {
+      return `Voting closes in: ${diffDays}d ${formattedHours}h ${formattedMins}m`;
+    }
+    if (diffHours > 0) {
+      return `Voting closes in: ${formattedHours}h ${formattedMins}m ${formattedSecs}s`;
+    }
+    return `Voting closes in: ${formattedMins}m ${formattedSecs}s`;
+  }, [worldCupMatches, currentTime]);
+
   const [activeSection, setActiveSection] = useState('home');
   const [foodRatings, setFoodRatings] = useState<FoodRating[]>([]);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -767,7 +832,7 @@ function App() {
             <Hero />
             <StoreStatusAlert isStoreOpen={isStoreOpen} startTime={storeSettings.startTime} endTime={storeSettings.endTime} />
             
-            {/* Customer Scream Challenge Live Promo Banner */}
+            {/* Customer Scream Challenge Live Promo Banner - Temporarily Disabled
             <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 mb-4">
               <style>{`
                 @keyframes btn-shimmer {
@@ -782,7 +847,6 @@ function App() {
                 onClick={() => { setComingSoonTitle('Scream Challenge'); setShowComingSoon(true); }}
                 className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-950/25 via-[#0c0c0c] to-stone-900/50 border border-red-500/20 hover:border-gold-500/50 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_40px_rgba(239,68,68,0.06)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
               >
-                {/* Glowing decorative background meshes */}
                 <div className="absolute inset-0 bg-gradient-to-r from-red-950/30 via-transparent to-gold-950/20 pointer-events-none z-0"></div>
                 <div className="absolute top-0 right-0 w-80 h-80 bg-[radial-gradient(circle_at_top_right,_rgba(212,175,55,0.12)_0%,_transparent_70%)] rounded-full pointer-events-none"></div>
 
@@ -806,7 +870,6 @@ function App() {
 
                 <div className="shrink-0 relative z-10 w-full md:w-auto">
                   <button className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(var(--brand-500-rgb,212,175,55),0.25)] hover:shadow-[0_0_35px_rgba(var(--brand-500-rgb,212,175,55),0.55)] transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] relative overflow-hidden group/btn">
-                    {/* Moving diagonal light sheen shimmer */}
                     <div className="absolute top-0 bottom-0 left-0 w-12 bg-white/35 -translate-x-full animate-btn-shimmer blur-sm pointer-events-none z-0"></div>
                     
                     <span className="relative z-10 flex items-center gap-2 font-black">
@@ -816,11 +879,12 @@ function App() {
                 </div>
               </div>
             </div>
+            */}
 
             {/* FIFA World Cup Predict & Win Banner */}
             <div className="max-w-7xl mx-auto px-4 md:px-8 mt-4 mb-4">
               <div 
-                onClick={() => { setComingSoonTitle('FIFA Predictor'); setShowComingSoon(true); }}
+                onClick={() => navigate('/predict')}
                 className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-950/20 via-[#0c0c0c] to-stone-900/50 border border-emerald-500/20 hover:border-gold-500/50 transition-all duration-500 cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_40px_rgba(16,185,129,0.04)] group p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6"
               >
                 {/* Glowing decorative background meshes */}
@@ -833,8 +897,16 @@ function App() {
                     <Trophy size={28} className="text-white animate-bounce-slow" />
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/25 rounded-full text-amber-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2.5">
-                      Coming Soon
+                    <div className="flex flex-wrap items-center gap-2 mb-2.5">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/25 rounded-full text-emerald-400 text-[9px] font-black uppercase tracking-[0.2em]">
+                        Active Now
+                      </div>
+                      {votingCloseCountdown && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-500 text-[9px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                          <Clock size={10} className="animate-spin-slow" />
+                          {votingCloseCountdown}
+                        </div>
+                      )}
                     </div>
                     <h3 className="text-white text-xl md:text-2xl font-serif leading-tight">
                       Predict & Win <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 italic font-black">Free Rewards!</span>
@@ -846,9 +918,9 @@ function App() {
                 </div>
 
                 <div className="shrink-0 relative z-10 w-full md:w-auto">
-                  <button className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(var(--brand-500-rgb,212,175,55),0.25)] hover:shadow-[0_0_35px_rgba(var(--brand-500-rgb,212,175,55),0.55)] transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] relative overflow-hidden group/btn">
+                  <button className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black uppercase tracking-[0.25em] text-[10px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_35px_rgba(212,175,55,0.55)] transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] relative overflow-hidden group/btn">
                     <span className="relative z-10 flex items-center gap-2 font-black">
-                      Stay Tuned <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+                      Predict Now <ChevronRight size={14} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
                     </span>
                   </button>
                 </div>

@@ -32,6 +32,14 @@ const PredictPage: React.FC = () => {
   const [confetti, setConfetti] = useState<{ id: number; left: number; delay: number; color: string }[]>([]);
   // Track match currently celebrating in popup
   const [celebratingMatch, setCelebratingMatch] = useState<any | null>(null);
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 10000); // update every 10 seconds to keep countdown and locking in sync
+    return () => clearInterval(timer);
+  }, []);
 
   // Toast helper
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -196,11 +204,59 @@ const PredictPage: React.FC = () => {
     setTimeout(() => setConfetti([]), 4000);
   };
 
+  const getMatchVotingStatus = (match: any) => {
+    if (match.status === 'finished') {
+      return {
+        isOpen: false,
+        reason: 'Match Ended - Predictions Locked',
+        subtext: 'Predictions are closed for this fixture.'
+      };
+    }
+    
+    if (match.status === 'live') {
+      return {
+        isOpen: false,
+        reason: 'Live Now - Predictions Locked',
+        subtext: 'Predictions are closed as the match is currently LIVE.'
+      };
+    }
+
+    // upcoming
+    const kickoff = new Date(`${match.matchDate}T${match.matchTime || '00:00'}`);
+    const diffMs = kickoff.getTime() - now.getTime();
+    const tenMinsMs = 10 * 60 * 1000;
+
+    if (isNaN(kickoff.getTime())) {
+      return {
+        isOpen: true,
+        reason: '',
+        subtext: ''
+      };
+    }
+
+    if (diffMs <= tenMinsMs) {
+      return {
+        isOpen: false,
+        reason: 'Predictions Closed',
+        subtext: 'Voting closed 10 minutes before kickoff.'
+      };
+    }
+
+    return {
+      isOpen: true,
+      reason: '',
+      subtext: ''
+    };
+  };
+
   // Modern Two-Step Prediction Confirm
   const handleConfirmPredict = async (matchId: string) => {
     const matchObj = matches.find(m => m.id === matchId);
-    if (!matchObj || matchObj.status !== 'live') {
-      showToast("Voting is only allowed when match is live!", "error");
+    if (!matchObj) return;
+
+    const votingStatus = getMatchVotingStatus(matchObj);
+    if (!votingStatus.isOpen) {
+      showToast(votingStatus.subtext || "Voting is closed for this match.", "error");
       return;
     }
 
@@ -320,7 +376,6 @@ const PredictPage: React.FC = () => {
   };
 
   const getRelativeTimeStr = (matchDate: string, matchTime: string) => {
-    const now = new Date();
     const kickoff = new Date(`${matchDate}T${matchTime || '00:00'}`);
     const diffMs = kickoff.getTime() - now.getTime();
     
@@ -734,7 +789,8 @@ const PredictPage: React.FC = () => {
                       const isUpcoming = match.status === 'upcoming';
                       const isLive = match.status === 'live';
                       const isFinished = match.status === 'finished';
-                      const isVoteOpen = isLive;
+                      const votingStatus = getMatchVotingStatus(match);
+                      const isVoteOpen = votingStatus.isOpen;
                       
                       const selectedVal = selectedPrediction[match.id];
                       const confirmPanelActive = isVoteOpen && selectedVal && !userPred;
@@ -1006,10 +1062,10 @@ const PredictPage: React.FC = () => {
                             {!isVoteOpen && !userPred && (
                               <div className="p-4 bg-stone-950/40 rounded-2xl border border-white/5 text-center space-y-1 mb-2">
                                 <p className="text-[10px] text-stone-500 uppercase tracking-widest font-black flex items-center justify-center gap-1.5">
-                                  <span>🔒 {isUpcoming ? 'Predictions Not Started Yet' : 'Match Ended - Predictions Locked'}</span>
+                                  <span>🔒 {votingStatus.reason}</span>
                                 </p>
                                 <p className="text-[9px] text-gold-500 font-mono tracking-wider">
-                                  {isUpcoming ? 'Voting opens as soon as the match is LIVE!' : 'Predictions are closed for this fixture.'}
+                                  {votingStatus.subtext}
                                 </p>
                               </div>
                             )}
