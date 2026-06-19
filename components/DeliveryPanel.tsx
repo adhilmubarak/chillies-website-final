@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   X, Lock, LogOut, ShoppingBag, MapPin, 
-  Send, Check, PhoneCall, User, Navigation, ArrowRight, BellRing, Volume2, Loader2
+  Send, Check, PhoneCall, User, Navigation, ArrowRight, BellRing, Volume2, Loader2,
+  Wallet, CheckCircle
 } from 'lucide-react';
 import { Order } from '../types';
 import { db } from '../firebase';
@@ -48,6 +49,21 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
         ['ready', 'out_for_delivery'].includes(order.status) &&
         order.assignedTo === loggedInRider?.id
     );
+  }, [orders, loggedInRider]);
+
+  const riderStats = useMemo(() => {
+    if (!loggedInRider?.id) return { totalDelivered: 0, totalEarned: 0 };
+    
+    const deliveredOrders = orders.filter(order => 
+      order.type === 'delivery' &&
+      order.status === 'delivered' &&
+      order.assignedTo === loggedInRider.id
+    );
+
+    const totalDelivered = deliveredOrders.length;
+    const totalEarned = deliveredOrders.reduce((sum, order) => sum + (order.deliveryCharge || 0), 0);
+
+    return { totalDelivered, totalEarned };
   }, [orders, loggedInRider]);
   
   // Authentication Persistence
@@ -346,6 +362,33 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-stone-950">
         <div className="max-w-3xl mx-auto space-y-6 pb-20">
+            {/* Stats Dashboard */}
+            <div className="grid grid-cols-2 gap-4">
+                {/* Delivered Card */}
+                <div className="bg-stone-900/40 backdrop-blur-md border border-emerald-500/10 rounded-3xl p-6 flex items-center gap-4 relative overflow-hidden group hover:border-emerald-500/25 transition-all duration-300 shadow-xl">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.08)_0%,_transparent_70%)] rounded-full pointer-events-none"></div>
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 shadow-lg">
+                        <CheckCircle size={22} className="group-hover:scale-110 transition-transform duration-300" />
+                    </div>
+                    <div>
+                        <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Delivered</span>
+                        <span className="text-2xl font-serif font-black text-white">{riderStats.totalDelivered}</span>
+                    </div>
+                </div>
+
+                {/* Total Earned Card */}
+                <div className="bg-stone-900/40 backdrop-blur-md border border-purple-500/10 rounded-3xl p-6 flex items-center gap-4 relative overflow-hidden group hover:border-purple-500/25 transition-all duration-300 shadow-xl">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[radial-gradient(circle_at_top_right,_rgba(168,85,247,0.08)_0%,_transparent_70%)] rounded-full pointer-events-none"></div>
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 shadow-lg">
+                        <Wallet size={22} className="group-hover:scale-110 transition-transform duration-300" />
+                    </div>
+                    <div>
+                        <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black block">Total Earned</span>
+                        <span className="text-2xl font-serif font-black text-white">₹{riderStats.totalEarned}</span>
+                    </div>
+                </div>
+            </div>
+
             {deliveryOrders.length === 0 ? (
                 <div className="py-32 text-center border-2 border-dashed border-stone-800 rounded-[3rem] bg-stone-900/20">
                     <Check className="mx-auto text-stone-300 mb-6 opacity-20" size={64} />
