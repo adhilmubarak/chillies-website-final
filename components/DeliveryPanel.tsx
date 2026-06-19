@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { Order } from '../types';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, updateDoc, doc, onSnapshot, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, onSnapshot, addDoc, setDoc } from 'firebase/firestore';
 
 const renderAddressWithLinks = (address: string) => {
     if (!address) return null;
@@ -84,12 +84,42 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
     }
   }, []);
 
+  const initializeRiderTracking = async (riderId: string, riderName: string) => {
+    try {
+        const docRef = doc(db, 'tracking', riderId);
+        await setDoc(docRef, {
+            lat: 9.4981,
+            lng: 76.3388,
+            name: riderName,
+            timestamp: Date.now()
+        });
+    } catch (e) {
+        console.error("Failed to initialize rider tracking:", e);
+    }
+  };
+
   // Real-time Rider Location Tracking
   useEffect(() => {
     if (!isAuthenticated || !loggedInRider) return;
     
+    // Initialize tracking with shop default immediately to guarantee document exists
+    initializeRiderTracking(loggedInRider.id, loggedInRider.name);
+    
     let watchId: number;
     if ("geolocation" in navigator) {
+        // 1. Get current position immediately to override shop default if location is available
+        navigator.geolocation.getCurrentPosition((position) => {
+            onUpdateRiderLocation(
+                position.coords.latitude, 
+                position.coords.longitude,
+                loggedInRider.id,
+                loggedInRider.name
+            );
+        }, (error) => {
+            console.error("Initial geolocation error:", error);
+        });
+
+        // 2. Watch position for active movement updates
         watchId = navigator.geolocation.watchPosition((position) => {
             onUpdateRiderLocation(
                 position.coords.latitude, 
@@ -98,7 +128,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                 loggedInRider.name
             );
         }, (error) => {
-            console.error("Location tracking error:", error);
+             console.error("Location tracking error:", error);
         }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
     }
     
