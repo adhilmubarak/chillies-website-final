@@ -1781,7 +1781,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                             <Truck size={14} className="text-gold-500" />
                                             <span className="text-[9px] uppercase tracking-widest font-black">Assign Rider</span>
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-col gap-3">
                                             <select
                                                 value={order.assignedTo || ''}
                                                 onChange={async (e) => {
@@ -1811,7 +1811,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                         });
                                                     }
                                                 }}
-                                                className="flex-1 bg-stone-900 border border-stone-850 rounded-2xl p-4 text-stone-200 text-xs focus:outline-none focus:border-gold-500 font-bold"
+                                                className="w-full bg-stone-900 border border-stone-850 rounded-2xl p-4 text-stone-200 text-xs focus:outline-none focus:border-gold-500 font-bold"
                                             >
                                                 <option value="">-- Select Rider --</option>
                                                 {deliveryBoys.map((boy: any) => (
@@ -1819,7 +1819,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 ))}
                                             </select>
                                             {order.assignedTo && (
-                                                <>
+                                                <div className="flex gap-2">
                                                     <button 
                                                         onClick={async () => {
                                                             await addDoc(collection(db, 'delivery_notifications'), {
@@ -1831,10 +1831,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                             });
                                                             alert(`Alert sent to ${order.assignedToName || 'Rider'}!`);
                                                         }}
-                                                        className="px-4 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-stone-950 border border-amber-500/30 rounded-2xl transition-all text-xs font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.1)] hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] animate-pulse"
+                                                        className="flex-1 py-3.5 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-stone-950 border border-amber-500/30 rounded-2xl transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.1)] hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] animate-pulse"
                                                         title="Send Push Notification Alert"
                                                     >
-                                                        <BellRing size={14} /> Alert
+                                                        <BellRing size={14} /> Send Alert
                                                     </button>
                                                     <button 
                                                         onClick={async () => {
@@ -1855,7 +1855,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                     >
                                                         Clear
                                                     </button>
-                                                </>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
