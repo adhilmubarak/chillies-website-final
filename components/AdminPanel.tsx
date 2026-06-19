@@ -2954,10 +2954,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 const permission = await Notification.requestPermission();
                                                 if (permission === 'granted') {
                                                     const { getToken } = await import('firebase/messaging');
+                                                    const registration = await navigator.serviceWorker.ready;
                                                     // IMPORTANT: Replace the key below with your actual VAPID key from Firebase Console -> Project Settings -> Cloud Messaging -> Web Push Certificates
                                                     const VAPID_KEY = 'BHcAqM5__bhlDGUtAjxBAlLfTxQCq9UxfSi0bCalkbMorZVrRZJ-Xq7fuD9RKjMQkBnAWzJemeja6sZDd8GQRCo';
                                                     
-                                                    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                                                    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
                                                     const updatedTokens = Array.from(new Set([...(storeSettings.adminTokens || []), token]));
                                                     onUpdateStoreSettings({...storeSettings, adminTokens: updatedTokens});
                                                     alert('Web Browser Push Registered Successfully!');

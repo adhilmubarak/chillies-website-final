@@ -129,7 +129,11 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
                       if (messaging) {
                           const { getToken } = await import('firebase/messaging');
                           const VAPID_KEY = 'BHcAqM5__bhlDGUtAjxBAlLfTxQCq9UxfSi0bCalkbMorZVrRZJ-Xq7fuD9RKjMQkBnAWzJemeja6sZDd8GQRCo';
-                          const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                          const registration = await navigator.serviceWorker.ready;
+                          const token = await getToken(messaging, { 
+                              vapidKey: VAPID_KEY,
+                              serviceWorkerRegistration: registration
+                          });
                           
                           const riderRef = doc(db, 'delivery_boys', loggedInRider.id);
                           const snap = await getDocs(query(collection(db, 'delivery_boys')));

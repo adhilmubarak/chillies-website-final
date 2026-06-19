@@ -18,23 +18,24 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
   
-  // If the payload contains a notification object, the FCM SDK handles
-  // displaying the message automatically in the background. 
+  // If the payload contains a notification block, let the browser/FCM SDK handle the display to prevent duplicates.
   if (payload.notification) {
-      console.log('[firebase-messaging-sw.js] Payload has notification, letting FCM handle it.');
-      return;
+    console.log('[firebase-messaging-sw.js] Notification payload present, letting FCM handle it.');
+    return;
   }
 
-  // Support both notification object (standard) or data object containing title/body
-  const title = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || 'New Notification';
-  const body = (payload.notification && payload.notification.body) || (payload.data && payload.data.body) || 'You have a new update.';
+  // Fall back to showing manual notification if the automatic handler fails or doesn't execute
+  // when the PWA is completely closed on mobile platforms.
 
-  
+  // Support both notification object (standard) or data object containing title/body
+  const title = (payload.data && payload.data.title) || 'New Notification';
+  const body = (payload.data && payload.data.body) || 'You have a new update.';
+
   const notificationOptions = {
     body: body,
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
-    tag: (payload.notification && payload.notification.tag) || (payload.data && payload.data.orderId) || 'new_order',
+    tag: (payload.data && payload.data.orderId) || 'new_order',
     vibrate: [300, 100, 300, 100, 300],
     requireInteraction: true,
     data: Object.assign({}, payload.data, {
@@ -49,7 +50,7 @@ self.addEventListener('notificationclick', function(event) {
   console.log('[firebase-messaging-sw.js] Notification click Received.', event.notification.data);
   event.notification.close();
   
-  const urlToOpen = new URL(event.notification.data.url || '/admin', self.location.origin).href;
+  const urlToOpen = new URL((event.notification.data && event.notification.data.url) || '/admin', self.location.origin).href;
 
   const promiseChain = clients.matchAll({
     type: 'window',
@@ -72,3 +73,9 @@ self.addEventListener('notificationclick', function(event) {
 
   event.waitUntil(promiseChain);
 });
+
+// Dummy fetch handler to satisfy PWA installability requirements
+self.addEventListener('fetch', (event) => {
+  // Let browser handle requests normally
+});
+

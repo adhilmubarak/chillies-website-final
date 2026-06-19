@@ -25,3 +25,16 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// Register Firebase Service Worker manually to support background notifications and satisfy PWA criteria.
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      .then((reg) => {
+        console.log('Firebase Service Worker registered with scope:', reg.scope);
+      })
+      .catch((err) => {
+        console.error('Firebase Service Worker registration failed:', err);
+      });
+  });
+}
