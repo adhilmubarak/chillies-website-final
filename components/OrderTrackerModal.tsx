@@ -313,7 +313,7 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
   const [activeRiderLocation, setActiveRiderLocation] = useState<{lat: number, lng: number, timestamp: number} | null>(null);
 
   useEffect(() => {
-    if (!foundOrder?.assignedTo || foundOrder.status !== 'out_for_delivery') {
+    if (!foundOrder?.assignedTo || ['delivered', 'cancelled'].includes(foundOrder.status)) {
       setActiveRiderLocation(null);
       return;
     }
@@ -693,101 +693,51 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
         break;
 
       case 'out_for_delivery':
-        const riderIcon = getRiderIcon();
         content = (
           <div className="flex flex-col items-center py-6 text-center w-full">
-            {activeRiderLocation ? (
-              <div className="w-full space-y-4 px-2">
-                {/* Live Tracking Map */}
-                <div className="w-full h-60 relative rounded-2xl overflow-hidden border border-purple-500/30 shadow-lg bg-stone-950 z-0">
-                  <MapContainer 
-                    center={[activeRiderLocation.lat, activeRiderLocation.lng]} 
-                    zoom={16} 
-                    scrollWheelZoom={true} 
-                    style={{ height: '100%', width: '100%' }}
-                    zoomControl={false}
-                  >
-                    <TileLayer 
-                      url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                      attribution="&copy; <a href='https://carto.com/'>CARTO</a>"
-                    />
-                    <MapUpdater center={[activeRiderLocation.lat, activeRiderLocation.lng]} />
-                    
-                    {/* Shop Location (Valiyakulam, Alappuzha) */}
-                    <CircleMarker center={[9.4981, 76.3388]} pathOptions={{ color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.5, weight: 2 }} radius={8}>
-                        <Tooltip permanent direction="top" className="bg-stone-900 border-none text-green-500 font-bold uppercase tracking-widest text-[9px] shadow-lg">Chillies Restaurant</Tooltip>
-                    </CircleMarker>
-                    
-                    {/* Rider Marker */}
-                    {riderIcon && (
-                      <Marker position={[activeRiderLocation.lat, activeRiderLocation.lng]} icon={riderIcon}>
-                        <Tooltip permanent direction="top" className="bg-stone-900 border-none text-purple-400 font-bold uppercase tracking-widest text-[9px] shadow-lg">
-                          Rider ({foundOrder?.assignedToName || 'Courier'})
-                        </Tooltip>
-                      </Marker>
-                    )}
-                  </MapContainer>
-                </div>
-                
-                <div className="flex items-center justify-between gap-3 text-[10px] uppercase font-bold tracking-widest text-stone-500 px-1">
-                  <span>Last Seen: {new Date(activeRiderLocation.timestamp).toLocaleTimeString()}</span>
-                  <a 
-                    href={`https://www.google.com/maps/search/?api=1&query=${activeRiderLocation.lat},${activeRiderLocation.lng}`} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="flex items-center gap-1.5 bg-purple-600/20 border border-purple-500/30 hover:bg-purple-600/40 text-purple-400 px-3 py-1.5 rounded-lg text-[9px] transition-all active:scale-95"
-                  >
-                    Google Maps <MapPin size={10} />
-                  </a>
+            {/* Fallback Animated Road & Scooter */}
+            <div className="relative w-64 h-28 flex flex-col justify-end items-center overflow-hidden bg-stone-950/40 rounded-2xl border border-white/5 shadow-inner p-2">
+              {/* Repeating Parallax City Skyline Background */}
+              <div className="absolute inset-x-0 bottom-6 h-14 opacity-20 pointer-events-none z-0 overflow-hidden">
+                <div className="w-[300%] h-full bg-repeat-x animate-scroll-skyline" style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' width='100' height='40'%3E%3Cpath d='M0,40 L0,30 L10,30 L10,20 L25,20 L25,25 L40,25 L40,15 L60,15 L60,32 L75,32 L75,22 L90,22 L90,30 L100,30 L100,40 Z' fill='%23a855f7'/%3E%3C/svg%3E")`,
+                  backgroundSize: '100px 40px',
+                  backgroundPosition: 'bottom'
+                }}></div>
+              </div>
+
+              {/* Horizontally scrolling speed lines representing high speed */}
+              <div className="absolute bottom-6 w-full h-10 pointer-events-none z-0">
+                <div className="absolute top-2 w-14 h-[1px] bg-gradient-to-r from-transparent via-purple-400/40 to-transparent animate-speed-lines-1"></div>
+                <div className="absolute top-6 w-20 h-[1px] bg-gradient-to-r from-transparent via-purple-400/40 to-transparent animate-speed-lines-2"></div>
+                <div className="absolute top-10 w-16 h-[1px] bg-gradient-to-r from-transparent via-purple-400/40 to-transparent animate-speed-lines-3"></div>
+              </div>
+
+              {/* Delivery Rider Scooter */}
+              <div className="relative z-10 flex flex-col items-center animate-drive-vibe">
+                <Bike className="text-purple-500 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]" size={48} />
+                {/* Small dust particles behind the scooter */}
+                <div className="absolute bottom-1 -left-4 flex gap-1">
+                  <div className="w-1.5 h-1.5 bg-purple-400/30 rounded-full animate-ping"></div>
+                  <div className="w-1 h-1 bg-purple-500/20 rounded-full animate-ping" style={{ animationDelay: '0.15s' }}></div>
                 </div>
               </div>
-            ) : (
-              /* Fallback Animated Road & Scooter */
-              <div className="relative w-64 h-28 flex flex-col justify-end items-center overflow-hidden bg-stone-950/40 rounded-2xl border border-white/5 shadow-inner p-2">
-                {/* Repeating Parallax City Skyline Background */}
-                <div className="absolute inset-x-0 bottom-6 h-14 opacity-20 pointer-events-none z-0 overflow-hidden">
-                  <div className="w-[300%] h-full bg-repeat-x animate-scroll-skyline" style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' width='100' height='40'%3E%3Cpath d='M0,40 L0,30 L10,30 L10,20 L25,20 L25,25 L40,25 L40,15 L60,15 L60,32 L75,32 L75,22 L90,22 L90,30 L100,30 L100,40 Z' fill='%23a855f7'/%3E%3C/svg%3E")`,
-                    backgroundSize: '100px 40px',
-                    backgroundPosition: 'bottom'
-                  }}></div>
-                </div>
 
-                {/* Horizontally scrolling speed lines representing high speed */}
-                <div className="absolute bottom-6 w-full h-10 pointer-events-none z-0">
-                  <div className="absolute top-2 w-14 h-[1px] bg-gradient-to-r from-transparent via-purple-400/40 to-transparent animate-speed-lines-1"></div>
-                  <div className="absolute top-6 w-20 h-[1px] bg-gradient-to-r from-transparent via-purple-400/40 to-transparent animate-speed-lines-2"></div>
-                  <div className="absolute top-10 w-16 h-[1px] bg-gradient-to-r from-transparent via-purple-400/40 to-transparent animate-speed-lines-3"></div>
-                </div>
-
-                {/* Delivery Rider Scooter */}
-                <div className="relative z-10 flex flex-col items-center animate-drive-vibe">
-                  <Bike className="text-purple-500 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]" size={48} />
-                  {/* Small dust particles behind the scooter */}
-                  <div className="absolute bottom-1 -left-4 flex gap-1">
-                    <div className="w-1.5 h-1.5 bg-purple-400/30 rounded-full animate-ping"></div>
-                    <div className="w-1 h-1 bg-purple-500/20 rounded-full animate-ping" style={{ animationDelay: '0.15s' }}></div>
-                  </div>
-                </div>
-
-                {/* Rapidly scrolling road dashed markers */}
-                <div className="w-full h-1.5 bg-stone-900 rounded-full mt-2 relative z-10 overflow-hidden">
-                  <div className="absolute inset-0 flex gap-4 animate-scroll-road w-[200%]">
-                    {[...Array(16)].map((_, i) => (
-                      <div key={i} className="w-6 h-full bg-purple-400/50 rounded-sm"></div>
-                    ))}
-                  </div>
+              {/* Rapidly scrolling road dashed markers */}
+              <div className="w-full h-1.5 bg-stone-900 rounded-full mt-2 relative z-10 overflow-hidden">
+                <div className="absolute inset-0 flex gap-4 animate-scroll-road w-[200%]">
+                  {[...Array(16)].map((_, i) => (
+                    <div key={i} className="w-6 h-full bg-purple-400/50 rounded-sm"></div>
+                  ))}
                 </div>
               </div>
-            )}
+            </div>
 
             <h4 className="text-white font-serif text-base mt-4 font-semibold tracking-wide flex items-center gap-1.5 justify-center">
               Out for Delivery <Bike size={16} className="text-purple-500 animate-bounce" />
             </h4>
             <p className="text-stone-400 text-xs px-6 mt-1.5 leading-relaxed max-w-xs">
-              {activeRiderLocation 
-                ? `Rider ${foundOrder?.assignedToName || 'Courier'} is bringing your order. Follow them on the map!` 
-                : 'Our high-speed delivery courier is racing across the streets straight to your doorstep!'}
+              Our high-speed delivery courier is racing across the streets straight to your doorstep!
             </p>
           </div>
         );
@@ -1151,6 +1101,77 @@ const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ isOpen, onClose, 
                     </div>
                     
                     {renderKitchenVisual(foundOrder.status, foundOrder.type)}
+                    
+                    {/* Live Tracking Map Card */}
+                    {foundOrder.type === 'delivery' && foundOrder.assignedTo && !['delivered', 'cancelled'].includes(foundOrder.status) && (
+                      <div className="mb-6 bg-stone-950/60 border border-purple-500/20 rounded-2xl shadow-xl p-4 relative z-10 overflow-hidden">
+                        <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                          <div className="flex items-center gap-2">
+                            <Navigation size={16} className="text-purple-400 animate-pulse" />
+                            <span className="text-xs font-bold text-white uppercase tracking-wider">Live Delivery Tracker</span>
+                          </div>
+                          <span className="text-[9px] font-black uppercase tracking-widest text-purple-400 px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded animate-pulse">
+                            {foundOrder.status === 'out_for_delivery' ? 'On the way' : 'Waiting for Courier'}
+                          </span>
+                        </div>
+
+                        {activeRiderLocation ? (
+                          <div className="space-y-3">
+                            {/* Live Leaflet Map */}
+                            <div className="w-full h-48 relative rounded-xl overflow-hidden border border-white/10 shadow-lg bg-stone-900 z-0">
+                              <MapContainer 
+                                center={[activeRiderLocation.lat, activeRiderLocation.lng]} 
+                                zoom={15} 
+                                scrollWheelZoom={true} 
+                                style={{ height: '100%', width: '100%' }}
+                                zoomControl={false}
+                              >
+                                <TileLayer 
+                                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                  attribution="&copy; <a href='https://carto.com/'>CARTO</a>"
+                                />
+                                <MapUpdater center={[activeRiderLocation.lat, activeRiderLocation.lng]} />
+                                
+                                {/* Shop Location (Valiyakulam, Alappuzha) */}
+                                <CircleMarker center={[9.4981, 76.3388]} pathOptions={{ color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.5, weight: 2 }} radius={7}>
+                                    <Tooltip permanent direction="top" className="bg-stone-900 border-none text-green-500 font-bold uppercase tracking-widest text-[8px] shadow-lg">Chillies Restaurant</Tooltip>
+                                </CircleMarker>
+                                
+                                {/* Rider Marker */}
+                                {getRiderIcon() && (
+                                  <Marker position={[activeRiderLocation.lat, activeRiderLocation.lng]} icon={getRiderIcon()!}>
+                                    <Tooltip permanent direction="top" className="bg-stone-900 border-none text-purple-400 font-bold uppercase tracking-widest text-[8px] shadow-lg">
+                                      Rider ({foundOrder?.assignedToName || 'Courier'})
+                                    </Tooltip>
+                                  </Marker>
+                                )}
+                              </MapContainer>
+                            </div>
+                            
+                            <div className="flex items-center justify-between gap-3 text-[9px] uppercase font-bold tracking-widest text-stone-500">
+                              <span>Last Updated: {new Date(activeRiderLocation.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                              <a 
+                                href={`https://www.google.com/maps/search/?api=1&query=${activeRiderLocation.lat},${activeRiderLocation.lng}`} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="flex items-center gap-1 bg-purple-600/20 border border-purple-500/30 hover:bg-purple-600/40 text-purple-400 px-2.5 py-1 rounded transition-all active:scale-95"
+                              >
+                                Google Maps <MapPin size={10} />
+                              </a>
+                            </div>
+                          </div>
+                        ) : (
+                          /* Connecting/Loading Spinner Card */
+                          <div className="flex flex-col items-center justify-center py-6 text-center bg-stone-900/40 border border-white/5 rounded-xl">
+                            <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                            <h5 className="text-stone-300 text-xs font-semibold uppercase tracking-wider">Connecting to Rider's GPS...</h5>
+                            <p className="text-stone-500 text-[10px] px-6 mt-1 leading-relaxed">
+                              Waiting for the assigned rider to share their live location transmission.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     
                     <div className="mb-6 flex justify-center">
                         <a 

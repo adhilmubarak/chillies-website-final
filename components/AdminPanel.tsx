@@ -1819,25 +1819,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                                 ))}
                                             </select>
                                             {order.assignedTo && (
-                                                <button 
-                                                    onClick={async () => {
-                                                        const updates: any = { 
-                                                            assignedTo: '',
-                                                            assignedToName: ''
-                                                        };
-                                                        if (order.firestoreId) {
-                                                            await updateDoc(doc(db, 'orders', order.firestoreId), updates);
-                                                        } else {
-                                                            const q = query(collection(db, 'orders'), where("id", "==", order.id));
-                                                            const snap = await getDocs(q);
-                                                            for (const d of snap.docs) await updateDoc(d.ref, updates);
-                                                        }
-                                                    }}
-                                                    className="px-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all text-xs font-bold"
-                                                    title="Clear Assignment"
-                                                >
-                                                    Clear
-                                                </button>
+                                                <>
+                                                    <button 
+                                                        onClick={async () => {
+                                                            await addDoc(collection(db, 'delivery_notifications'), {
+                                                                deliveryBoyId: order.assignedTo,
+                                                                orderId: order.id,
+                                                                title: "Urgent Delivery Alert! 🚨",
+                                                                body: `Please check Order #${order.id} details immediately.`,
+                                                                createdAt: Date.now()
+                                                            });
+                                                            alert(`Alert sent to ${order.assignedToName || 'Rider'}!`);
+                                                        }}
+                                                        className="px-4 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-stone-950 border border-amber-500/30 rounded-2xl transition-all text-xs font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.1)] hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] animate-pulse"
+                                                        title="Send Push Notification Alert"
+                                                    >
+                                                        <BellRing size={14} /> Alert
+                                                    </button>
+                                                    <button 
+                                                        onClick={async () => {
+                                                            const updates: any = { 
+                                                                assignedTo: '',
+                                                                assignedToName: ''
+                                                            };
+                                                            if (order.firestoreId) {
+                                                                await updateDoc(doc(db, 'orders', order.firestoreId), updates);
+                                                            } else {
+                                                                const q = query(collection(db, 'orders'), where("id", "==", order.id));
+                                                                const snap = await getDocs(q);
+                                                                for (const d of snap.docs) await updateDoc(d.ref, updates);
+                                                            }
+                                                        }}
+                                                        className="px-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all text-xs font-bold"
+                                                        title="Clear Assignment"
+                                                    >
+                                                        Clear
+                                                    </button>
+                                                </>
                                             )}
                                         </div>
                                     </div>
