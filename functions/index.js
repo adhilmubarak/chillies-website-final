@@ -233,3 +233,101 @@ exports.sendGlobalBroadcast = onDocumentCreated("broadcasts/{broadcastId}", asyn
     console.log(`Global broadcast: ${result.successCount} sent, ${result.failureCount} failed.`);
 });
 
+exports.sendDeliveryNotification = onDocumentCreated("delivery_notifications/{notificationId}", async (event) => {
+    const newNotification = event.data.data();
+    if (!newNotification || !newNotification.deliveryBoyId) return;
+
+    // Fetch the delivery boy document to get tokens
+    const boyDoc = await admin.firestore().collection("delivery_boys").doc(newNotification.deliveryBoyId).get();
+    if (!boyDoc.exists) {
+        console.log(`Delivery boy not found: ${newNotification.deliveryBoyId}`);
+        return;
+    }
+
+    const tokens = boyDoc.data().tokens || [];
+    const validTokens = [...new Set(tokens.filter(t => typeof t === 'string' && t.length > 0))];
+    if (validTokens.length === 0) {
+        console.log(`No valid tokens for delivery boy: ${newNotification.deliveryBoyId}`);
+        return;
+    }
+
+    const title = newNotification.title || "New Order Assigned! 🛵";
+    const bodyText = newNotification.body || `Order #${newNotification.orderId} is assigned to you.`;
+
+    const payload = {
+        data: {
+            title: title,
+            body: bodyText,
+            orderId: newNotification.orderId,
+            type: "delivery_assign",
+            url: "/delivery"
+        },
+        android: {
+            priority: "high",
+            ttl: 86400,
+            directBootOk: true,
+            notification: {
+                sound: "default",
+                channelId: "delivery_alerts"
+            }
+        },
+        apns: {
+            payload: {
+                aps: {
+                    alert: { title, body: bodyText },
+                    sound: { critical: 1, name: "default", volume: 1.0 }
+                }
+            }
+        },
+        webpush: {
+            fcmOptions: { link: "/delivery" },
+            notification: {
+                title: title,
+                body: bodyText,
+                icon: "/pwa-192x192.png",
+                requireInteraction: true,
+                vibrate: [500, 100, 500, 100, 500]
+            }
+        }
+    };
+
+    let totalSuccess = 0;
+    let totalFailure = 0;
+    const allFailedTokens = [];
+
+    for (let i = 0; i < validTokens.length; i += 500) {
+        const chunk = validTokens.slice(i, i + 500);
+        try {
+            const response = await admin.messaging().sendEachForMulticast({ ...payload, tokens: chunk });
+            totalSuccess += response.successCount;
+            totalFailure += response.failureCount;
+
+            if (response.failureCount > 0) {
+                response.responses.forEach((resp, idx) => {
+                    if (!resp.success) {
+                        const code = resp.error?.code;
+                        if (code === 'messaging/invalid-registration-token' || code === 'messaging/registration-token-not-registered') {
+                            allFailedTokens.push(chunk[idx]);
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("Batch send failed:", err);
+        }
+    }
+
+    if (allFailedTokens.length > 0) {
+        try {
+            await admin.firestore().collection("delivery_boys").doc(newNotification.deliveryBoyId).update({
+                tokens: admin.firestore.FieldValue.arrayRemove(...allFailedTokens)
+            });
+            console.log(`Cleaned up ${allFailedTokens.length} invalid tokens for delivery boy ${newNotification.deliveryBoyId}.`);
+        } catch (err) {
+            console.error("Failed to clean up delivery boy tokens:", err);
+        }
+    }
+
+    console.log(`Delivery notification sent to ${newNotification.deliveryBoyId}: ${totalSuccess} success, ${totalFailure} failed.`);
+});
+

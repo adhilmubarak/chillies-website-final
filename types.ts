@@ -77,6 +77,8 @@ export interface Order {
   firestoreId?: string; // Internal ID for direct updates
   assignedAt?: number; // Timestamp when order status changed to 'ready' or 'out_for_delivery'
   messages?: { text: string, sender: 'admin' | 'customer', timestamp: number, read?: boolean }[];
+  assignedTo?: string; // Delivery boy ID
+  assignedToName?: string; // Delivery boy Name
 }
 
 export interface FoodRating {
@@ -130,5 +132,14 @@ export interface UserPrediction {
   matchId: string;
   phone: string;
   predictedWinner: 'teamA' | 'teamB' | 'draw';
+  createdAt: number;
+}
+
+export interface DeliveryBoy {
+  id: string;
+  name: string;
+  phone: string;
+  password: string;
+  tokens?: string[];
   createdAt: number;
 }

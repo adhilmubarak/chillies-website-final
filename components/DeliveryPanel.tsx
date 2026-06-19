@@ -1,9 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   X, Lock, LogOut, ShoppingBag, MapPin, 
-  Send, Check, PhoneCall, User, Navigation, ArrowRight
+  Send, Check, PhoneCall, User, Navigation, ArrowRight, BellRing, Volume2, Loader2
 } from 'lucide-react';
 import { Order } from '../types';
+import { db } from '../firebase';
+import { collection, query, where, getDocs, updateDoc, doc, onSnapshot, addDoc } from 'firebase/firestore';
 
 const renderAddressWithLinks = (address: string) => {
     if (!address) return null;
@@ -20,7 +22,7 @@ const renderAddressWithLinks = (address: string) => {
 interface DeliveryPanelProps {
   orders: Order[];
   onUpdateOrderStatus: (id: string, status: Order['status'], paymentMethod?: string, firestoreId?: string) => Promise<void>;
-  onUpdateRiderLocation: (lat: number, lng: number) => Promise<void>;
+  onUpdateRiderLocation: (lat: number, lng: number, riderId: string, riderName: string) => Promise<void>;
   deliveryUpiId?: string;
 }
 
@@ -28,32 +30,57 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
   orders, onUpdateOrderStatus, onUpdateRiderLocation, deliveryUpiId
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [phoneInput, setPhoneInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
+  const [loggedInRider, setLoggedInRider] = useState<any>(null);
   const [paymentMethods, setPaymentMethods] = useState<Record<string, 'Cash' | 'UPI'>>({});
+
+  const [isRegisteringPush, setIsRegisteringPush] = useState(false);
+  const [isPushRegistered, setIsPushRegistered] = useState(false);
+  
+  const [activeAlert, setActiveAlert] = useState<{ id: string, orderId: string } | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const deliveryOrders = useMemo(() => {
     return orders.filter(order => 
         order.type === 'delivery' && 
-        ['ready', 'out_for_delivery'].includes(order.status)
+        ['ready', 'out_for_delivery'].includes(order.status) &&
+        order.assignedTo === loggedInRider?.id
     );
-  }, [orders]);
+  }, [orders, loggedInRider]);
   
   // Authentication Persistence
   useEffect(() => {
-    if (localStorage.getItem('chillies_rider_auth') === 'true') {
-        setIsAuthenticated(true);
+    const saved = localStorage.getItem('chillies_rider_profile');
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            setLoggedInRider(parsed);
+            setIsAuthenticated(true);
+            
+            if (localStorage.getItem(`chillies_rider_push_registered_${parsed.id}`) === 'true') {
+                setIsPushRegistered(true);
+            }
+        } catch(e) {
+            localStorage.removeItem('chillies_rider_profile');
+        }
     }
   }, []);
 
   // Real-time Rider Location Tracking
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !loggedInRider) return;
     
     let watchId: number;
     if ("geolocation" in navigator) {
         watchId = navigator.geolocation.watchPosition((position) => {
-            onUpdateRiderLocation(position.coords.latitude, position.coords.longitude);
+            onUpdateRiderLocation(
+                position.coords.latitude, 
+                position.coords.longitude,
+                loggedInRider.id,
+                loggedInRider.name
+            );
         }, (error) => {
             console.error("Location tracking error:", error);
         }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
@@ -62,22 +89,165 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
     return () => {
         if (watchId) navigator.geolocation.clearWatch(watchId);
     };
-  }, [isAuthenticated, onUpdateRiderLocation]);
+  }, [isAuthenticated, onUpdateRiderLocation, loggedInRider]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Register Device for FCM push notifications
+  const registerPushAlerts = async () => {
+      if (!loggedInRider) return;
+      setIsRegisteringPush(true);
+      try {
+          const { Capacitor } = await import('@capacitor/core');
+          const isNative = Capacitor.isNativePlatform();
+          
+          if (isNative) {
+              const { PushNotifications } = await import('@capacitor/push-notifications');
+              const res = await PushNotifications.requestPermissions();
+              if (res.receive === 'granted') {
+                  PushNotifications.addListener('registration', async (token) => {
+                      const riderRef = doc(db, 'delivery_boys', loggedInRider.id);
+                      const snap = await getDocs(query(collection(db, 'delivery_boys')));
+                      const myDoc = snap.docs.find(d => d.id === loggedInRider.id);
+                      if (myDoc) {
+                          const currentTokens = myDoc.data().tokens || [];
+                          const updated = Array.from(new Set([...currentTokens, token.value]));
+                          await updateDoc(riderRef, { tokens: updated });
+                          localStorage.setItem(`chillies_rider_push_registered_${loggedInRider.id}`, 'true');
+                          setIsPushRegistered(true);
+                          alert('Device registered for native push alerts!');
+                      }
+                  });
+                  await PushNotifications.register();
+              } else {
+                  alert('Notification permission denied.');
+              }
+          } else {
+              // Web push
+              if (typeof window !== 'undefined' && 'Notification' in window) {
+                  const permission = await Notification.requestPermission();
+                  if (permission === 'granted') {
+                      const { messaging } = await import('../firebase');
+                      if (messaging) {
+                          const { getToken } = await import('firebase/messaging');
+                          const VAPID_KEY = 'BHcAqM5__bhlDGUtAjxBAlLfTxQCq9UxfSi0bCalkbMorZVrRZJ-Xq7fuD9RKjMQkBnAWzJemeja6sZDd8GQRCo';
+                          const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                          
+                          const riderRef = doc(db, 'delivery_boys', loggedInRider.id);
+                          const snap = await getDocs(query(collection(db, 'delivery_boys')));
+                          const myDoc = snap.docs.find(d => d.id === loggedInRider.id);
+                          if (myDoc) {
+                              const currentTokens = myDoc.data().tokens || [];
+                              const updated = Array.from(new Set([...currentTokens, token]));
+                              await updateDoc(riderRef, { tokens: updated });
+                              localStorage.setItem(`chillies_rider_push_registered_${loggedInRider.id}`, 'true');
+                              setIsPushRegistered(true);
+                              alert('Browser registered for push alerts!');
+                          }
+                      } else {
+                          alert('Messaging service unavailable.');
+                      }
+                  } else {
+                      alert('Notification permission denied.');
+                  }
+              }
+          }
+      } catch (err: any) {
+          console.error("Failed to register push:", err);
+          alert("Registration failed: " + err.message);
+      } finally {
+          setIsRegisteringPush(false);
+      }
+  };
+
+  // Foreground High Volume Sound Alarm Listener
+  useEffect(() => {
+      if (!isAuthenticated || !loggedInRider) return;
+
+      const q = query(
+          collection(db, 'delivery_notifications'),
+          where('deliveryBoyId', '==', loggedInRider.id)
+      );
+      
+      const sessionStart = Date.now();
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+              if (change.type === 'added') {
+                  const data = change.doc.data();
+                  // Only alert for notifications created after session start
+                  if (data.createdAt && data.createdAt > sessionStart - 5000) {
+                      setActiveAlert({ id: change.doc.id, orderId: data.orderId });
+                      
+                      if (!audioRef.current) {
+                          audioRef.current = new Audio('/notification.mp3');
+                          audioRef.current.loop = true;
+                      }
+                      audioRef.current.volume = 1.0;
+                      audioRef.current.play().catch(err => {
+                          console.warn("Autoplay blocked. Press anywhere on screen to enable alarm sounds.", err);
+                      });
+                  }
+              }
+          });
+      });
+
+      return () => {
+          unsubscribe();
+          if (audioRef.current) {
+              audioRef.current.pause();
+              audioRef.current = null;
+          }
+      };
+  }, [isAuthenticated, loggedInRider]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === 'rider123' || passwordInput === 'admin123') {
-        localStorage.setItem('chillies_rider_auth', 'true');
-        setIsAuthenticated(true);
-        setAuthError(false);
-        setPasswordInput('');
-    } else {
+    setAuthError(false);
+    
+    const cleanPhone = phoneInput.trim().replace(/\D/g, '');
+    try {
+        const q = query(collection(db, 'delivery_boys'), where("phone", "==", cleanPhone));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            const docData = snap.docs[0].data();
+            const docId = snap.docs[0].id;
+            if (docData.password === passwordInput) {
+                const riderProfile = { id: docId, name: docData.name, phone: docData.phone };
+                localStorage.setItem('chillies_rider_profile', JSON.stringify(riderProfile));
+                setLoggedInRider(riderProfile);
+                setIsAuthenticated(true);
+                setPhoneInput('');
+                setPasswordInput('');
+                
+                if (localStorage.getItem(`chillies_rider_push_registered_${docId}`) === 'true') {
+                    setIsPushRegistered(true);
+                } else {
+                    setIsPushRegistered(false);
+                }
+                return;
+            }
+        }
+        
+        // Fallback for legacy admin
+        if (phoneInput === 'admin' && passwordInput === 'admin123') {
+            const adminProfile = { id: 'admin', name: 'Admin Rider', phone: 'admin' };
+            localStorage.setItem('chillies_rider_profile', JSON.stringify(adminProfile));
+            setLoggedInRider(adminProfile);
+            setIsAuthenticated(true);
+            setPhoneInput('');
+            setPasswordInput('');
+            return;
+        }
+
+        setAuthError(true);
+    } catch(err) {
+        console.error("Login error:", err);
         setAuthError(true);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('chillies_rider_auth');
+    localStorage.removeItem('chillies_rider_profile');
+    setLoggedInRider(null);
     setIsAuthenticated(false);
   };
 
@@ -88,36 +258,47 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
 
   const getDirectionsUrl = (address?: string) => {
     if (!address) return '#';
-    // Clean line breaks and extra spaces
     const cleaned = address.replace(/\s+/g, ' ').trim();
-    
-    // Check for any URL in the string
     const urlMatch = cleaned.match(/https?:\/\/[^\s,)]+/);
-    
-    // If a link is found, return it directly. 
-    // Otherwise, use the standard Google Maps search format.
     return urlMatch ? urlMatch[0] : `https://www.google.com/maps?q=${encodeURIComponent(cleaned)}`;
   };
 
   if (!isAuthenticated) {
     return (
-      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-stone-950 p-4">
-        <div className="w-full max-w-md bg-stone-900 border border-brand-500/20 rounded-3xl p-10 text-center shadow-2xl relative">
-          <div className="w-16 h-16 bg-stone-950 border border-brand-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-stone-950 p-4 font-sans text-stone-200">
+        <div className="w-full max-w-md bg-stone-900 border border-brand-500/20 rounded-[2.5rem] p-10 text-center shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-[radial-gradient(circle_at_top_right,_rgba(212,175,55,0.08)_0%,_transparent_70%)] rounded-full pointer-events-none"></div>
+          <div className="w-16 h-16 bg-stone-950 border border-brand-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
             <Lock className="text-brand-500" />
           </div>
-          <h2 className="text-2xl font-serif text-stone-50 mb-2">Delivery Portal</h2>
-          <p className="text-stone-500 text-sm mb-8">Chillies Rider Access</p>
+          <h2 className="text-3xl font-serif text-stone-50 mb-2">Delivery Portal</h2>
+          <p className="text-stone-500 text-xs uppercase tracking-widest font-bold mb-8">Chillies Rider Access</p>
           <form onSubmit={handleLogin} className="space-y-4">
-            <input 
-              type="password" 
-              placeholder="Rider Passkey" 
-              value={passwordInput} 
-              onChange={e => setPasswordInput(e.target.value)} 
-              className={`w-full bg-stone-950 border rounded-xl p-4 text-center text-stone-50 focus:outline-none focus:border-brand-500 ${authError ? 'border-red-500' : 'border-stone-800'}`}
-              autoFocus 
-            />
-            <button type="submit" className="w-full bg-brand-500 text-white font-bold py-4 rounded-xl uppercase tracking-widest shadow-lg">Login</button>
+            <div className="space-y-1 text-left">
+                <label className="text-[9px] text-stone-500 uppercase tracking-wider block font-bold">Registered Phone</label>
+                <input 
+                  type="tel" 
+                  placeholder="Enter phone number" 
+                  value={phoneInput} 
+                  onChange={e => setPhoneInput(e.target.value)} 
+                  className={`w-full bg-stone-950 border rounded-xl p-4 text-center text-stone-50 focus:outline-none focus:border-brand-500 transition-all font-mono tracking-wider ${authError ? 'border-red-500' : 'border-stone-850'}`}
+                  autoFocus 
+                  required
+                />
+            </div>
+            <div className="space-y-1 text-left">
+                <label className="text-[9px] text-stone-500 uppercase tracking-wider block font-bold">Passkey / Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Enter passkey" 
+                  value={passwordInput} 
+                  onChange={e => setPasswordInput(e.target.value)} 
+                  className={`w-full bg-stone-950 border rounded-xl p-4 text-center text-stone-50 focus:outline-none focus:border-brand-500 transition-all font-mono tracking-wider ${authError ? 'border-red-500' : 'border-stone-850'}`}
+                  required
+                />
+            </div>
+            {authError && <p className="text-red-500 text-xs font-bold uppercase tracking-wide animate-pulse">Invalid Credentials</p>}
+            <button type="submit" className="w-full bg-gradient-to-r from-brand-600 to-brand-500 text-stone-950 font-black py-4 rounded-xl uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/10 hover:shadow-brand-500/30 transition-all hover:scale-[1.01] active:scale-95 mt-6">Login</button>
           </form>
         </div>
       </div>
@@ -126,17 +307,37 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
 
   return (
     <div className="fixed inset-0 z-[200] bg-stone-950 flex flex-col font-sans text-stone-200">
-      <header className="h-20 border-b border-stone-900/10 px-6 flex items-center justify-between shrink-0 bg-stone-900/50 backdrop-blur-md">
+      <header className="h-20 border-b border-stone-800 px-6 flex items-center justify-between shrink-0 bg-stone-900/50 backdrop-blur-md">
           <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white"><ShoppingBag size={20} /></div>
               <div>
                   <h2 className="text-xl font-serif text-stone-50 leading-none">Deliveries</h2>
-                  <p className="text-[10px] text-brand-500 font-bold uppercase tracking-widest">{deliveryOrders.length} Active</p>
+                  <p className="text-[10px] text-stone-500 leading-none uppercase mt-1">Rider: <span className="text-brand-500 font-bold">{loggedInRider?.name || 'Staff'}</span></p>
               </div>
           </div>
-          <button onClick={handleLogout} className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-red-500 hover:bg-stone-800 transition-colors" title="Logout">
-              <LogOut size={16} />
-          </button>
+          <div className="flex items-center gap-3">
+              <button 
+                  onClick={registerPushAlerts}
+                  disabled={isPushRegistered || isRegisteringPush}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      isPushRegistered 
+                          ? 'bg-green-500/10 text-green-500 border border-green-500/25 cursor-default' 
+                          : isRegisteringPush 
+                              ? 'bg-stone-900 border border-stone-800 text-stone-500 cursor-wait' 
+                              : 'bg-brand-500 text-stone-950 hover:bg-brand-400 border border-brand-500 shadow-md active:scale-95'
+                  }`}
+              >
+                  {isRegisteringPush ? (
+                      <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                      <BellRing size={12} />
+                  )}
+                  {isPushRegistered ? 'Alerts Enabled 🔊' : 'Enable Alerts'}
+              </button>
+              <button onClick={handleLogout} className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-red-500 hover:bg-stone-800 transition-colors shadow-inner" title="Logout">
+                  <LogOut size={16} />
+              </button>
+          </div>
       </header>
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-stone-950">
@@ -150,7 +351,7 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
             ) : deliveryOrders.map(order => {
                 const method = paymentMethods[order.id] || 'Cash';
                 return (
-                <div key={order.firestoreId || order.id} className="bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden shadow-xl">
+                <div key={order.firestoreId || order.id} className="bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden shadow-xl animate-fade-in">
                     <div className="p-6 border-b border-stone-800 bg-stone-950/50 flex justify-between items-start">
                         <div>
                             <span className="text-brand-500 font-mono font-bold text-xl block mb-1">#{order.id}</span>
@@ -261,6 +462,33 @@ const DeliveryPanel: React.FC<DeliveryPanelProps> = ({
             )})}
         </div>
       </main>
+
+      {activeAlert && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-stone-950/90 p-4 animate-fade-in">
+              <div className="w-full max-w-md bg-stone-900 border-4 border-red-500 rounded-[2.5rem] p-10 text-center shadow-[0_0_80px_rgba(239,68,68,0.5)] relative animate-pulse-slow">
+                  <div className="w-24 h-24 bg-red-500/10 border-2 border-red-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                      <BellRing className="text-red-500 animate-pulse" size={48} />
+                  </div>
+                  <h2 className="text-3xl font-serif text-white font-bold mb-3 tracking-wide animate-pulse">NEW ORDER ASSIGNED!</h2>
+                  <p className="text-stone-300 text-sm mb-2 font-mono">Order ID: #{activeAlert.orderId}</p>
+                  <p className="text-red-400 text-[10px] font-black uppercase tracking-widest mb-8 flex items-center justify-center gap-1.5 animate-pulse">
+                      <Volume2 size={14} /> Loud Sound Alert Active
+                  </p>
+                  
+                  <button 
+                      onClick={() => {
+                          if (audioRef.current) {
+                              audioRef.current.pause();
+                          }
+                          setActiveAlert(null);
+                      }} 
+                      className="w-full bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-xl uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95"
+                  >
+                      Acknowledge & Dismiss
+                  </button>
+              </div>
+          </div>
+      )}
     </div>
   );
 };

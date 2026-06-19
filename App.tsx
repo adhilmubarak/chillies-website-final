@@ -805,7 +805,7 @@ function App() {
                 for (const d of snap.docs) await updateDoc(d.ref, { status: s });
               }
             } catch(e) { console.error(e); }
-        }} onUpdateRiderLocation={async (lat: number, lng: number) => { await setDoc(doc(db, 'tracking', 'rider1'), { lat, lng, timestamp: Date.now() }); }} deliveryUpiId={storeSettings.deliveryUpiId} />} />
+        }} onUpdateRiderLocation={async (lat: number, lng: number, riderId: string, riderName: string) => { await setDoc(doc(db, 'tracking', riderId), { lat, lng, name: riderName, timestamp: Date.now() }); }} deliveryUpiId={storeSettings.deliveryUpiId} />} />
         <Route path="/offers" element={<OffersPage isFlashSaleActive={isFlashSaleActive} isHappyHourActive={isHappyHourActive} flashSaleEndTime={promoSettings.flashSaleEndTime} happyHourStartTime={promoSettings.happyHourStartTime} happyHourEndTime={promoSettings.happyHourEndTime} customOffers={customOffers} />} />
         <Route path="/rewards" element={<RewardsPage loyaltyAccounts={loyaltyAccounts} onEnrollLoyalty={async (phone: string, name: string) => { await addDoc(collection(db, 'loyalty'), { phone, customerName: name, points: 0, lastUpdated: Date.now() }); }} />} />
         <Route path="/scream-challenge" element={<ScreamChallenge />} />

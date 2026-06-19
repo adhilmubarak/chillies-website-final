@@ -38,7 +38,7 @@ messaging.onBackgroundMessage((payload) => {
     vibrate: [300, 100, 300, 100, 300],
     requireInteraction: true,
     data: Object.assign({}, payload.data, {
-      url: '/admin' // Store the URL we want to open on click
+      url: (payload.data && payload.data.url) || '/admin' // Store the URL we want to open on click
     })
   };
 

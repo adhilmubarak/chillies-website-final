@@ -4,7 +4,7 @@ import {
   Settings, LayoutDashboard, Search, Trophy,
   Lock, LogOut, ShoppingBag, User, Clock, Copy, Check, Printer, Ticket, Zap, PartyPopper,
   ChefHat, Calendar, MapPin, Send, Timer, DollarSign, Image as ImageIcon, ChevronRight, TrendingUp, BarChart3,
-  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone, RefreshCw, Upload
+  Layers, AlertTriangle, Scan, CameraOff, Edit2, Filter, EyeOff, Flame, SearchX, Camera, MessageCircle, Menu, Minus, Wallet, Star, ChevronUp, ChevronDown, Phone, Navigation, MessageSquare, Sparkles, Gift, Award, BellRing, VolumeX, Download, Smartphone, RefreshCw, Upload, Truck
 } from 'lucide-react';
 import { MenuItem, Order, Coupon, CategoryConfig, FoodRating, CustomOffer, LoyaltyAccount, Complaint } from '../types';
 import { printThermalBill, printKOT, printNetworkKOT, discoverNetworkPrinters } from '../App';
@@ -203,7 +203,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   });
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty' | 'complaints' | 'predictions'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'items' | 'categories' | 'coupons' | 'promotions' | 'reviews' | 'payment' | 'settings' | 'loyalty' | 'complaints' | 'predictions' | 'delivery_boys'>('dashboard');
+  
+  // Delivery boys states
+  const [deliveryBoys, setDeliveryBoys] = useState<any[]>([]);
+  const [newRiderName, setNewRiderName] = useState('');
+  const [newRiderPhone, setNewRiderPhone] = useState('');
+  const [newRiderPassword, setNewRiderPassword] = useState('');
+  const [isAddingRider, setIsAddingRider] = useState(false);
+
+  useEffect(() => {
+    const q = query(collection(db, 'delivery_boys'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setDeliveryBoys(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsubscribe();
+  }, []);
   
   // FIFA predictions states
   const [worldCupMatches, setWorldCupMatches] = useState<any[]>([]);
@@ -1346,6 +1361,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 { id: 'complaints', icon: AlertTriangle, label: 'Complaints' },
                 { id: 'payment', icon: Wallet, label: 'Payment' },
                 { id: 'predictions', icon: Trophy, label: 'FIFA Predictions' },
+                { id: 'delivery_boys', icon: Truck, label: 'Delivery Staff' },
                 { id: 'settings', icon: Settings, label: 'Operations' }
             ].map(tab => (
                 <button 
@@ -1759,6 +1775,73 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                         </div>
                                     </div>
                                 </div>
+                                {order.type === 'delivery' && (
+                                    <div className="p-8 pb-0 bg-stone-950 flex flex-col gap-2 shrink-0">
+                                        <div className="flex items-center gap-2 text-stone-500">
+                                            <Truck size={14} className="text-gold-500" />
+                                            <span className="text-[9px] uppercase tracking-widest font-black">Assign Rider</span>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <select
+                                                value={order.assignedTo || ''}
+                                                onChange={async (e) => {
+                                                    const boyId = e.target.value;
+                                                    const selectedBoy = deliveryBoys.find(b => b.id === boyId);
+                                                    const boyName = selectedBoy ? selectedBoy.name : '';
+                                                    
+                                                    const updates: any = { 
+                                                        assignedTo: boyId,
+                                                        assignedToName: boyName
+                                                    };
+                                                    if (order.firestoreId) {
+                                                        await updateDoc(doc(db, 'orders', order.firestoreId), updates);
+                                                    } else {
+                                                        const q = query(collection(db, 'orders'), where("id", "==", order.id));
+                                                        const snap = await getDocs(q);
+                                                        for (const d of snap.docs) await updateDoc(d.ref, updates);
+                                                    }
+                                                    
+                                                    if (boyId) {
+                                                        await addDoc(collection(db, 'delivery_notifications'), {
+                                                            deliveryBoyId: boyId,
+                                                            orderId: order.id,
+                                                            title: "New Order Assigned! 🛵",
+                                                            body: `Order #${order.id} has been assigned to you.`,
+                                                            createdAt: Date.now()
+                                                        });
+                                                    }
+                                                }}
+                                                className="flex-1 bg-stone-900 border border-stone-850 rounded-2xl p-4 text-stone-200 text-xs focus:outline-none focus:border-gold-500 font-bold"
+                                            >
+                                                <option value="">-- Select Rider --</option>
+                                                {deliveryBoys.map((boy: any) => (
+                                                    <option key={boy.id} value={boy.id}>{boy.name} ({boy.phone})</option>
+                                                ))}
+                                            </select>
+                                            {order.assignedTo && (
+                                                <button 
+                                                    onClick={async () => {
+                                                        const updates: any = { 
+                                                            assignedTo: '',
+                                                            assignedToName: ''
+                                                        };
+                                                        if (order.firestoreId) {
+                                                            await updateDoc(doc(db, 'orders', order.firestoreId), updates);
+                                                        } else {
+                                                            const q = query(collection(db, 'orders'), where("id", "==", order.id));
+                                                            const snap = await getDocs(q);
+                                                            for (const d of snap.docs) await updateDoc(d.ref, updates);
+                                                        }
+                                                    }}
+                                                    className="px-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all text-xs font-bold"
+                                                    title="Clear Assignment"
+                                                >
+                                                    Clear
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="p-8 bg-stone-950 border-t border-stone-800">
                                     <select 
                                         value={order.status} 
@@ -3487,6 +3570,149 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
                       </div>
                     )}
+                </div>
+            )}
+
+            {activeTab === 'delivery_boys' && (
+                <div className="max-w-6xl animate-fade-in mx-auto pb-12 px-4 space-y-12">
+                     <div className="bg-stone-900/80 border border-white/5 rounded-[3rem] p-12 space-y-8 shadow-2xl">
+                         <div className="flex items-center gap-4 mb-4">
+                             <div className="w-12 h-12 bg-brand-500/10 rounded-2xl flex items-center justify-center text-brand-500 border border-brand-500/20 shadow-lg shadow-brand-500/10">
+                                 <Truck size={24} />
+                             </div>
+                             <div>
+                                 <h4 className="text-2xl font-serif text-white">Delivery Staff Management</h4>
+                                 <p className="text-stone-500 text-xs uppercase tracking-widest font-bold">Manage Riders and Authentication</p>
+                             </div>
+                         </div>
+                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                             {/* Create Rider Form */}
+                             <div className="bg-stone-950 p-8 rounded-3xl border border-white/5 space-y-6 shadow-inner">
+                                 <h5 className="text-[10px] text-stone-600 uppercase tracking-widest font-black block border-b border-white/5 pb-2">Add New Rider</h5>
+                                 <form onSubmit={async (e) => {
+                                     e.preventDefault();
+                                     const cleanName = newRiderName.trim();
+                                     const cleanPhone = newRiderPhone.trim().replace(/\D/g, '');
+                                     const cleanPassword = newRiderPassword.trim();
+                                     if (!cleanName || !cleanPhone || !cleanPassword) {
+                                         alert("Please fill all fields correctly.");
+                                         return;
+                                     }
+                                     if (cleanPhone.length < 10) {
+                                         alert("Phone number must be at least 10 digits.");
+                                         return;
+                                     }
+                                     if (deliveryBoys.some(b => b.phone === cleanPhone)) {
+                                         alert("A rider with this phone number already exists.");
+                                         return;
+                                     }
+                                     setIsAddingRider(true);
+                                     try {
+                                         await addDoc(collection(db, 'delivery_boys'), {
+                                             name: cleanName,
+                                             phone: cleanPhone,
+                                             password: cleanPassword,
+                                             tokens: [],
+                                             createdAt: Date.now()
+                                         });
+                                         setNewRiderName('');
+                                         setNewRiderPhone('');
+                                         setNewRiderPassword('');
+                                         alert("Delivery rider added successfully!");
+                                     } catch(err) {
+                                         console.error(err);
+                                         alert("Failed to add rider.");
+                                     } finally {
+                                         setIsAddingRider(false);
+                                     }
+                                 }} className="space-y-4">
+                                     <div className="space-y-1">
+                                         <label className="text-[9px] text-stone-500 uppercase tracking-wider block font-bold">Full Name</label>
+                                         <input 
+                                             type="text" 
+                                             value={newRiderName}
+                                             onChange={e => setNewRiderName(e.target.value)}
+                                             placeholder="e.g. John Doe"
+                                             className="w-full bg-stone-900 border border-stone-850 rounded-xl p-4 text-white text-xs outline-none focus:border-brand-500 transition-all font-medium"
+                                             required
+                                         />
+                                     </div>
+                                     <div className="space-y-1">
+                                         <label className="text-[9px] text-stone-500 uppercase tracking-wider block font-bold">Phone (Login Username)</label>
+                                         <input 
+                                             type="tel" 
+                                             value={newRiderPhone}
+                                             onChange={e => setNewRiderPhone(e.target.value)}
+                                             placeholder="10-digit number"
+                                             className="w-full bg-stone-900 border border-stone-850 rounded-xl p-4 text-white text-xs outline-none focus:border-brand-500 transition-all font-mono tracking-wider"
+                                             required
+                                         />
+                                     </div>
+                                     <div className="space-y-1">
+                                         <label className="text-[9px] text-stone-500 uppercase tracking-wider block font-bold">Passkey / Password</label>
+                                         <input 
+                                             type="text" 
+                                             value={newRiderPassword}
+                                             onChange={e => setNewRiderPassword(e.target.value)}
+                                             placeholder="Set password"
+                                             className="w-full bg-stone-900 border border-stone-850 rounded-xl p-4 text-white text-xs outline-none focus:border-brand-500 transition-all font-mono tracking-wider"
+                                             required
+                                         />
+                                     </div>
+                                     <button 
+                                         type="submit"
+                                         disabled={isAddingRider}
+                                         className="w-full bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-stone-950 font-black py-4 rounded-xl uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/10 hover:shadow-brand-500/30 transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                                     >
+                                         {isAddingRider ? 'Adding Staff...' : 'Create Rider Account'}
+                                     </button>
+                                 </form>
+                             </div>
+
+                             {/* Riders List */}
+                             <div className="bg-stone-950 p-8 rounded-3xl border border-white/5 space-y-4 shadow-inner flex flex-col max-h-[500px]">
+                                 <h5 className="text-[10px] text-stone-600 uppercase tracking-widest font-black block border-b border-white/5 pb-2 shrink-0">Active Riders ({deliveryBoys.length})</h5>
+                                 <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide shrink">
+                                     {deliveryBoys.map(boy => (
+                                         <div key={boy.id} className="p-4 bg-stone-900 border border-stone-850 rounded-2xl flex justify-between items-center relative overflow-hidden group hover:border-stone-700 transition-all">
+                                             <div className="space-y-1">
+                                                 <p className="text-white font-bold text-sm">{boy.name}</p>
+                                                 <p className="text-stone-500 font-mono text-[10px] uppercase tracking-widest">Phone: {boy.phone}</p>
+                                                 <p className="text-stone-500 font-mono text-[10px] uppercase tracking-widest">Passkey: <span className="text-gold-500 font-bold select-all">{boy.password}</span></p>
+                                                 <div className="flex items-center gap-1.5 mt-1.5">
+                                                     <div className={`w-1.5 h-1.5 rounded-full ${boy.tokens && boy.tokens.length > 0 ? 'bg-green-500 shadow-md shadow-green-500/50' : 'bg-stone-600'}`}></div>
+                                                     <span className="text-[8px] text-stone-500 uppercase tracking-wider font-bold">
+                                                         {boy.tokens && boy.tokens.length > 0 
+                                                             ? `${boy.tokens.length} Device(s) Linked` 
+                                                             : 'No Push Devices'}
+                                                     </span>
+                                                 </div>
+                                             </div>
+                                             <button 
+                                                 onClick={async () => {
+                                                     if (confirm(`Are you sure you want to delete rider "${boy.name}"? This will also remove their authenticated devices.`)) {
+                                                         try {
+                                                             await deleteDoc(doc(db, 'delivery_boys', boy.id));
+                                                         } catch(err) {
+                                                             console.error(err);
+                                                             alert("Failed to delete rider.");
+                                                         }
+                                                     }
+                                                 }}
+                                                 className="p-3 text-stone-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                                                 title="Delete Rider"
+                                             >
+                                                 <Trash2 size={16} />
+                                             </button>
+                                         </div>
+                                     ))}
+                                     {deliveryBoys.length === 0 && (
+                                         <div className="py-12 text-center text-stone-600 italic text-xs">No delivery riders registered. Add one using the form.</div>
+                                     )}
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
                 </div>
             )}
         </div>
