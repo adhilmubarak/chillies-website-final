@@ -528,6 +528,25 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const q = query(collection(db, 'tracking'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const docs = snapshot.docs.map(d => d.data());
+        docs.sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
+        const latest = docs[0];
+        if (latest) {
+          setRiderLocation({
+            lat: latest.lat,
+            lng: latest.lng,
+            timestamp: latest.timestamp || Date.now()
+          });
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const settingsRef = doc(db, 'settings', 'general');
     const unsubscribe = onSnapshot(settingsRef, (docSnap) => {
         if (docSnap.exists()) {
