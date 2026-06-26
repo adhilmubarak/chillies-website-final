@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { resolve } from 'path';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 
 export default defineConfig({
   plugins: [
@@ -27,7 +28,21 @@ export default defineConfig({
           }
         ]
       }
-    })
+    }),
+    {
+      name: 'remove-main-manifest-from-admin',
+      closeBundle() {
+        const filePath = resolve(__dirname, 'dist/admin.html');
+        if (existsSync(filePath)) {
+          const html = readFileSync(filePath, 'utf8');
+          const cleanHtml = html.replace('<link rel="manifest" href="/manifest.webmanifest">', '');
+          writeFileSync(filePath, cleanHtml, 'utf8');
+          console.log('Successfully removed manifest.webmanifest from dist/admin.html on disk!');
+        } else {
+          console.log('dist/admin.html not found on disk at:', filePath);
+        }
+      }
+    }
   ],
   build: {
     outDir: 'dist',

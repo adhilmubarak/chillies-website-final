@@ -13,7 +13,24 @@
   <meta name="keywords"
     content="restaurant, fresh food, delivery, takeaway, shawarma, fast food, alappuzha restaurant, fast delivery, local restaurant, best food, good food, customers choice" />
   <link rel="canonical" href="https://www.chilliesrestaurant.in/admin.html" />
-  <link rel="manifest" href="/admin-manifest.json" />
+  <link id="pwa-manifest" rel="manifest" href="/admin-manifest.json" />
+  <script>
+    (function() {
+      var manifestEl = document.getElementById('pwa-manifest');
+      if (manifestEl) {
+        if (window.location.pathname.startsWith('/delivery')) {
+          manifestEl.setAttribute('href', '/delivery-manifest.json');
+          document.title = "CHILLIES | Delivery";
+        } else if (window.location.pathname.startsWith('/kitchen')) {
+          manifestEl.setAttribute('href', '/kitchen-manifest.json');
+          document.title = "CHILLIES | Kitchen";
+        } else {
+          manifestEl.setAttribute('href', '/admin-manifest.json');
+          document.title = "CHILLIES | Admin";
+        }
+      }
+    })();
+  </script>
   <!-- Open Graph / Social -->
   <meta property="og:type" content="restaurant.restaurant" />
   <meta property="og:title" content="CHILLIES RESTAURANT | Fresh & Vibrant" />
