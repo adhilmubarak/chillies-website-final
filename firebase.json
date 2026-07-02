@@ -30,11 +30,19 @@
       },
       {
         "source": "/kitchen",
-        "destination": "/admin.html"
+        "destination": "/kitchen.html"
+      },
+      {
+        "source": "/kitchen/**",
+        "destination": "/kitchen.html"
       },
       {
         "source": "/delivery",
-        "destination": "/admin.html"
+        "destination": "/delivery.html"
+      },
+      {
+        "source": "/delivery/**",
+        "destination": "/delivery.html"
       },
       {
         "source": "**",

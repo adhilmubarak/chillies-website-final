@@ -32,15 +32,18 @@ export default defineConfig({
     {
       name: 'remove-main-manifest-from-admin',
       closeBundle() {
-        const filePath = resolve(__dirname, 'dist/admin.html');
-        if (existsSync(filePath)) {
-          const html = readFileSync(filePath, 'utf8');
-          const cleanHtml = html.replace('<link rel="manifest" href="/manifest.webmanifest">', '');
-          writeFileSync(filePath, cleanHtml, 'utf8');
-          console.log('Successfully removed manifest.webmanifest from dist/admin.html on disk!');
-        } else {
-          console.log('dist/admin.html not found on disk at:', filePath);
-        }
+        const files = ['admin.html', 'delivery.html', 'kitchen.html'];
+        files.forEach(file => {
+          const filePath = resolve(__dirname, 'dist', file);
+          if (existsSync(filePath)) {
+            const html = readFileSync(filePath, 'utf8');
+            const cleanHtml = html.replace('<link rel="manifest" href="/manifest.webmanifest">', '');
+            writeFileSync(filePath, cleanHtml, 'utf8');
+            console.log(`Successfully removed manifest.webmanifest from dist/${file} on disk!`);
+          } else {
+            console.log(`dist/${file} not found on disk at:`, filePath);
+          }
+        });
       }
     }
   ],
@@ -50,7 +53,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        admin: resolve(__dirname, 'admin.html')
+        admin: resolve(__dirname, 'admin.html'),
+        delivery: resolve(__dirname, 'delivery.html'),
+        kitchen: resolve(__dirname, 'kitchen.html')
       },
       output: {
         manualChunks: {
